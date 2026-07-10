@@ -11,14 +11,22 @@ interface MonthSelection {
   monthIndex: number;
 }
 
+export type ModalKind = "addTransaction" | "manageCards" | "registerMsi" | "logSavings";
+
 interface UiState {
   detailMonth: MonthSelection | null;
+  activeModal: ModalKind | null;
   openMonthDetail: (selection: MonthSelection) => void;
   closeMonthDetail: () => void;
+  openModal: (kind: ModalKind) => void;
+  closeModal: () => void;
 }
 
 export const useUiStore = create<UiState>((set) => ({
   detailMonth: null,
+  activeModal: null,
   openMonthDetail: (selection) => set({ detailMonth: selection }),
   closeMonthDetail: () => set({ detailMonth: null }),
+  openModal: (kind) => set({ activeModal: kind }),
+  closeModal: () => set({ activeModal: null }),
 }));

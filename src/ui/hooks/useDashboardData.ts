@@ -22,6 +22,20 @@ export function useMonthDetail(year: number | null, monthIndex: number | null) {
   });
 }
 
+export function useExpensesFeed() {
+  return useQuery({
+    queryKey: ["expensesFeed"],
+    queryFn: () => useCases.getExpensesFeed(),
+  });
+}
+
+export function useSavingsOverview() {
+  return useQuery({
+    queryKey: ["savingsOverview"],
+    queryFn: () => useCases.getSavingsOverview(),
+  });
+}
+
 export function useAnnualSummary(year: number) {
   return useQuery({
     queryKey: ["annualSummary", year],

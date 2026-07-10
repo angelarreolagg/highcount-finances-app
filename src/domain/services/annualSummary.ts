@@ -3,11 +3,8 @@ import type { Category } from "../entities/Category";
 import type { SavingsEntry } from "../entities/SavingsEntry";
 import type { Transaction } from "../entities/Transaction";
 import { Money } from "../value-objects/Money";
-import { makeLocalDate, startOfDay } from "../value-objects/calendar";
-import { summarizeTransactions } from "./monthlySummary";
-
-export const ANNUAL_SUMMARY_UNLOCK_MONTH_INDEX = 11; // December
-export const ANNUAL_SUMMARY_UNLOCK_DAY = 15;
+import { summarizeTransactions, summarizeYearByMonth } from "./monthlySummary";
+import type { MonthBreakdown } from "./monthlySummary";
 
 export interface CategoryBreakdown {
   categoryId: string;
@@ -19,12 +16,6 @@ export interface CardBreakdown {
   cardId: string;
   cardName: string;
   total: Money;
-}
-
-export interface MonthBreakdown {
-  monthIndex: number;
-  income: Money;
-  expenses: Money;
 }
 
 export interface AnnualSummary {
@@ -43,19 +34,11 @@ export interface AnnualSummary {
 }
 
 /**
- * The Year in Review for year Y unlocks on December 15th of Y.
- * Past years are always unlocked, future years never are.
+ * The Year in Review is available for the current year (as a running
+ * summary) and every past year. Only future years are locked.
  */
 export function isAnnualSummaryUnlocked(year: number, today: Date): boolean {
-  const currentYear = today.getFullYear();
-  if (year < currentYear) return true;
-  if (year > currentYear) return false;
-  const unlockDate = makeLocalDate(
-    year,
-    ANNUAL_SUMMARY_UNLOCK_MONTH_INDEX,
-    ANNUAL_SUMMARY_UNLOCK_DAY,
-  );
-  return startOfDay(today).getTime() >= unlockDate.getTime();
+  return year <= today.getFullYear();
 }
 
 export function buildAnnualSummary(
@@ -67,20 +50,12 @@ export function buildAnnualSummary(
 ): AnnualSummary {
   const totals = summarizeTransactions(transactions);
 
+  const byMonth = summarizeYearByMonth(transactions);
   const byCategory = new Map<string, Money>();
   const byCard = new Map<string, Money>();
-  const byMonth: MonthBreakdown[] = Array.from({ length: 12 }, (_, monthIndex) => ({
-    monthIndex,
-    income: Money.zero(),
-    expenses: Money.zero(),
-  }));
 
   for (const t of transactions) {
-    const monthIndex = Number(t.date.slice(5, 7)) - 1;
-    if (t.type === "income") {
-      byMonth[monthIndex].income = byMonth[monthIndex].income.add(t.amount);
-    } else {
-      byMonth[monthIndex].expenses = byMonth[monthIndex].expenses.add(t.amount);
+    if (t.type === "expense") {
       byCategory.set(t.categoryId, (byCategory.get(t.categoryId) ?? Money.zero()).add(t.amount));
       byCard.set(t.cardId, (byCard.get(t.cardId) ?? Money.zero()).add(t.amount));
     }
@@ -98,11 +73,22 @@ export function buildAnnualSummary(
     .map(([cardId, total]) => ({ cardId, cardName: cardName(cardId), total }))
     .sort((a, b) => b.total.toNumber() - a.total.toNumber());
 
-  const yearEntries = savingsEntries
-    .filter((e) => e.date.startsWith(`${year}-`))
-    .sort((a, b) => a.date.localeCompare(b.date));
-  const savingsStart = yearEntries.length > 0 ? yearEntries[0].balance : null;
-  const savingsEnd = yearEntries.length > 0 ? yearEntries[yearEntries.length - 1].balance : null;
+  // Savings entries are deposit/returns deltas; derive the year's start balance
+  // (cumulative before Jan 1) and the in-year change.
+  const hasYearEntries = savingsEntries.some((e) => e.date.startsWith(`${year}-`));
+  let savingsStart: Money | null = null;
+  let savingsEnd: Money | null = null;
+  if (hasYearEntries) {
+    let before = Money.zero();
+    let change = Money.zero();
+    for (const e of savingsEntries) {
+      const entryYear = Number(e.date.slice(0, 4));
+      if (entryYear < year) before = before.add(e.amount);
+      else if (entryYear === year) change = change.add(e.amount);
+    }
+    savingsStart = before;
+    savingsEnd = before.add(change);
+  }
 
   return {
     year,

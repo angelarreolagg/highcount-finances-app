@@ -1,1 +1,116 @@
 @import "tailwindcss";
+
+@theme {
+  --color-night: #05060e;
+  --color-panel: #0b0d1f;
+  --color-peri: #818cf8;
+  --color-peri-deep: #2536e8;
+  --color-mint: #34d399;
+  --color-coral: #f87171;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background-color: var(--color-night);
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Thin, theme-matching scrollbars (lists scroll inside their glass cards). */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.15) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.15);
+    border-radius: 9999px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* ---- App backdrop: the animated gradient is the page background, blue over the
+   header zone fading to night below. ---- */
+
+@keyframes backdrop-pan {
+  0%,
+  100% {
+    background-position: 50% -70px;
+  }
+  50% {
+    background-position: 50% 0;
+  }
+}
+
+@keyframes blob-drift-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(3rem, 2.5rem) scale(1.15);
+  }
+  66% {
+    transform: translate(-1.5rem, 4rem) scale(0.95);
+  }
+}
+
+@keyframes blob-drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-3.5rem, -2rem) scale(1.2);
+  }
+}
+
+.app-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: var(--color-night);
+  background-image: linear-gradient(
+    180deg,
+    #7c8cf8 -12%,
+    #2536e8 30%,
+    #0a1180 62%,
+    #05060e 100%
+  );
+  background-size: 100% 820px;
+  background-repeat: no-repeat;
+  animation: backdrop-pan 18s ease-in-out infinite;
+}
+
+.hero-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(56px);
+  pointer-events: none;
+}
+
+.hero-blob-a {
+  background: radial-gradient(circle, rgb(147 197 253 / 0.55), transparent 70%);
+  animation: blob-drift-a 26s ease-in-out infinite;
+}
+
+.hero-blob-b {
+  background: radial-gradient(circle, rgb(129 140 248 / 0.5), transparent 70%);
+  animation: blob-drift-b 34s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-backdrop,
+  .hero-blob {
+    animation: none;
+  }
+}

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 High Count — a local-only personal finance tracker (no backend). Tracks expenses/income per card/account, credit-card billing cycles (Mexican-style cut date + payment due date), MSI/MCI installment plans, manually-logged savings growth, and risk indicators (months of runway). Data persists in IndexedDB.
 
-The current state is a **foundation pass**: domain logic and persistence are complete and tested; the UI is intentionally plain (minimal Tailwind, no visual design). A follow-up styling pass will define the final look, animations, and modal choreography — don't pre-build visual polish unless asked.
+Domain logic and persistence are complete and tested. The UI follows a glassmorphism + Revolut-inspired dark design — **all UI work must follow `docs/DESIGN.md`** (tokens, glass recipe, motion language, composition rules; it also describes the reference screenshots the design was distilled from).
 
 ## Commands
 
@@ -35,8 +35,8 @@ Outer layers depend inward, never the reverse. The point is portability: a futur
 
 ## Core business rules (all unit-tested in `src/domain/**/*.test.ts`)
 
-- **Month locking** (`billingCycle.ts`): current month always enabled; previous month enabled only while some credit card's payment due date for the previous month's statement hasn't passed (due day ≤ cut day rolls the due date into the next month; days clamp for short months). All other months — future or older — are disabled. Per spec, older months are unclickable in the grid; history is viewed via the annual summary.
+- **Month statuses** (`billingCycle.ts`): each month has two independent flags. `isViewable` — every past and current month can be clicked to view its detail (even with no transactions); future months cannot. `isOpenForLogging` — the current month is always open; the previous month stays open only while some credit card's payment due date for the previous month's statement hasn't passed (due day ≤ cut day rolls the due date into the next month; days clamp for short months); all other months are closed.
 - **MSI/MCI schedules** (`msiSchedule.ts`): total ÷ months rounded to cents; the **last** installment absorbs the rounding remainder so the sum is exact. Registering a plan (`registerMSIPurchase`) creates the plan plus one expense transaction per installment tagged with plan id + installment number; credit cards only. `totalAmount` is the full amount to be paid (interest included when `withInterest`).
 - **Risk indicator** (`riskIndicator.ts`): runway = latest manually-logged savings balance ÷ average monthly income (averaged over distinct months that have income); warning below 3 months; "unknown" when data is missing.
-- **Annual summary** (`annualSummary.ts`): unlocks December 15 of its year; past years always unlocked, future never.
+- **Annual summary** (`annualSummary.ts`): the current year is always available as a running summary, and past years always unlocked; only future years are locked.
 - Savings growth is **logged manually** by the user (a dated balance snapshot) — deliberately not automated.

@@ -4,7 +4,9 @@ import { makeAddCard } from "../../application/useCases/manageCards";
 import { makeAddTransaction } from "../../application/useCases/addTransaction";
 import { makeGetAnnualSummary } from "../../application/useCases/getAnnualSummary";
 import { makeGetDashboardSummary } from "../../application/useCases/getDashboardSummary";
+import { makeGetExpensesFeed } from "../../application/useCases/getExpensesFeed";
 import { makeGetMonthDetail } from "../../application/useCases/getMonthDetail";
+import { makeGetSavingsOverview } from "../../application/useCases/getSavingsOverview";
 import { makeLogSavingsGrowth } from "../../application/useCases/logSavingsGrowth";
 import { makeRegisterMSIPurchase } from "../../application/useCases/registerMSIPurchase";
 import { CardRepositoryIndexedDb } from "../persistence/indexedDb/CardRepositoryIndexedDb";
@@ -36,6 +38,8 @@ export const useCases = {
   getDashboardSummary: makeGetDashboardSummary(repositories),
   getMonthDetail: makeGetMonthDetail(repositories),
   getAnnualSummary: makeGetAnnualSummary(repositories),
+  getExpensesFeed: makeGetExpensesFeed(repositories),
+  getSavingsOverview: makeGetSavingsOverview(repositories),
   addCard: makeAddCard(repositories),
 };
 

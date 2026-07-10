@@ -5,7 +5,9 @@ export interface TransactionLineDTO {
   id: string;
   type: TransactionType;
   amount: Money;
+  categoryId: string;
   categoryName: string;
+  cardId: string;
   cardName: string;
   date: string;
   description: string;

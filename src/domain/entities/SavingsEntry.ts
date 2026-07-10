@@ -1,13 +1,17 @@
 import type { Money } from "../value-objects/Money";
 
+export type SavingsEntryKind = "deposit" | "returns";
+
 /**
- * A manual snapshot of the user's total savings balance on a given date.
- * Growth is logged by hand — interest rates change too often to automate.
+ * A manual savings movement: money the user put in ("deposit") or interest
+ * the account produced ("returns"). Returns are logged by hand — bank
+ * interest rates change too often to automate.
  */
 export interface SavingsEntry {
   id: string;
   /** Local ISO date, "YYYY-MM-DD". */
   date: string;
-  balance: Money;
+  amount: Money;
+  kind: SavingsEntryKind;
   note?: string;
 }

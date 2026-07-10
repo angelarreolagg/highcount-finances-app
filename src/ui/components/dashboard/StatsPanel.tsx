@@ -1,25 +1,37 @@
 import type { DashboardSummaryDTO } from "../../../application/dto/dashboard";
-import { MONTH_NAMES } from "../../../shared/utils/months";
+import { chipClass } from "../../utils/chips";
+import { GlassCard } from "../shared/GlassCard";
 
 export function StatsPanel({ summary }: { summary: DashboardSummaryDTO }) {
+  const largest = summary.largestExpense;
   return (
-    <section className="mb-6 border p-3">
-      <h2 className="text-lg font-semibold mb-2">
-        {MONTH_NAMES[summary.monthIndex]} {summary.year}
-      </h2>
-      {/* Primary metric — plain number for now; ring chart comes in the styling pass. */}
-      <p className="text-2xl">{summary.totalExpenses.format()}</p>
-      <p className="text-sm">total expenses this month</p>
-      <ul className="mt-3 text-sm space-y-1">
-        <li>Total income: {summary.totalIncome.format()}</li>
-        <li>Net: {summary.net.format()}</li>
-        <li>
-          Largest expense:{" "}
-          {summary.largestExpense
-            ? `${summary.largestExpense.amount.format()} (${summary.largestExpense.categoryName})`
-            : "—"}
+    <GlassCard title="This month" className="h-full">
+      <ul className="space-y-3 text-sm">
+        <li className="flex items-center justify-between">
+          <span className="text-white/60">Income</span>
+          <span className="tabular-nums text-mint">+{summary.totalIncome.format()}</span>
+        </li>
+        <li className="flex items-center justify-between">
+          <span className="text-white/60">Net</span>
+          <span className="tabular-nums">{summary.net.format()}</span>
+        </li>
+        <li className="flex items-center justify-between gap-3">
+          <span className="text-white/60">Largest expense</span>
+          {largest ? (
+            <span className="flex min-w-0 items-center gap-2">
+              <span
+                className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${chipClass(largest.categoryName)}`}
+              >
+                {largest.categoryName[0]}
+              </span>
+              <span className="truncate text-white/60">{largest.categoryName}</span>
+              <span className="tabular-nums">−{largest.amount.format()}</span>
+            </span>
+          ) : (
+            <span className="text-white/40">No expenses yet</span>
+          )}
         </li>
       </ul>
-    </section>
+    </GlassCard>
   );
 }

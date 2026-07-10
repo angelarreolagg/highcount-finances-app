@@ -1,12 +1,14 @@
-import type { SavingsEntry } from "../../domain/entities/SavingsEntry";
+import type { SavingsEntry, SavingsEntryKind } from "../../domain/entities/SavingsEntry";
 import type { SavingsRepository } from "../../domain/repositories/SavingsRepository";
 import { Money } from "../../domain/value-objects/Money";
 import { parseISODate } from "../../domain/value-objects/calendar";
 
 export interface LogSavingsGrowthInput {
   date: string;
-  /** Total savings balance on that date, as a decimal string. */
-  balance: string;
+  /** Positive amount of the movement, as a decimal string. */
+  amount: string;
+  /** "deposit" = money the user put in; "returns" = interest the account produced. */
+  kind: SavingsEntryKind;
   note?: string;
 }
 
@@ -16,16 +18,17 @@ export interface LogSavingsGrowthDeps {
 
 export function makeLogSavingsGrowth(deps: LogSavingsGrowthDeps) {
   return async function logSavingsGrowth(input: LogSavingsGrowthInput): Promise<SavingsEntry> {
-    const balance = Money.from(input.balance);
-    if (balance.isNegative()) {
-      throw new Error("Savings balance cannot be negative");
+    const amount = Money.from(input.amount);
+    if (!amount.isPositive()) {
+      throw new Error("Amount must be greater than zero");
     }
     parseISODate(input.date);
 
     const entry: SavingsEntry = {
       id: crypto.randomUUID(),
       date: input.date,
-      balance,
+      amount,
+      kind: input.kind,
       note: input.note?.trim() || undefined,
     };
     await deps.savingsRepository.add(entry);

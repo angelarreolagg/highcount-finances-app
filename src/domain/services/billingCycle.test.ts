@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { Card } from "../entities/Card";
 import {
-  getYearAvailability,
-  isMonthEnabled,
+  getMonthStatus,
+  getYearMonthStatuses,
   isPreviousMonthOpen,
   statementPaymentDueDate,
 } from "./billingCycle";
@@ -69,36 +69,45 @@ describe("isPreviousMonthOpen", () => {
   });
 });
 
-describe("isMonthEnabled / getYearAvailability", () => {
+describe("getMonthStatus / getYearMonthStatuses", () => {
   const card = creditCard(28, 17);
   const today = new Date(2026, 6, 9); // July 9, 2026 — June statement due Jul 17
 
-  it("enables the current month", () => {
-    expect(isMonthEnabled(2026, 6, [card], today)).toBe(true);
+  it("keeps the current month open for logging", () => {
+    expect(getMonthStatus(2026, 6, [card], today).isOpenForLogging).toBe(true);
   });
 
-  it("enables the previous month while its cycle is open", () => {
-    expect(isMonthEnabled(2026, 5, [card], today)).toBe(true);
-    expect(isMonthEnabled(2026, 5, [card], new Date(2026, 6, 20))).toBe(false);
+  it("keeps the previous month open for logging only while its cycle is open", () => {
+    expect(getMonthStatus(2026, 5, [card], today).isOpenForLogging).toBe(true);
+    expect(getMonthStatus(2026, 5, [card], new Date(2026, 6, 20)).isOpenForLogging).toBe(false);
   });
 
-  it("disables future and older months", () => {
-    expect(isMonthEnabled(2026, 7, [card], today)).toBe(false);
-    expect(isMonthEnabled(2026, 4, [card], today)).toBe(false);
-    expect(isMonthEnabled(2027, 0, [card], today)).toBe(false);
+  it("closes future and older months for logging", () => {
+    expect(getMonthStatus(2026, 7, [card], today).isOpenForLogging).toBe(false);
+    expect(getMonthStatus(2026, 4, [card], today).isOpenForLogging).toBe(false);
+    expect(getMonthStatus(2027, 0, [card], today).isOpenForLogging).toBe(false);
+  });
+
+  it("makes every past and current month viewable, but not future ones", () => {
+    expect(getMonthStatus(2026, 6, [card], today).isViewable).toBe(true); // current
+    expect(getMonthStatus(2026, 0, [card], today).isViewable).toBe(true); // older, empty or not
+    expect(getMonthStatus(2025, 10, [card], today).isViewable).toBe(true); // past year
+    expect(getMonthStatus(2026, 7, [card], today).isViewable).toBe(false); // future month
+    expect(getMonthStatus(2027, 0, [card], today).isViewable).toBe(false); // future year
   });
 
   it("handles the January → previous December boundary across years", () => {
     const january = new Date(2027, 0, 10); // December statement (cut Dec 28) due Jan 17
-    expect(isMonthEnabled(2026, 11, [card], january)).toBe(true);
-    expect(isMonthEnabled(2026, 11, [card], new Date(2027, 0, 18))).toBe(false);
+    expect(getMonthStatus(2026, 11, [card], january).isOpenForLogging).toBe(true);
+    expect(getMonthStatus(2026, 11, [card], new Date(2027, 0, 18)).isOpenForLogging).toBe(false);
   });
 
-  it("builds a 12-slot availability array", () => {
-    const availability = getYearAvailability(2026, [card], today);
-    expect(availability).toHaveLength(12);
-    expect(availability[6]).toBe(true); // July (current)
-    expect(availability[5]).toBe(true); // June (still open)
-    expect(availability[7]).toBe(false); // August
+  it("builds a 12-slot status array", () => {
+    const statuses = getYearMonthStatuses(2026, [card], today);
+    expect(statuses).toHaveLength(12);
+    expect(statuses[6]).toEqual({ isViewable: true, isOpenForLogging: true }); // July (current)
+    expect(statuses[5]).toEqual({ isViewable: true, isOpenForLogging: true }); // June (still open)
+    expect(statuses[4]).toEqual({ isViewable: true, isOpenForLogging: false }); // May (view only)
+    expect(statuses[7]).toEqual({ isViewable: false, isOpenForLogging: false }); // August
   });
 });

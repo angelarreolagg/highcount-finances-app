@@ -2,9 +2,11 @@ import type { CardRepository } from "../../domain/repositories/CardRepository";
 import type { CategoryRepository } from "../../domain/repositories/CategoryRepository";
 import type { SavingsRepository } from "../../domain/repositories/SavingsRepository";
 import type { TransactionRepository } from "../../domain/repositories/TransactionRepository";
-import { getYearAvailability } from "../../domain/services/billingCycle";
-import { summarizeTransactions } from "../../domain/services/monthlySummary";
+import { computeBalances } from "../../domain/services/balances";
+import { getYearMonthStatuses } from "../../domain/services/billingCycle";
+import { summarizeTransactions, summarizeYearByMonth } from "../../domain/services/monthlySummary";
 import { assessRunway, averageMonthlyIncome } from "../../domain/services/riskIndicator";
+import { buildSavingsSummary } from "../../domain/services/savingsSummary";
 import type { DashboardSummaryDTO } from "../dto/dashboard";
 
 export interface GetDashboardSummaryDeps {
@@ -20,9 +22,10 @@ export function makeGetDashboardSummary(deps: GetDashboardSummaryDeps) {
     monthIndex: number,
     today: Date = new Date(),
   ): Promise<DashboardSummaryDTO> {
-    const [monthTransactions, allTransactions, cards, categories, savingsEntries] =
+    const [monthTransactions, yearTransactions, allTransactions, cards, categories, savingsEntries] =
       await Promise.all([
         deps.transactionRepository.getByMonth(year, monthIndex),
+        deps.transactionRepository.getByYear(year),
         deps.transactionRepository.getAll(),
         deps.cardRepository.getAll(),
         deps.categoryRepository.getAll(),
@@ -30,15 +33,27 @@ export function makeGetDashboardSummary(deps: GetDashboardSummaryDeps) {
       ]);
 
     const totals = summarizeTransactions(monthTransactions);
-    const latestSavings =
-      savingsEntries.length > 0 ? savingsEntries[savingsEntries.length - 1].balance : null;
-    const runway = assessRunway(latestSavings, averageMonthlyIncome(allTransactions));
+    const savings = buildSavingsSummary(savingsEntries);
+    const savingsBalance = savingsEntries.length > 0 ? savings.currentBalance : null;
+    const runway = assessRunway(savingsBalance, averageMonthlyIncome(allTransactions));
+    const balances = computeBalances(allTransactions, today);
 
     const largest = totals.largestExpense;
     return {
       year,
       monthIndex,
-      monthAvailability: getYearAvailability(year, cards, today),
+      overview: {
+        totalIncome: balances.totalIncome,
+        totalExpensesToDate: balances.totalExpensesToDate,
+        currentBalance: balances.currentBalance,
+        realBalance: balances.realBalance,
+      },
+      monthStatuses: getYearMonthStatuses(year, cards, today),
+      monthTotals: summarizeYearByMonth(yearTransactions).map((m) => ({
+        income: m.income,
+        expenses: m.expenses,
+        net: m.income.subtract(m.expenses),
+      })),
       totalIncome: totals.totalIncome,
       totalExpenses: totals.totalExpenses,
       net: totals.net,
@@ -51,7 +66,7 @@ export function makeGetDashboardSummary(deps: GetDashboardSummaryDeps) {
             date: largest.date,
           }
         : null,
-      currentSavings: latestSavings,
+      currentSavings: savingsBalance,
       monthsOfRunway: runway.monthsOfRunway?.toFixed(1) ?? null,
       riskLevel: runway.level,
     };

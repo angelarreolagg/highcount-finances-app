@@ -7,9 +7,9 @@ import { Money } from "../value-objects/Money";
 import { buildAnnualSummary, isAnnualSummaryUnlocked } from "./annualSummary";
 
 describe("isAnnualSummaryUnlocked", () => {
-  it("unlocks the current year on December 15th", () => {
-    expect(isAnnualSummaryUnlocked(2026, new Date(2026, 11, 14))).toBe(false);
-    expect(isAnnualSummaryUnlocked(2026, new Date(2026, 11, 15))).toBe(true);
+  it("unlocks the current year at any point in the year", () => {
+    expect(isAnnualSummaryUnlocked(2026, new Date(2026, 0, 1))).toBe(true);
+    expect(isAnnualSummaryUnlocked(2026, new Date(2026, 6, 9))).toBe(true);
     expect(isAnnualSummaryUnlocked(2026, new Date(2026, 11, 31))).toBe(true);
   });
 
@@ -45,9 +45,9 @@ describe("buildAnnualSummary", () => {
     description: "test",
   });
   const savings: SavingsEntry[] = [
-    { id: "s1", date: "2026-01-10", balance: Money.from("10000") },
-    { id: "s2", date: "2026-06-10", balance: Money.from("12500") },
-    { id: "s0", date: "2025-12-10", balance: Money.from("9000") }, // other year, ignored
+    { id: "s0", date: "2025-12-10", amount: Money.from("10000"), kind: "deposit" }, // prior year → start balance
+    { id: "s1", date: "2026-01-10", amount: Money.from("2000"), kind: "deposit" },
+    { id: "s2", date: "2026-06-10", amount: Money.from("500"), kind: "returns" },
   ];
 
   const summary = buildAnnualSummary(
@@ -90,13 +90,13 @@ describe("buildAnnualSummary", () => {
     expect(summary.byMonth[5].expenses.isZero()).toBe(true);
   });
 
-  it("computes savings change from the year's first and last snapshots", () => {
+  it("derives start balance from prior years and change from in-year entries", () => {
     expect(summary.savingsStart?.toStorage()).toBe("10000");
     expect(summary.savingsEnd?.toStorage()).toBe("12500");
     expect(summary.savingsChange?.toStorage()).toBe("2500");
   });
 
-  it("returns nulls for savings when the year has no snapshots", () => {
+  it("returns nulls for savings when the year has no entries", () => {
     const empty = buildAnnualSummary(2024, [], [], categories, cards);
     expect(empty.savingsStart).toBeNull();
     expect(empty.savingsChange).toBeNull();

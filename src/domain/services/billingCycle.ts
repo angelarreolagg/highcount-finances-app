@@ -44,31 +44,43 @@ export function isPreviousMonthOpen(cards: Card[], today: Date): boolean {
   });
 }
 
-/**
- * Month-grid locking rule:
- * - the current month is always enabled,
- * - the previous month is enabled only while it is still open (see above),
- * - every other month (future or older past) is disabled.
- */
-export function isMonthEnabled(
+export interface MonthStatus {
+  /** Past and current months can always be opened to view their detail. */
+  isViewable: boolean;
+  /**
+   * Logging rule: the current month is always open; the previous month
+   * stays open only while its billing cycle is (see isPreviousMonthOpen);
+   * every other month is closed for logging.
+   */
+  isOpenForLogging: boolean;
+}
+
+export function getMonthStatus(
   year: number,
   monthIndex: number,
   cards: Card[],
   today: Date,
-): boolean {
+): MonthStatus {
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
-  if (year === currentYear && monthIndex === currentMonth) return true;
-  const prev = addMonths(currentYear, currentMonth, -1);
-  if (year === prev.year && monthIndex === prev.monthIndex) {
-    return isPreviousMonthOpen(cards, today);
+  const isViewable =
+    year < currentYear || (year === currentYear && monthIndex <= currentMonth);
+
+  let isOpenForLogging = false;
+  if (year === currentYear && monthIndex === currentMonth) {
+    isOpenForLogging = true;
+  } else {
+    const prev = addMonths(currentYear, currentMonth, -1);
+    if (year === prev.year && monthIndex === prev.monthIndex) {
+      isOpenForLogging = isPreviousMonthOpen(cards, today);
+    }
   }
-  return false;
+  return { isViewable, isOpenForLogging };
 }
 
-/** Availability of the 12 months of `year`, index 0 = January. */
-export function getYearAvailability(year: number, cards: Card[], today: Date): boolean[] {
+/** Status of the 12 months of `year`, index 0 = January. */
+export function getYearMonthStatuses(year: number, cards: Card[], today: Date): MonthStatus[] {
   return Array.from({ length: 12 }, (_, monthIndex) =>
-    isMonthEnabled(year, monthIndex, cards, today),
+    getMonthStatus(year, monthIndex, cards, today),
   );
 }

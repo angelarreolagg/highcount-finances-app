@@ -1,6 +1,8 @@
 import { MONTH_NAMES } from "../../../shared/utils/months";
 import { useUiStore } from "../../../state/uiStore";
 import { useMonthDetail } from "../../hooks/useDashboardData";
+import { chipClass } from "../../utils/chips";
+import { Modal } from "../shared/Modal";
 
 export function MonthDetailModal() {
   const detailMonth = useUiStore((s) => s.detailMonth);
@@ -10,62 +12,74 @@ export function MonthDetailModal() {
     detailMonth?.monthIndex ?? null,
   );
 
-  if (!detailMonth) return null;
+  const title = detailMonth
+    ? `${MONTH_NAMES[detailMonth.monthIndex]} ${detailMonth.year}`
+    : "";
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
-      <div className="bg-white border p-4 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-        <div className="flex justify-between mb-3">
-          <h2 className="text-lg font-semibold">
-            {MONTH_NAMES[detailMonth.monthIndex]} {detailMonth.year}
-          </h2>
-          <button type="button" onClick={closeMonthDetail} className="border px-2">
-            Close
-          </button>
-        </div>
-        {isLoading && <p className="text-sm">Loading…</p>}
-        {data && (
-          <>
-            <ul className="text-sm mb-3">
-              <li>Total income: {data.totalIncome.format()}</li>
-              <li>Total expenses: {data.totalExpenses.format()}</li>
-              <li>Net: {data.net.format()}</li>
+    <Modal open={detailMonth !== null} title={title} onClose={closeMonthDetail}>
+      {isLoading && <p className="text-sm text-white/50">Loading…</p>}
+      {data && (
+        <>
+          <div className="mb-4 grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-2xl bg-white/5 p-3">
+              <p className="text-xs text-white/50">Income</p>
+              <p className="mt-1 text-sm font-semibold tabular-nums text-mint">
+                +{data.totalIncome.format()}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-white/5 p-3">
+              <p className="text-xs text-white/50">Spent</p>
+              <p className="mt-1 text-sm font-semibold tabular-nums">
+                −{data.totalExpenses.format()}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-white/5 p-3">
+              <p className="text-xs text-white/50">Net</p>
+              <p className="mt-1 text-sm font-semibold tabular-nums">{data.net.format()}</p>
+            </div>
+          </div>
+
+          {data.transactions.length === 0 ? (
+            <p className="text-sm text-white/40">
+              Nothing logged this month yet — add an expense or income to see it here.
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {data.transactions.map((t) => (
+                <li key={t.id} className="flex items-center gap-3 text-sm">
+                  <span
+                    className={`flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${chipClass(t.categoryName)}`}
+                  >
+                    {t.categoryName[0]}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-1.5">
+                      <span className="truncate font-medium">
+                        {t.description || t.categoryName}
+                      </span>
+                      {t.installmentLabel && (
+                        <span className="shrink-0 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] text-white/70">
+                          {t.installmentLabel}
+                        </span>
+                      )}
+                    </span>
+                    <span className="block text-xs text-white/50">
+                      {t.date} · {t.cardName}
+                    </span>
+                  </span>
+                  <span
+                    className={`shrink-0 tabular-nums ${t.type === "income" ? "text-mint" : ""}`}
+                  >
+                    {t.type === "income" ? "+" : "−"}
+                    {t.amount.format()}
+                  </span>
+                </li>
+              ))}
             </ul>
-            {data.transactions.length === 0 ? (
-              <p className="text-sm">No transactions this month.</p>
-            ) : (
-              <table className="text-sm w-full border-collapse">
-                <thead>
-                  <tr className="text-left border-b">
-                    <th className="pr-2">Date</th>
-                    <th className="pr-2">Description</th>
-                    <th className="pr-2">Category</th>
-                    <th className="pr-2">Account</th>
-                    <th className="text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.transactions.map((t) => (
-                    <tr key={t.id} className="border-b">
-                      <td className="pr-2">{t.date}</td>
-                      <td className="pr-2">
-                        {t.description || "—"}
-                        {t.installmentLabel && ` [${t.installmentLabel}]`}
-                      </td>
-                      <td className="pr-2">{t.categoryName}</td>
-                      <td className="pr-2">{t.cardName}</td>
-                      <td className={`text-right ${t.type === "income" ? "text-green-700" : ""}`}>
-                        {t.type === "income" ? "+" : "−"}
-                        {t.amount.format()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </>
-        )}
-      </div>
-    </div>
+          )}
+        </>
+      )}
+    </Modal>
   );
 }

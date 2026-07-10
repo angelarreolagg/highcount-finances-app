@@ -31,3 +31,32 @@ export function summarizeTransactions(transactions: Transaction[]): MonthlySumma
     largestExpense,
   };
 }
+
+export interface MonthBreakdown {
+  monthIndex: number;
+  income: Money;
+  expenses: Money;
+}
+
+/**
+ * Bucket a year's transactions into 12 month slots (0 = January) with income
+ * and expense totals. Months without activity stay at zero.
+ */
+export function summarizeYearByMonth(transactions: Transaction[]): MonthBreakdown[] {
+  const byMonth: MonthBreakdown[] = Array.from({ length: 12 }, (_, monthIndex) => ({
+    monthIndex,
+    income: Money.zero(),
+    expenses: Money.zero(),
+  }));
+
+  for (const t of transactions) {
+    const monthIndex = Number(t.date.slice(5, 7)) - 1;
+    if (t.type === "income") {
+      byMonth[monthIndex].income = byMonth[monthIndex].income.add(t.amount);
+    } else {
+      byMonth[monthIndex].expenses = byMonth[monthIndex].expenses.add(t.amount);
+    }
+  }
+
+  return byMonth;
+}

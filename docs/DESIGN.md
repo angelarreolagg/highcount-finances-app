@@ -89,7 +89,8 @@ names, never raw hexes in components.
   renders the plain number.
 - Modals: AnimatePresence — backdrop fades, glass panel springs up (y 32→0,
   scale 0.96→1) and exits the same way.
-- Buttons: `whileTap` scale 0.97 (0.94 for the round action buttons); subtle hover.
+- Buttons: `whileTap` scale 0.97 (0.94 for the dock's round buttons); subtle hover.
+  The ActionDock magnifies macOS-style — item size springs with cursor distance.
 - Ambient: the hero gradient pan (18s) and blob drift (26–34s) are CSS keyframes.
 - **Reduced motion is respected**: `MotionConfig reducedMotion="user"` app-wide and a
   `prefers-reduced-motion` media query kills the ambient hero animation.
@@ -97,9 +98,11 @@ names, never raw hexes in components.
 ## Composition rules
 
 1. Responsive, phone-first: a centered column (`max-w-md`, scrolls) that widens to a
-   2-col grid at `md:max-w-3xl` (scrolls), and at `xl` becomes a **full-bleed,
-   viewport-locked app shell** (`xl:h-dvh`, `xl:max-w-none` — no width cap, no side
-   margins, no page scroll): the hero keeps its natural height across the full width,
+   2-col grid at `md:max-w-3xl` (scrolls). Scrolling routes (Expenses, Savings,
+   Summary) keep a centered column but widen it at desktop (`xl:max-w-6xl`,
+   `2xl:max-w-7xl`) so wide monitors aren't mostly gutter. Home at `xl` becomes a
+   **full-bleed, viewport-locked app shell** (`xl:h-dvh`, `xl:max-w-none` — no width
+   cap, no side margins, no page scroll): the hero keeps its natural height across the full width,
    and the sections fill the remaining height as a `4×2` grid — months span 2 columns
    × 2 rows on the left, This month / Cards on the top right, MSI / Savings below
    them. Lists that outgrow their card scroll INSIDE the card (GlassCard bodies are
@@ -113,9 +116,20 @@ names, never raw hexes in components.
    whatever sits behind it, so it keeps its own surface color and never shows the
    animation sharply through it.
 3. Actions split by frequency: everyday actions (Add transaction, MSI) live in the
-   **ActionDock** — a floating bottom-centered glass pill (`fixed bottom-5`,
-   `bg-panel/80 backdrop-blur-2xl rounded-full`) holding the frosted circular
-   buttons, visible on every route (pages reserve `pb-28` for it). Account-level
+   **ActionDock** — a floating bottom-centered glass panel (`fixed bottom-4`,
+   `bg-panel/70 backdrop-blur-2xl rounded-3xl`) holding two rounded-square
+   **liquid-glass** buttons (`rounded-2xl`) that magnify macOS-style as the cursor
+   approaches (distance-based size spring, 48→68px; reduced motion keeps them
+   static). Both share the same transparent frosted fill (`bg-white/[0.06]`) plus
+   a specular top sheen — Add and MSI are distinguished only by their glow ring,
+   not by color. Instead of static borders, each button wears an **animated glow
+   ring** (`.dock-ring-*` in index.css): a conic-gradient light segment traveling
+   around the rounded-square edge — Add in peri → sky with a warm amber spark
+   opposite (4s), MSI a softer white/peri (6s); reduced motion freezes the ring as
+   a static gradient border. Each action's name reveals as a small glass tooltip
+   above the button on hover/focus (the buttons carry the full name as their
+   `aria-label` for assistive tech). Visible on every route (pages reserve `pb-28`
+   for it). Account-level
    actions (Cards & accounts manager, Log savings, Year in Review) live in the
    **profile dropdown** — a frosted avatar button at the header's top-right opening
    a small glass menu (`bg-panel/90`, `rounded-2xl`, springs in from the top-right,
@@ -123,10 +137,30 @@ names, never raw hexes in components.
    modals.
 4. Money semantics: income mint with a `+`, expenses plain white with a `−`.
    Currency is MXN, `es-MX` locale (see `Money.format()`).
-5. Icon chips: rows get a small filled circular chip (initial letter or icon) with a
-   hue derived from the row's id — colorful chips on dark cards, per the wealth screen.
+5. Icon chips: rows get a small filled circular chip (initial letter or icon) —
+   colorful chips on dark cards, per the wealth screen. The hue is the row's
+   **user-assigned color** when one was picked; otherwise it falls back to a hash
+   of the row's id/name (`chipClassFor`). Transactions, MSI plans, and savings
+   movements pick from a curated 8-swatch palette (`ChipColor`, Tailwind classes).
+   **Cards/accounts** are different: they carry a **free hex color** and render as
+   gradient card faces (no initial chip) — the Cards & accounts manager shows a
+   grid of `CardVisual` mini-cards (2 cols on mobile, 3 from `sm`; gradient tinted
+   by the card's color via `cardSurface`, inset hairline ring, optional `·last4`
+   hint, type badge top-right), and the add/edit form shows the same `CardVisual`
+   live above a **free color picker** (`ColorField`: a native OS color well only —
+   no preset swatches). A brand-new card starts with a random color
+   (`randomCardColor`); editing keeps the card's stored color. Card color persists
+   as a hex string; cards without one fall back to the peri-deep blue gradient.
 6. Copy is plain and directive: buttons say what they do ("Add expense", "Log
    balance"); empty states invite the action, they don't apologize.
+   **Row actions**: every list row (transactions, cards, MSI plans, savings
+   movements) exposes hover-reveal edit/delete icon buttons (`RowActions`) at its
+   right edge — hidden until hover/focus on desktop, faintly visible on touch.
+   Destructive actions always pass through the glass `DeleteConfirmModal` with a
+   solid-coral `danger` button. Edits reuse the registration form in an "Edit"
+   variant (prefilled, "Save changes"). MSI installments are managed only through
+   their plan — installment rows show no actions, and editing a plan regenerates
+   its schedule.
 7. One bold thing per screen — the hero owns the drama; cards stay quiet. Before
    adding decoration, remove one.
 8. **Route shell**: every route renders through `PageShell` (backdrop + header with
@@ -143,8 +177,10 @@ names, never raw hexes in components.
 9. **Savings model**: savings are logged as movements — `deposit` (money put in) or
    `returns` (interest produced), both positive amounts; balances are cumulative
    sums. Returns render in mint with a tiny kind tag; deposits in white.
-10. **Charts** (savings route, hand-rolled SVG — no chart library): single-series
-   per chart, identity from the card title (no legend). Balance over time = 2px
+10. **Charts** (savings route, hand-rolled SVG — no chart library): the two chart
+   cards sit side by side from `md` up (`grid md:grid-cols-2`), History full-width
+   below them. Single-series per chart, identity from the card title (no legend).
+   Balance over time = 2px
    periwinkle line + 14%-opacity area + ≥8px markers ringed in `panel`; returns =
    thin mint bars with 4px rounded data-ends anchored to the baseline. Dotted
    `white/12` hairline gridlines with compact right-side axis labels; all values in

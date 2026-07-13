@@ -3,9 +3,11 @@ import { MONTH_NAMES } from "../../shared/utils/months";
 import { GlassCard } from "../components/shared/GlassCard";
 import { PageShell } from "../components/layout/PageShell";
 import { RouteHero } from "../components/layout/RouteHero";
-import { control } from "../components/shared/formStyles";
+import { Select } from "../components/shared/Select";
 import { useCards, useCategories, useExpensesFeed } from "../hooks/useDashboardData";
-import { chipClass } from "../utils/chips";
+import { useUiStore } from "../../state/uiStore";
+import { RowActions } from "../components/shared/RowActions";
+import { chipClassFor } from "../utils/chips";
 import { Money } from "../../domain/value-objects/Money";
 
 type TypeFilter = "expense" | "income" | "all";
@@ -14,6 +16,8 @@ export function ExpensesPage() {
   const { data: feed, isLoading } = useExpensesFeed();
   const { data: categories = [] } = useCategories();
   const { data: cards = [] } = useCards();
+  const openEdit = useUiStore((s) => s.openEdit);
+  const openDelete = useUiStore((s) => s.openDelete);
 
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("expense");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -57,20 +61,18 @@ export function ExpensesPage() {
       {feed && (
         <div className="space-y-4 px-4 pt-2">
           <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-            <select
+            <Select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
-              className={control}
               aria-label="Filter by type"
             >
               <option value="expense">Expenses</option>
               <option value="income">Income</option>
               <option value="all">All types</option>
-            </select>
-            <select
+            </Select>
+            <Select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className={control}
               aria-label="Filter by category"
             >
               <option value="all">All categories</option>
@@ -79,11 +81,10 @@ export function ExpensesPage() {
                   {c.name}
                 </option>
               ))}
-            </select>
-            <select
+            </Select>
+            <Select
               value={cardFilter}
               onChange={(e) => setCardFilter(e.target.value)}
-              className={control}
               aria-label="Filter by card"
             >
               <option value="all">All cards</option>
@@ -92,11 +93,10 @@ export function ExpensesPage() {
                   {c.name}
                 </option>
               ))}
-            </select>
-            <select
+            </Select>
+            <Select
               value={monthFilter}
               onChange={(e) => setMonthFilter(e.target.value)}
-              className={control}
               aria-label="Filter by month"
             >
               <option value="all">All open months</option>
@@ -109,7 +109,7 @@ export function ExpensesPage() {
                   </option>
                 );
               })}
-            </select>
+            </Select>
           </div>
 
           <GlassCard
@@ -126,9 +126,9 @@ export function ExpensesPage() {
             ) : (
               <ul className="space-y-3">
                 {filtered.map((t) => (
-                  <li key={t.id} className="flex items-center gap-3 text-sm">
+                  <li key={t.id} className="group flex items-center gap-3 text-sm">
                     <span
-                      className={`flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${chipClass(t.categoryName)}`}
+                      className={`flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${chipClassFor(t.color, t.categoryName)}`}
                     >
                       {t.categoryName[0]}
                     </span>
@@ -153,6 +153,19 @@ export function ExpensesPage() {
                       {t.type === "income" ? "+" : "−"}
                       {t.amount.format()}
                     </span>
+                    {!t.installmentLabel && (
+                      <RowActions
+                        label={t.description || t.categoryName}
+                        onEdit={() => openEdit({ type: "transaction", transaction: t })}
+                        onDelete={() =>
+                          openDelete({
+                            type: "transaction",
+                            id: t.id,
+                            label: t.description || t.categoryName,
+                          })
+                        }
+                      />
+                    )}
                   </li>
                 ))}
               </ul>

@@ -3,7 +3,10 @@ import { useCases, repositories } from "../../infrastructure/di/container";
 import type { AddTransactionInput } from "../../application/useCases/addTransaction";
 import type { RegisterMSIPurchaseInput } from "../../application/useCases/registerMSIPurchase";
 import type { LogSavingsGrowthInput } from "../../application/useCases/logSavingsGrowth";
-import type { AddCardInput } from "../../application/useCases/manageCards";
+import type { AddCardInput, UpdateCardInput } from "../../application/useCases/manageCards";
+import type { UpdateMSIPlanInput } from "../../application/useCases/updateMSIPlan";
+import type { UpdateSavingsEntryInput } from "../../application/useCases/updateSavingsEntry";
+import type { UpdateTransactionInput } from "../../application/useCases/updateTransaction";
 
 /** Tanstack Query wraps the application use cases; the UI never touches repositories or IndexedDB directly. */
 
@@ -106,5 +109,87 @@ export function useAddCard() {
   return useMutation({
     mutationFn: (input: AddCardInput) => useCases.addCard(input),
     onSuccess: invalidateAll,
+  });
+}
+
+export function useUpdateTransaction() {
+  const invalidateAll = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: UpdateTransactionInput) => useCases.updateTransaction(input),
+    onSuccess: invalidateAll,
+  });
+}
+
+export function useRemoveTransaction() {
+  const invalidateAll = useInvalidateAll();
+  return useMutation({
+    mutationFn: (id: string) => useCases.removeTransaction(id),
+    onSuccess: invalidateAll,
+  });
+}
+
+export function useUpdateCard() {
+  const invalidateAll = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: UpdateCardInput) => useCases.updateCard(input),
+    onSuccess: invalidateAll,
+  });
+}
+
+export function useRemoveCard() {
+  const invalidateAll = useInvalidateAll();
+  return useMutation({
+    mutationFn: (id: string) => useCases.removeCard(id),
+    onSuccess: invalidateAll,
+  });
+}
+
+export function useUpdateMSIPlan() {
+  const invalidateAll = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: UpdateMSIPlanInput) => useCases.updateMSIPlan(input),
+    onSuccess: invalidateAll,
+  });
+}
+
+export function useRemoveMSIPlan() {
+  const invalidateAll = useInvalidateAll();
+  return useMutation({
+    mutationFn: (id: string) => useCases.removeMSIPlan(id),
+    onSuccess: invalidateAll,
+  });
+}
+
+export function useUpdateSavingsEntry() {
+  const invalidateAll = useInvalidateAll();
+  return useMutation({
+    mutationFn: (input: UpdateSavingsEntryInput) => useCases.updateSavingsEntry(input),
+    onSuccess: invalidateAll,
+  });
+}
+
+export function useRemoveSavingsEntry() {
+  const invalidateAll = useInvalidateAll();
+  return useMutation({
+    mutationFn: (id: string) => useCases.removeSavingsEntry(id),
+    onSuccess: invalidateAll,
+  });
+}
+
+/** How many transactions / MSI plans still reference a card (deletion is blocked while > 0). */
+export function useCardUsage(cardId: string | null) {
+  return useQuery({
+    queryKey: ["cardUsage", cardId],
+    enabled: cardId !== null,
+    queryFn: async () => {
+      const [transactions, plans] = await Promise.all([
+        repositories.transactionRepository.getAll(),
+        repositories.msiPlanRepository.getAll(),
+      ]);
+      return {
+        transactionCount: transactions.filter((t) => t.cardId === cardId).length,
+        planCount: plans.filter((p) => p.cardId === cardId).length,
+      };
+    },
   });
 }

@@ -1,12 +1,13 @@
 import { motion } from "motion/react";
 import type { ComponentProps } from "react";
 
-type ButtonVariant = "pill" | "primary" | "ghost";
+type ButtonVariant = "pill" | "primary" | "ghost" | "danger";
 
 const variantClasses: Record<ButtonVariant, string> = {
   pill: "bg-white/15 text-white backdrop-blur hover:bg-white/25",
   primary: "bg-white text-night hover:bg-white/90",
   ghost: "text-peri hover:bg-white/10",
+  danger: "bg-coral text-night hover:bg-coral/90",
 };
 
 interface ButtonProps extends ComponentProps<typeof motion.button> {

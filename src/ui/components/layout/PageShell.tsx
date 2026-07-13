@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { NavLink } from "react-router";
 import { AddTransactionModal } from "../modals/AddTransactionModal";
 import { CardsManagerModal } from "../modals/CardsManagerModal";
+import { DeleteConfirmModal } from "../modals/DeleteConfirmModal";
 import { LogSavingsModal } from "../modals/LogSavingsModal";
 import { RegisterMsiModal } from "../modals/RegisterMsiModal";
 import { ActionDock } from "../shared/ActionDock";
@@ -39,9 +40,18 @@ export function PageShell({ hero, lockDesktop = false, children }: PageShellProp
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07 } } }}
         className={`pb-28 ${lockDesktop ? "xl:flex xl:h-full xl:flex-col" : ""}`}
       >
-        {/* The header renders statically — it must not animate on route changes. */}
-        <header className="flex items-center justify-between gap-3 px-5 pt-5 lg:px-8">
-          <h1 className="text-lg font-bold tracking-tight">High Count</h1>
+        {/* The header renders statically — it must not animate on route changes.
+            3-column grid so the nav pills sit dead-center regardless of the
+            wordmark/avatar widths on either side. */}
+        <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 pt-5 lg:px-8">
+          <div className="flex items-center gap-2">
+            <img
+              src="/favicon/favicon-128x128.png"
+              alt=""
+              className="size-7 rounded-lg ring-1 ring-white/10"
+            />
+            <h1 className="text-lg font-bold tracking-tight">High Count</h1>
+          </div>
           <nav className="flex items-center gap-1 rounded-full border border-white/10 bg-white/10 p-1 text-xs backdrop-blur">
             {NAV_ITEMS.map((item) => (
               <NavLink
@@ -57,7 +67,9 @@ export function PageShell({ hero, lockDesktop = false, children }: PageShellProp
               </NavLink>
             ))}
           </nav>
-          <ProfileMenu year={year} />
+          <div className="justify-self-end">
+            <ProfileMenu year={year} />
+          </div>
         </header>
 
         <motion.div variants={riseIn} className="px-5 lg:px-8">
@@ -68,7 +80,7 @@ export function PageShell({ hero, lockDesktop = false, children }: PageShellProp
           className={`mx-auto w-full max-w-md md:max-w-3xl ${
             lockDesktop
               ? "xl:flex xl:min-h-0 xl:max-w-none xl:flex-1 xl:flex-col"
-              : "xl:max-w-5xl"
+              : "xl:max-w-6xl 2xl:max-w-7xl"
           }`}
         >
           {children}
@@ -80,6 +92,8 @@ export function PageShell({ hero, lockDesktop = false, children }: PageShellProp
       <RegisterMsiModal />
       <LogSavingsModal />
       <CardsManagerModal />
+      {/* Rendered last so the confirmation stacks above any modal that triggered it. */}
+      <DeleteConfirmModal />
     </div>
   );
 }

@@ -78,6 +78,16 @@ export async function idbDelete(store: StoreName, key: string): Promise<void> {
   await transactionDone(tx);
 }
 
+/** Delete several records atomically in a single transaction. */
+export async function idbBulkDelete(store: StoreName, keys: string[]): Promise<void> {
+  const db = await openDb();
+  const tx = db.transaction(store, "readwrite");
+  for (const key of keys) {
+    tx.objectStore(store).delete(key);
+  }
+  await transactionDone(tx);
+}
+
 export async function idbCount(store: StoreName): Promise<number> {
   const db = await openDb();
   const tx = db.transaction(store, "readonly");

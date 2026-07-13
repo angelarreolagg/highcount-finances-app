@@ -1,40 +1,41 @@
-import type { ChipColor } from "../../domain/entities/ChipColor";
-import type { Transaction, TransactionType } from "../../domain/entities/Transaction";
+import type { Transaction } from "../../domain/entities/Transaction";
 import type { CardRepository } from "../../domain/repositories/CardRepository";
 import type { CategoryRepository } from "../../domain/repositories/CategoryRepository";
 import type { TransactionRepository } from "../../domain/repositories/TransactionRepository";
 import { Money } from "../../domain/value-objects/Money";
 import { parseISODate } from "../../domain/value-objects/calendar";
+import type { AddTransactionInput } from "./addTransaction";
 
-export interface AddTransactionInput {
-  type: TransactionType;
-  /** Decimal string, e.g. "1234.56". */
-  amount: string;
-  categoryId: string;
-  cardId: string;
-  date: string;
-  description: string;
-  color?: ChipColor;
+export interface UpdateTransactionInput extends AddTransactionInput {
+  id: string;
 }
 
-export interface AddTransactionDeps {
+export interface UpdateTransactionDeps {
   transactionRepository: TransactionRepository;
   cardRepository: CardRepository;
   categoryRepository: CategoryRepository;
 }
 
-export function makeAddTransaction(deps: AddTransactionDeps) {
-  return async function addTransaction(input: AddTransactionInput): Promise<Transaction> {
+export function makeUpdateTransaction(deps: UpdateTransactionDeps) {
+  return async function updateTransaction(input: UpdateTransactionInput): Promise<Transaction> {
     const amount = Money.from(input.amount);
     if (!amount.isPositive()) {
       throw new Error("Amount must be greater than zero");
     }
     parseISODate(input.date); // validates format
 
-    const [cards, categories] = await Promise.all([
+    const [transactions, cards, categories] = await Promise.all([
+      deps.transactionRepository.getAll(),
       deps.cardRepository.getAll(),
       deps.categoryRepository.getAll(),
     ]);
+    const existing = transactions.find((t) => t.id === input.id);
+    if (!existing) {
+      throw new Error("Transaction not found");
+    }
+    if (existing.msiPlanId != null) {
+      throw new Error("MSI installments are managed through their plan");
+    }
     if (!cards.some((c) => c.id === input.cardId)) {
       throw new Error("Unknown card/account");
     }
@@ -47,7 +48,7 @@ export function makeAddTransaction(deps: AddTransactionDeps) {
     }
 
     const transaction: Transaction = {
-      id: crypto.randomUUID(),
+      id: existing.id,
       type: input.type,
       amount,
       categoryId: input.categoryId,
@@ -56,7 +57,7 @@ export function makeAddTransaction(deps: AddTransactionDeps) {
       description: input.description.trim(),
       color: input.color,
     };
-    await deps.transactionRepository.add(transaction);
+    await deps.transactionRepository.update(transaction);
     return transaction;
   };
 }

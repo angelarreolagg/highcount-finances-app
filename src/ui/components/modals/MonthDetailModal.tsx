@@ -1,12 +1,15 @@
 import { MONTH_NAMES } from "../../../shared/utils/months";
 import { useUiStore } from "../../../state/uiStore";
 import { useMonthDetail } from "../../hooks/useDashboardData";
-import { chipClass } from "../../utils/chips";
+import { chipClassFor } from "../../utils/chips";
 import { Modal } from "../shared/Modal";
+import { RowActions } from "../shared/RowActions";
 
 export function MonthDetailModal() {
   const detailMonth = useUiStore((s) => s.detailMonth);
   const closeMonthDetail = useUiStore((s) => s.closeMonthDetail);
+  const openEdit = useUiStore((s) => s.openEdit);
+  const openDelete = useUiStore((s) => s.openDelete);
   const { data, isLoading } = useMonthDetail(
     detailMonth?.year ?? null,
     detailMonth?.monthIndex ?? null,
@@ -47,9 +50,9 @@ export function MonthDetailModal() {
           ) : (
             <ul className="space-y-3">
               {data.transactions.map((t) => (
-                <li key={t.id} className="flex items-center gap-3 text-sm">
+                <li key={t.id} className="group flex items-center gap-3 text-sm">
                   <span
-                    className={`flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${chipClass(t.categoryName)}`}
+                    className={`flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${chipClassFor(t.color, t.categoryName)}`}
                   >
                     {t.categoryName[0]}
                   </span>
@@ -74,6 +77,19 @@ export function MonthDetailModal() {
                     {t.type === "income" ? "+" : "−"}
                     {t.amount.format()}
                   </span>
+                  {!t.installmentLabel && (
+                    <RowActions
+                      label={t.description || t.categoryName}
+                      onEdit={() => openEdit({ type: "transaction", transaction: t })}
+                      onDelete={() =>
+                        openDelete({
+                          type: "transaction",
+                          id: t.id,
+                          label: t.description || t.categoryName,
+                        })
+                      }
+                    />
+                  )}
                 </li>
               ))}
             </ul>

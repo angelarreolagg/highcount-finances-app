@@ -1,7 +1,7 @@
 import type { MSIPlan } from "../../../domain/entities/MSIPlan";
 import type { MSIPlanRepository } from "../../../domain/repositories/MSIPlanRepository";
 import { Money } from "../../../domain/value-objects/Money";
-import { STORES, idbGetAll, idbPut } from "./db";
+import { STORES, idbDelete, idbGetAll, idbPut } from "./db";
 
 interface MSIPlanRecord {
   id: string;
@@ -23,6 +23,14 @@ export class MSIPlanRepositoryIndexedDb implements MSIPlanRepository {
       monthlyAmount: plan.monthlyAmount.toStorage(),
     };
     await idbPut(STORES.msiPlans, record);
+  }
+
+  async update(plan: MSIPlan): Promise<void> {
+    await this.add(plan);
+  }
+
+  async remove(id: string): Promise<void> {
+    await idbDelete(STORES.msiPlans, id);
   }
 
   async getAll(): Promise<MSIPlan[]> {

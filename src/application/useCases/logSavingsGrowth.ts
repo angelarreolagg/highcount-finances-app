@@ -1,3 +1,4 @@
+import type { ChipColor } from "../../domain/entities/ChipColor";
 import type { SavingsEntry, SavingsEntryKind } from "../../domain/entities/SavingsEntry";
 import type { SavingsRepository } from "../../domain/repositories/SavingsRepository";
 import { Money } from "../../domain/value-objects/Money";
@@ -10,6 +11,7 @@ export interface LogSavingsGrowthInput {
   /** "deposit" = money the user put in; "returns" = interest the account produced. */
   kind: SavingsEntryKind;
   note?: string;
+  color?: ChipColor;
 }
 
 export interface LogSavingsGrowthDeps {
@@ -30,6 +32,7 @@ export function makeLogSavingsGrowth(deps: LogSavingsGrowthDeps) {
       amount,
       kind: input.kind,
       note: input.note?.trim() || undefined,
+      color: input.color,
     };
     await deps.savingsRepository.add(entry);
     return entry;

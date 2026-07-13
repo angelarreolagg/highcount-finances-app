@@ -1,4 +1,3 @@
-import type { ChipColor } from "../../domain/entities/ChipColor";
 import type { MSIPlan } from "../../domain/entities/MSIPlan";
 import type { Transaction } from "../../domain/entities/Transaction";
 import type { CardRepository } from "../../domain/repositories/CardRepository";
@@ -7,20 +6,13 @@ import type { MSIPlanRepository } from "../../domain/repositories/MSIPlanReposit
 import type { TransactionRepository } from "../../domain/repositories/TransactionRepository";
 import { buildMsiSchedule } from "../../domain/services/msiSchedule";
 import { Money } from "../../domain/value-objects/Money";
+import type { RegisterMSIPurchaseInput } from "./registerMSIPurchase";
 
-export interface RegisterMSIPurchaseInput {
-  description: string;
-  /** Full amount to be paid, interest included when withInterest is true. */
-  totalAmount: string;
-  months: number;
-  cardId: string;
-  categoryId: string;
-  startDate: string;
-  withInterest: boolean;
-  color?: ChipColor;
+export interface UpdateMSIPlanInput extends RegisterMSIPurchaseInput {
+  id: string;
 }
 
-export interface RegisterMSIPurchaseDeps {
+export interface UpdateMSIPlanDeps {
   msiPlanRepository: MSIPlanRepository;
   transactionRepository: TransactionRepository;
   cardRepository: CardRepository;
@@ -28,16 +20,20 @@ export interface RegisterMSIPurchaseDeps {
 }
 
 /**
- * Registers an MSI/MCI plan and automatically creates one expense
- * transaction per installment, tagged with the plan, card, and
- * installment number.
+ * Full plan edit: the old installment transactions are deleted and the schedule
+ * is regenerated from the new values (same rounding rule — the last installment
+ * absorbs the remainder). The plan keeps its id.
  */
-export function makeRegisterMSIPurchase(deps: RegisterMSIPurchaseDeps) {
-  return async function registerMSIPurchase(input: RegisterMSIPurchaseInput): Promise<MSIPlan> {
-    const [cards, categories] = await Promise.all([
+export function makeUpdateMSIPlan(deps: UpdateMSIPlanDeps) {
+  return async function updateMSIPlan(input: UpdateMSIPlanInput): Promise<MSIPlan> {
+    const [plans, cards, categories] = await Promise.all([
+      deps.msiPlanRepository.getAll(),
       deps.cardRepository.getAll(),
       deps.categoryRepository.getAll(),
     ]);
+    if (!plans.some((p) => p.id === input.id)) {
+      throw new Error("Plan not found");
+    }
     const card = cards.find((c) => c.id === input.cardId);
     if (!card) throw new Error("Unknown card");
     if (card.type !== "credit") {
@@ -52,7 +48,7 @@ export function makeRegisterMSIPurchase(deps: RegisterMSIPurchaseDeps) {
     const schedule = buildMsiSchedule(totalAmount, input.months, input.startDate);
 
     const plan: MSIPlan = {
-      id: crypto.randomUUID(),
+      id: input.id,
       cardId: input.cardId,
       categoryId: input.categoryId,
       description: input.description.trim(),
@@ -75,11 +71,14 @@ export function makeRegisterMSIPurchase(deps: RegisterMSIPurchaseDeps) {
       msiPlanId: plan.id,
       installmentNumber: i.installmentNumber,
       installmentCount: input.months,
-      // Installments inherit the plan's color so they read as one purchase.
       color: input.color,
     }));
 
-    await deps.msiPlanRepository.add(plan);
+    const transactions = await deps.transactionRepository.getAll();
+    const oldInstallmentIds = transactions.filter((t) => t.msiPlanId === plan.id).map((t) => t.id);
+
+    await deps.transactionRepository.removeMany(oldInstallmentIds);
+    await deps.msiPlanRepository.update(plan);
     await deps.transactionRepository.addMany(installments);
     return plan;
   };

@@ -1,8 +1,9 @@
+import type { ChipColor } from "../../../domain/entities/ChipColor";
 import type { Transaction, TransactionType } from "../../../domain/entities/Transaction";
 import type { TransactionRepository } from "../../../domain/repositories/TransactionRepository";
 import { Money } from "../../../domain/value-objects/Money";
 import { monthPrefix } from "../../../domain/value-objects/calendar";
-import { STORES, idbBulkPut, idbDelete, idbGetAll, idbPut } from "./db";
+import { STORES, idbBulkDelete, idbBulkPut, idbDelete, idbGetAll, idbPut } from "./db";
 
 /** Persistence shape: Money is stored as an exact decimal string. */
 interface TransactionRecord {
@@ -16,6 +17,7 @@ interface TransactionRecord {
   msiPlanId?: string;
   installmentNumber?: number;
   installmentCount?: number;
+  color?: ChipColor;
 }
 
 function toRecord(t: Transaction): TransactionRecord {
@@ -51,7 +53,15 @@ export class TransactionRepositoryIndexedDb implements TransactionRepository {
     return records.filter((r) => r.date.startsWith(`${year}-`)).map(toEntity);
   }
 
+  async update(transaction: Transaction): Promise<void> {
+    await idbPut(STORES.transactions, toRecord(transaction));
+  }
+
   async remove(id: string): Promise<void> {
     await idbDelete(STORES.transactions, id);
+  }
+
+  async removeMany(ids: string[]): Promise<void> {
+    await idbBulkDelete(STORES.transactions, ids);
   }
 }

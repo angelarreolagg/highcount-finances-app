@@ -11,6 +11,10 @@ export class CardRepositoryIndexedDb implements CardRepository {
     return idbGetAll<Card>(STORES.cards);
   }
 
+  async update(card: Card): Promise<void> {
+    await idbPut(STORES.cards, card);
+  }
+
   async remove(id: string): Promise<void> {
     await idbDelete(STORES.cards, id);
   }

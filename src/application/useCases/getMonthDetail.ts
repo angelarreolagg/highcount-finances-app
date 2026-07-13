@@ -41,6 +41,7 @@ export function makeGetMonthDetail(deps: GetMonthDetailDeps) {
           t.installmentNumber != null && t.installmentCount != null
             ? `MSI ${t.installmentNumber}/${t.installmentCount}`
             : null,
+        color: t.color,
       })),
     };
   };

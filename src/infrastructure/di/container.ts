@@ -1,7 +1,13 @@
 import { DEFAULT_CATEGORIES } from "../../domain/entities/Category";
 import type { Card } from "../../domain/entities/Card";
-import { makeAddCard } from "../../application/useCases/manageCards";
+import { makeAddCard, makeRemoveCard, makeUpdateCard } from "../../application/useCases/manageCards";
 import { makeAddTransaction } from "../../application/useCases/addTransaction";
+import { makeRemoveMSIPlan } from "../../application/useCases/removeMSIPlan";
+import { makeRemoveSavingsEntry } from "../../application/useCases/removeSavingsEntry";
+import { makeRemoveTransaction } from "../../application/useCases/removeTransaction";
+import { makeUpdateMSIPlan } from "../../application/useCases/updateMSIPlan";
+import { makeUpdateSavingsEntry } from "../../application/useCases/updateSavingsEntry";
+import { makeUpdateTransaction } from "../../application/useCases/updateTransaction";
 import { makeGetAnnualSummary } from "../../application/useCases/getAnnualSummary";
 import { makeGetDashboardSummary } from "../../application/useCases/getDashboardSummary";
 import { makeGetExpensesFeed } from "../../application/useCases/getExpensesFeed";
@@ -41,6 +47,14 @@ export const useCases = {
   getExpensesFeed: makeGetExpensesFeed(repositories),
   getSavingsOverview: makeGetSavingsOverview(repositories),
   addCard: makeAddCard(repositories),
+  updateTransaction: makeUpdateTransaction(repositories),
+  removeTransaction: makeRemoveTransaction(repositories),
+  updateCard: makeUpdateCard(repositories),
+  removeCard: makeRemoveCard(repositories),
+  updateMSIPlan: makeUpdateMSIPlan(repositories),
+  removeMSIPlan: makeRemoveMSIPlan(repositories),
+  updateSavingsEntry: makeUpdateSavingsEntry(repositories),
+  removeSavingsEntry: makeRemoveSavingsEntry(repositories),
 };
 
 /** Seed reference data on first run. Call once before rendering the app. */

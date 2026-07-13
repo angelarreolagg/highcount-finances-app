@@ -54,6 +54,7 @@ export function makeGetExpensesFeed(deps: GetExpensesFeedDeps) {
           t.installmentNumber != null && t.installmentCount != null
             ? `MSI ${t.installmentNumber}/${t.installmentCount}`
             : null,
+        color: t.color,
       }));
 
     return {

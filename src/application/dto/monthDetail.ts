@@ -1,3 +1,4 @@
+import type { ChipColor } from "../../domain/entities/ChipColor";
 import type { Money } from "../../domain/value-objects/Money";
 import type { TransactionType } from "../../domain/entities/Transaction";
 
@@ -13,6 +14,8 @@ export interface TransactionLineDTO {
   description: string;
   /** e.g. "MSI 3/12" when the transaction is an installment. */
   installmentLabel: string | null;
+  /** User-assigned chip color; undefined = automatic hue. */
+  color?: ChipColor;
 }
 
 export interface MonthDetailDTO {

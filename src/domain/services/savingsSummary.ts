@@ -1,3 +1,4 @@
+import type { ChipColor } from "../entities/ChipColor";
 import type { SavingsEntry, SavingsEntryKind } from "../entities/SavingsEntry";
 import { Money } from "../value-objects/Money";
 
@@ -9,6 +10,8 @@ export interface SavingsTimelinePoint {
   /** Cumulative balance after this entry. */
   balanceAfter: Money;
   note?: string;
+  /** User-assigned chip color; undefined = automatic hue. */
+  color?: ChipColor;
 }
 
 export interface SavingsSummary {
@@ -44,6 +47,7 @@ export function buildSavingsSummary(entries: SavingsEntry[]): SavingsSummary {
       kind: entry.kind,
       balanceAfter: balance,
       note: entry.note,
+      color: entry.color,
     });
   }
 

@@ -1,3 +1,4 @@
+import type { ChipColor } from "./ChipColor";
 import type { Money } from "../value-objects/Money";
 
 export type TransactionType = "expense" | "income";
@@ -15,4 +16,6 @@ export interface Transaction {
   msiPlanId?: string;
   installmentNumber?: number;
   installmentCount?: number;
+  /** User-assigned chip color; undefined = automatic hue. */
+  color?: ChipColor;
 }

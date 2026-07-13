@@ -1,3 +1,4 @@
+import type { ChipColor } from "./ChipColor";
 import type { Money } from "../value-objects/Money";
 
 export type SavingsEntryKind = "deposit" | "returns";
@@ -14,4 +15,6 @@ export interface SavingsEntry {
   amount: Money;
   kind: SavingsEntryKind;
   note?: string;
+  /** User-assigned chip color; undefined = automatic hue. */
+  color?: ChipColor;
 }

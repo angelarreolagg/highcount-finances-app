@@ -1,12 +1,15 @@
 import { useUiStore } from "../../../state/uiStore";
 import { useMsiPlans } from "../../hooks/useDashboardData";
-import { chipClass } from "../../utils/chips";
+import { chipClassFor } from "../../utils/chips";
 import { Button } from "../shared/Button";
 import { GlassCard } from "../shared/GlassCard";
+import { RowActions } from "../shared/RowActions";
 
 export function MSISection() {
   const { data: plans = [] } = useMsiPlans();
   const openModal = useUiStore((s) => s.openModal);
+  const openEdit = useUiStore((s) => s.openEdit);
+  const openDelete = useUiStore((s) => s.openDelete);
 
   return (
     <GlassCard
@@ -25,9 +28,9 @@ export function MSISection() {
       ) : (
         <ul className="space-y-3">
           {plans.map((p) => (
-            <li key={p.id} className="flex items-center gap-3 text-sm">
+            <li key={p.id} className="group flex items-center gap-3 text-sm">
               <span
-                className={`flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${chipClass(p.id)}`}
+                className={`flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${chipClassFor(p.color, p.id)}`}
               >
                 {p.months}
               </span>
@@ -42,6 +45,11 @@ export function MSISection() {
                 <span className="block">{p.monthlyAmount.format()}</span>
                 <span className="block text-xs text-white/50">of {p.totalAmount.format()}</span>
               </span>
+              <RowActions
+                label={p.description}
+                onEdit={() => openEdit({ type: "msiPlan", plan: p })}
+                onDelete={() => openDelete({ type: "msiPlan", plan: p })}
+              />
             </li>
           ))}
         </ul>

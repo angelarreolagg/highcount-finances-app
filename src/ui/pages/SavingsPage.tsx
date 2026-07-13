@@ -5,10 +5,14 @@ import { Button } from "../components/shared/Button";
 import { GlassCard } from "../components/shared/GlassCard";
 import { useSavingsOverview } from "../hooks/useDashboardData";
 import { useUiStore } from "../../state/uiStore";
+import { RowActions } from "../components/shared/RowActions";
+import { chipClassFor } from "../utils/chips";
 
 export function SavingsPage() {
   const { data, isLoading } = useSavingsOverview();
   const openModal = useUiStore((s) => s.openModal);
+  const openEdit = useUiStore((s) => s.openEdit);
+  const openDelete = useUiStore((s) => s.openDelete);
 
   const summary = data?.summary ?? null;
   const timeline = summary?.timeline ?? [];
@@ -45,20 +49,22 @@ export function SavingsPage() {
             </GlassCard>
           ) : (
             <>
-              <GlassCard title="Balance over time">
-                <BalanceLineChart timeline={timeline} />
-              </GlassCard>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <GlassCard title="Balance over time">
+                  <BalanceLineChart timeline={timeline} />
+                </GlassCard>
 
-              <GlassCard title="Returns per entry">
-                {hasReturns ? (
-                  <ReturnsBarChart timeline={timeline} />
-                ) : (
-                  <p className="text-sm text-white/40">
-                    No returns logged yet — when your account pays interest, log it as a
-                    "returns" movement and it will chart here.
-                  </p>
-                )}
-              </GlassCard>
+                <GlassCard title="Returns per entry">
+                  {hasReturns ? (
+                    <ReturnsBarChart timeline={timeline} />
+                  ) : (
+                    <p className="text-sm text-white/40">
+                      No returns logged yet — when your account pays interest, log it as a
+                      "returns" movement and it will chart here.
+                    </p>
+                  )}
+                </GlassCard>
+              </div>
 
               <GlassCard
                 title="History"
@@ -70,9 +76,15 @@ export function SavingsPage() {
               >
                 <ul className="space-y-3">
                   {newestFirst.map((p) => (
-                    <li key={p.id} className="flex items-center justify-between gap-3 text-sm">
+                    <li key={p.id} className="group flex items-center justify-between gap-3 text-sm">
                       <span className="min-w-0">
                         <span className="flex items-center gap-1.5">
+                          {p.color && (
+                            <span
+                              className={`size-2.5 shrink-0 rounded-full ${chipClassFor(p.color, p.id)}`}
+                              aria-hidden="true"
+                            />
+                          )}
                           <span className="font-medium tabular-nums">{p.date}</span>
                           <span
                             className={`rounded-full px-1.5 py-0.5 text-[10px] ${
@@ -98,6 +110,13 @@ export function SavingsPage() {
                           balance {p.balanceAfter.format()}
                         </span>
                       </span>
+                      <RowActions
+                        label={`${p.kind} on ${p.date}`}
+                        onEdit={() => openEdit({ type: "savings", entry: p })}
+                        onDelete={() =>
+                          openDelete({ type: "savings", id: p.id, label: `${p.kind} · ${p.date}` })
+                        }
+                      />
                     </li>
                   ))}
                 </ul>

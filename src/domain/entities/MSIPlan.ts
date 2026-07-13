@@ -1,3 +1,4 @@
+import type { ChipColor } from "./ChipColor";
 import type { Money } from "../value-objects/Money";
 
 /**
@@ -16,4 +17,6 @@ export interface MSIPlan {
   withInterest: boolean;
   /** Local ISO date of the purchase / first installment. */
   startDate: string;
+  /** User-assigned chip color; undefined = automatic hue. */
+  color?: ChipColor;
 }

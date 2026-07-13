@@ -4,14 +4,16 @@ import { MONTH_NAMES } from "../../shared/utils/months";
 import { GlassCard } from "../components/shared/GlassCard";
 import { riseIn } from "../components/shared/motionPresets";
 import { ArrowLeftIcon } from "../components/shared/icons";
-import { useAnnualSummary } from "../hooks/useDashboardData";
-import { chipClass } from "../utils/chips";
+import { useAnnualSummary, useCards } from "../hooks/useDashboardData";
+import { cardChipStyle, chipClass } from "../utils/chips";
 import { splitFormattedMoney } from "../utils/money";
 
 export function AnnualSummaryPage() {
   const params = useParams();
   const year = Number(params.year);
   const { data, isLoading } = useAnnualSummary(year);
+  const { data: cards = [] } = useCards();
+  const cardColors = new Map(cards.map((c) => [c.id, c.color]));
 
   if (!Number.isInteger(year)) {
     return (
@@ -153,7 +155,8 @@ export function AnnualSummaryPage() {
                 {summary.expensesByCard.map((c) => (
                   <li key={c.cardId} className="flex items-center gap-3">
                     <span
-                      className={`flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${chipClass(c.cardId)}`}
+                      className={`flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${cardChipStyle(cardColors.get(c.cardId)) ? "" : chipClass(c.cardId)}`}
+                      style={cardChipStyle(cardColors.get(c.cardId))}
                     >
                       {c.cardName[0]}
                     </span>

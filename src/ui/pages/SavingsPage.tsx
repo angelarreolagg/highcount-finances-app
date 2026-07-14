@@ -37,7 +37,7 @@ export function SavingsPage() {
       }
     >
       {summary && (
-        <div className="space-y-4 px-4 pt-2">
+        <div className="space-y-4 pt-2">
           {!data?.hasEntries ? (
             <GlassCard className="text-center">
               <p className="mb-3 text-sm text-white/60">

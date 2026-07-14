@@ -44,13 +44,14 @@ export function PageShell({ hero, lockDesktop = false, children }: PageShellProp
             3-column grid so the nav pills sit dead-center regardless of the
             wordmark/avatar widths on either side. */}
         <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 pt-5 lg:px-8">
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <img
               src="/favicon/favicon-128x128.png"
               alt=""
-              className="size-7 rounded-lg ring-1 ring-white/10"
+              className="size-7 shrink-0 rounded-lg ring-1 ring-white/10"
             />
-            <h1 className="text-lg font-bold tracking-tight">High Count</h1>
+            {/* Hidden on the narrowest screens so the centered nav never squeezes it into a wrap. */}
+            <h1 className="hidden truncate text-lg font-bold tracking-tight sm:block">High Count</h1>
           </div>
           <nav className="flex items-center gap-1 rounded-full border border-white/10 bg-white/10 p-1 text-xs backdrop-blur">
             {NAV_ITEMS.map((item) => (
@@ -76,11 +77,13 @@ export function PageShell({ hero, lockDesktop = false, children }: PageShellProp
           {hero}
         </motion.div>
 
+        {/* Every route goes full-bleed at xl+ (no width cap); lockDesktop only adds
+            the vertical viewport-lock so Home's grid fills the height too. The
+            horizontal gutter matches the header/hero (px-5 lg:px-8) so content aligns
+            with the logo/avatar at the screen edge. */}
         <div
-          className={`mx-auto w-full max-w-md md:max-w-3xl ${
-            lockDesktop
-              ? "xl:flex xl:min-h-0 xl:max-w-none xl:flex-1 xl:flex-col"
-              : "xl:max-w-6xl 2xl:max-w-7xl"
+          className={`mx-auto w-full max-w-md px-5 md:max-w-3xl lg:px-8 xl:max-w-none ${
+            lockDesktop ? "xl:flex xl:min-h-0 xl:flex-1 xl:flex-col" : ""
           }`}
         >
           {children}

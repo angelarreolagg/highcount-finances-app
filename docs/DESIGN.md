@@ -98,18 +98,21 @@ names, never raw hexes in components.
 ## Composition rules
 
 1. Responsive, phone-first: a centered column (`max-w-md`, scrolls) that widens to a
-   2-col grid at `md:max-w-3xl` (scrolls). Scrolling routes (Expenses, Savings,
-   Summary) keep a centered column but widen it at desktop (`xl:max-w-6xl`,
-   `2xl:max-w-7xl`) so wide monitors aren't mostly gutter. Home at `xl` becomes a
-   **full-bleed, viewport-locked app shell** (`xl:h-dvh`, `xl:max-w-none` — no width
-   cap, no side margins, no page scroll): the hero keeps its natural height across the full width,
-   and the sections fill the remaining height as a `4×2` grid — months span 2 columns
-   × 2 rows on the left, This month / Cards on the top right, MSI / Savings below
-   them. Lists that outgrow their card scroll INSIDE the card (GlassCard bodies are
-   `overflow-y-auto`; global thin scrollbars) — the page itself never scrolls at
-   `xl`. At `lg+` each month cell also shows tiny readable figures under the name:
-   `+income` (mint), `−spent` (white/70), `net` (white/50), `text-[11px]
-   tabular-nums`; inactive months show a muted `—`.
+   2-col grid at `md:max-w-3xl` (scrolls). At `xl` **every route goes full-bleed**
+   (`xl:max-w-none` — no width cap); the difference is only vertical:
+   Home also locks the viewport (`xl:h-dvh`, `lockDesktop`) so the page never scrolls,
+   while Expenses / Savings / Summary keep scrolling. The content column carries the
+   **same horizontal gutter as the header/hero** (`px-5 lg:px-8`, set once on PageShell's
+   children wrapper — pages add only vertical padding) so cards align with the wordmark
+   and avatar at the screen edge. Home's sections fill the freed
+   height as a `4×2` grid — months span 2 columns × 2 rows on the left, This month /
+   Cards on the top right, MSI / Savings below them. Lists that outgrow their card
+   scroll INSIDE the card (GlassCard bodies are `overflow-y-auto`; global thin
+   scrollbars) — the page itself never scrolls at `xl`. At `lg+` each month cell also
+   shows tiny readable figures under the name: `+income` (mint), `−spent` (white/70),
+   `net` (white/50), `text-[11px] tabular-nums`; inactive months show a muted `—`.
+   The month calendar has prev/next **year navigation** (client state on Home); cells
+   spring up slightly on hover.
 2. The animated gradient exists only as the dashboard's app backdrop (see Tokens):
    blue over the header zone, pure `night` under the sections. Cards are frosted
    glass floating over that dark tail — the month grid's blur + tint diffuses
@@ -163,17 +166,22 @@ names, never raw hexes in components.
    its schedule.
 7. One bold thing per screen — the hero owns the drama; cards stay quiet. Before
    adding decoration, remove one.
-8. **Route shell**: every route renders through `PageShell` (backdrop + header with
-   wordmark / nav pills / profile avatar + hero slot + ActionDock + global modals)
-   and a `RouteHero` (muted label, big split number, route-specific sub-lines).
-   The header + hero zone is ALWAYS full-bleed and identical across routes — the
-   wordmark, nav, and avatar must not move when navigating; only the route content
-   below carries per-route width caps.
-   Home locks the desktop viewport (`lockDesktop`); Expenses and Savings scroll.
+8. **Route shell**: EVERY route renders through `PageShell` (backdrop + header with
+   wordmark / nav pills / profile avatar + hero slot + ActionDock + global modals),
+   Year in Review included — its back-arrow + year-pager + big spent figure sit in the
+   `hero` slot (it doesn't use `RouteHero`, whose label+number contract doesn't fit).
+   Most routes use `RouteHero` (muted label, big split number, route-specific
+   sub-lines). The header + hero zone is ALWAYS full-bleed and identical across routes —
+   the wordmark, nav, and avatar must not move when navigating.
+   Home locks the desktop viewport (`lockDesktop`); Expenses, Savings, and Summary scroll.
    Hero numbers per route — Home: current balance (income − expenses to date), with
    total income, total expenses, REAL total (all MSI committed) and the runway chip;
    Expenses: current month spent, with income/net; Savings: net savings balance,
    with total saved (Σ deposits) and total returns (Σ returns).
+   **Year in Review** lays its cards out as a desktop **bento** (`xl:grid-cols-4`):
+   Highlights full-width on top, a tall By-category column (`col-span-2 row-span-2`)
+   beside a stacked By-card / Month-by-month column — asymmetric sizing, not a uniform
+   grid. Below `xl` it degrades to the standard 1-col → `md:grid-cols-2` stack.
 9. **Savings model**: savings are logged as movements — `deposit` (money put in) or
    `returns` (interest produced), both positive amounts; balances are cumulative
    sums. Returns render in mint with a tiny kind tag; deposits in white.

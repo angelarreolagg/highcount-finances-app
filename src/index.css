@@ -18,6 +18,13 @@
     color: #fff;
     -webkit-font-smoothing: antialiased;
   }
+  /* Native <button> keeps the default arrow; give every enabled button a pointer. */
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
   /* Thin, theme-matching scrollbars (lists scroll inside their glass cards). */
   * {
     scrollbar-width: thin;

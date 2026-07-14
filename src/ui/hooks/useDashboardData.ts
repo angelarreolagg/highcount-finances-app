@@ -17,6 +17,13 @@ export function useDashboardSummary(year: number, monthIndex: number) {
   });
 }
 
+export function useYearMonthGrid(year: number) {
+  return useQuery({
+    queryKey: ["yearMonthGrid", year],
+    queryFn: () => useCases.getYearMonthGrid(year),
+  });
+}
+
 export function useMonthDetail(year: number | null, monthIndex: number | null) {
   return useQuery({
     queryKey: ["monthDetail", year, monthIndex],

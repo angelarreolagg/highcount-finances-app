@@ -120,6 +120,7 @@ export function CardsManagerModal() {
   return (
     <Modal
       open={open}
+      size="wide"
       title={
         view === "list"
           ? "Cards & accounts"
@@ -138,7 +139,7 @@ export function CardsManagerModal() {
             exit={{ opacity: 0, x: -24 }}
             transition={viewTransition}
           >
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
               {cards.map((c) => (
                 <div key={c.id} className="group relative">
                   <CardVisual
@@ -148,6 +149,7 @@ export function CardsManagerModal() {
                     last4={c.last4}
                     cutDay={c.cutDay}
                     paymentDueDay={c.paymentDueDay}
+                    contentClassName="pr-14"
                   />
                   <div className="absolute right-2 bottom-2">
                     <RowActions

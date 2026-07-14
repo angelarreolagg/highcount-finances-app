@@ -59,7 +59,7 @@ export function ExpensesPage() {
       }
     >
       {feed && (
-        <div className="space-y-4 px-4 pt-2">
+        <div className="space-y-4 pt-2">
           <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
             <Select
               value={typeFilter}

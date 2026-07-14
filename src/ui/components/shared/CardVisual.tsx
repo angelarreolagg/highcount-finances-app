@@ -16,6 +16,8 @@ interface CardVisualProps {
   paymentDueDay?: number | string;
   /** Width/aspect overrides from the caller. */
   className?: string;
+  /** Extra classes on the text block — e.g. `pr-14` to clear overlaid row actions. */
+  contentClassName?: string;
 }
 
 /** A gradient card face tinted by the assigned color — used in the wallet grid and the live form preview. */
@@ -27,6 +29,7 @@ export function CardVisual({
   cutDay,
   paymentDueDay,
   className = "",
+  contentClassName = "",
 }: CardVisualProps) {
   const trimmed = name.trim();
   const showDays = type === "credit" && (cutDay !== undefined || paymentDueDay !== undefined);
@@ -41,15 +44,18 @@ export function CardVisual({
           {TYPE_LABEL[type]}
         </span>
       </div>
-      <div className="min-w-0">
+      <div className={`min-w-0 ${contentClassName}`}>
         <p className={`truncate text-sm font-semibold ${trimmed ? "text-white" : "text-white/50"}`}>
           {trimmed || "Card name"}
         </p>
-        <p className="truncate text-[11px] tabular-nums text-white/70">
-          {last4 ? `·${last4}` : ""}
-          {last4 && showDays ? " · " : ""}
-          {showDays ? `cuts ${cutDay || "—"} · due ${paymentDueDay || "—"}` : ""}
-        </p>
+        {/* Each detail on its own truncating line so the due date is never clipped
+            just because a last-4 is also present. */}
+        {last4 && <p className="truncate text-[11px] tabular-nums text-white/70">·{last4}</p>}
+        {showDays && (
+          <p className="truncate text-[11px] tabular-nums text-white/70">
+            cuts {cutDay || "—"} · due {paymentDueDay || "—"}
+          </p>
+        )}
       </div>
     </div>
   );

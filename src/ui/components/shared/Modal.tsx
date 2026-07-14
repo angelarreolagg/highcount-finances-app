@@ -7,11 +7,18 @@ interface ModalProps {
   open: boolean;
   title: string;
   onClose: () => void;
+  /** "wide" widens the panel on desktop for content-dense modals (e.g. the wallet grid). */
+  size?: "default" | "wide";
   children: ReactNode;
 }
 
+const SIZE_CLASSES: Record<NonNullable<ModalProps["size"]>, string> = {
+  default: "max-w-md sm:max-w-lg",
+  wide: "max-w-md sm:max-w-lg lg:max-w-2xl xl:max-w-3xl",
+};
+
 /** Frosted glass modal: backdrop fades, panel springs up. Closes on backdrop click or Escape. */
-export function Modal({ open, title, onClose, children }: ModalProps) {
+export function Modal({ open, title, onClose, size = "default", children }: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -39,7 +46,7 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
             transition={{ type: "spring", bounce: 0.2, duration: 0.45 }}
-            className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-3xl border border-white/10 bg-panel/90 p-5 backdrop-blur-2xl sm:max-w-lg"
+            className={`max-h-[85vh] w-full overflow-y-auto rounded-3xl border border-white/10 bg-panel/90 p-5 backdrop-blur-2xl ${SIZE_CLASSES[size]}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">

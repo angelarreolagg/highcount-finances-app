@@ -154,6 +154,24 @@ names, never raw hexes in components.
    no preset swatches). A brand-new card starts with a random color
    (`randomCardColor`); editing keeps the card's stored color. Card color persists
    as a hex string; cards without one fall back to the peri-deep blue gradient.
+   **Form choices that need a visual identifier don't use a native `<select>`**:
+   Category uses `IconSelect` (a glass listbox, real vector icon per row via
+   `lucide-react` + `categoryIcon()` name lookup — never emoji); Card/account uses
+   `CardSelect` (trigger shows a small gradient swatch + name/type; the open panel
+   is a dense `grid-cols-4` of simple color+name mini-tiles — a light index, not
+   full wallet-card detail crammed smaller). Dates use the shared `DatePicker`
+   (glass month-grid popover, prev/next month chevrons, today/selected-day
+   states) instead of the native OS date input — single-date only for now, built
+   from the same `calendar.ts` helpers so a range mode is a natural extension if
+   one is ever needed. **All three custom popovers close on outside click via
+   `useClickOutside`** (a `ref` + `document` `pointerdown`-containment check) —
+   not the z-index-dependent overlay-div trick `ProfileMenu` uses, which breaks
+   once nested inside `Modal`'s Motion-animated panel (its inline `transform`
+   creates a stacking context that traps z-index comparisons). Type
+   (Expense/Income) is a two-button segmented control (`layoutId` sliding
+   highlight, same pattern as Card type), defaulting to Expense. The Amount field
+   offers quick +10/+100/+200/+500/+1000 chips that add to whatever's already
+   typed.
 6. Copy is plain and directive: buttons say what they do ("Add expense", "Log
    balance"); empty states invite the action, they don't apologize.
    **Row actions**: every list row (transactions, cards, MSI plans, savings
@@ -184,7 +202,13 @@ names, never raw hexes in components.
    grid. Below `xl` it degrades to the standard 1-col → `md:grid-cols-2` stack.
 9. **Savings model**: savings are logged as movements — `deposit` (money put in) or
    `returns` (interest produced), both positive amounts; balances are cumulative
-   sums. Returns render in mint with a tiny kind tag; deposits in white.
+   sums. Returns render in mint with a tiny kind tag; deposits in white. The kind is
+   a two-button **segmented control** (Deposit / Returns), matching the Add-expense
+   Type control. A movement may carry an optional **account** (`cardId`, debit/cash
+   only — credit cards excluded); it's a label of where the savings sit (no credit/
+   balance effect) and shows as `· {account}` in the History rows. Likewise the MSI
+   modal's interest choice (MSI · no interest / MCI · with interest) is a segmented
+   control, and its card/category use `CardSelect`/`IconSelect` like Add-expense.
 10. **Charts** (savings route, hand-rolled SVG — no chart library): the two chart
    cards sit side by side from `md` up (`grid md:grid-cols-2`), History full-width
    below them. Single-series per chart, identity from the card title (no legend).

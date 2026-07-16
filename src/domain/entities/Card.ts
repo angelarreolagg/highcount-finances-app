@@ -1,3 +1,5 @@
+import type { Money } from "../value-objects/Money";
+
 export type CardType = "credit" | "debit" | "cash";
 
 export interface Card {
@@ -12,6 +14,8 @@ export interface Card {
   color?: string;
   /** Optional last four digits, shown as a hint on the card face. */
   last4?: string;
+  /** Spending limit. Credit cards only (required going forward; legacy cards may lack it). */
+  creditLimit?: Money;
 }
 
 export function isBillableCreditCard(

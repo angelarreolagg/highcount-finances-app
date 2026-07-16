@@ -2,6 +2,7 @@ import type { Transaction } from "../../domain/entities/Transaction";
 import type { CardRepository } from "../../domain/repositories/CardRepository";
 import type { CategoryRepository } from "../../domain/repositories/CategoryRepository";
 import type { TransactionRepository } from "../../domain/repositories/TransactionRepository";
+import { assertExpenseFitsCredit } from "../../domain/services/creditAvailability";
 import { Money } from "../../domain/value-objects/Money";
 import { parseISODate } from "../../domain/value-objects/calendar";
 import type { AddTransactionInput } from "./addTransaction";
@@ -36,7 +37,8 @@ export function makeUpdateTransaction(deps: UpdateTransactionDeps) {
     if (existing.msiPlanId != null) {
       throw new Error("MSI installments are managed through their plan");
     }
-    if (!cards.some((c) => c.id === input.cardId)) {
+    const card = cards.find((c) => c.id === input.cardId);
+    if (!card) {
       throw new Error("Unknown card/account");
     }
     const category = categories.find((c) => c.id === input.categoryId);
@@ -45,6 +47,14 @@ export function makeUpdateTransaction(deps: UpdateTransactionDeps) {
     }
     if (category.kind !== input.type) {
       throw new Error(`Category "${category.name}" is not a ${input.type} category`);
+    }
+    // Re-check available credit for expenses, excluding the row being edited from usage.
+    if (input.type === "expense") {
+      assertExpenseFitsCredit(
+        card,
+        amount,
+        transactions.filter((t) => t.id !== input.id),
+      );
     }
 
     const transaction: Transaction = {

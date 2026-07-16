@@ -3,6 +3,7 @@ import type { Transaction, TransactionType } from "../../domain/entities/Transac
 import type { CardRepository } from "../../domain/repositories/CardRepository";
 import type { CategoryRepository } from "../../domain/repositories/CategoryRepository";
 import type { TransactionRepository } from "../../domain/repositories/TransactionRepository";
+import { assertExpenseFitsCredit } from "../../domain/services/creditAvailability";
 import { Money } from "../../domain/value-objects/Money";
 import { parseISODate } from "../../domain/value-objects/calendar";
 
@@ -31,11 +32,13 @@ export function makeAddTransaction(deps: AddTransactionDeps) {
     }
     parseISODate(input.date); // validates format
 
-    const [cards, categories] = await Promise.all([
+    const [transactions, cards, categories] = await Promise.all([
+      deps.transactionRepository.getAll(),
       deps.cardRepository.getAll(),
       deps.categoryRepository.getAll(),
     ]);
-    if (!cards.some((c) => c.id === input.cardId)) {
+    const card = cards.find((c) => c.id === input.cardId);
+    if (!card) {
       throw new Error("Unknown card/account");
     }
     const category = categories.find((c) => c.id === input.categoryId);
@@ -44,6 +47,10 @@ export function makeAddTransaction(deps: AddTransactionDeps) {
     }
     if (category.kind !== input.type) {
       throw new Error(`Category "${category.name}" is not a ${input.type} category`);
+    }
+    // A credit-card expense must fit the card's available credit; income is a payment (skips).
+    if (input.type === "expense") {
+      assertExpenseFitsCredit(card, amount, transactions);
     }
 
     const transaction: Transaction = {

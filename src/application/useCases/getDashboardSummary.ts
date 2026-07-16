@@ -36,7 +36,9 @@ export function makeGetDashboardSummary(deps: GetDashboardSummaryDeps) {
     const savings = buildSavingsSummary(savingsEntries);
     const savingsBalance = savingsEntries.length > 0 ? savings.currentBalance : null;
     const runway = assessRunway(savingsBalance, averageMonthlyIncome(allTransactions));
-    const balances = computeBalances(allTransactions, today);
+    // Income logged to a credit card is a card payment, not cash income — exclude it.
+    const creditCardIds = new Set(cards.filter((c) => c.type === "credit").map((c) => c.id));
+    const balances = computeBalances(allTransactions, today, creditCardIds);
 
     const largest = totals.largestExpense;
     return {

@@ -12,6 +12,8 @@ export interface LogSavingsGrowthInput {
   kind: SavingsEntryKind;
   note?: string;
   color?: ChipColor;
+  /** Optional debit/cash account this movement is held in. */
+  cardId?: string;
 }
 
 export interface LogSavingsGrowthDeps {
@@ -33,6 +35,7 @@ export function makeLogSavingsGrowth(deps: LogSavingsGrowthDeps) {
       kind: input.kind,
       note: input.note?.trim() || undefined,
       color: input.color,
+      cardId: input.cardId || undefined,
     };
     await deps.savingsRepository.add(entry);
     return entry;

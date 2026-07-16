@@ -5,6 +5,7 @@ import type { CardRepository } from "../../domain/repositories/CardRepository";
 import type { CategoryRepository } from "../../domain/repositories/CategoryRepository";
 import type { MSIPlanRepository } from "../../domain/repositories/MSIPlanRepository";
 import type { TransactionRepository } from "../../domain/repositories/TransactionRepository";
+import { assertExpenseFitsCredit } from "../../domain/services/creditAvailability";
 import { buildMsiSchedule } from "../../domain/services/msiSchedule";
 import { Money } from "../../domain/value-objects/Money";
 
@@ -34,7 +35,8 @@ export interface RegisterMSIPurchaseDeps {
  */
 export function makeRegisterMSIPurchase(deps: RegisterMSIPurchaseDeps) {
   return async function registerMSIPurchase(input: RegisterMSIPurchaseInput): Promise<MSIPlan> {
-    const [cards, categories] = await Promise.all([
+    const [transactions, cards, categories] = await Promise.all([
+      deps.transactionRepository.getAll(),
       deps.cardRepository.getAll(),
       deps.categoryRepository.getAll(),
     ]);
@@ -49,6 +51,8 @@ export function makeRegisterMSIPurchase(deps: RegisterMSIPurchaseDeps) {
     }
 
     const totalAmount = Money.from(input.totalAmount);
+    // The whole plan commits its total up front, so it must fit the card's available credit.
+    assertExpenseFitsCredit(card, totalAmount, transactions);
     const schedule = buildMsiSchedule(totalAmount, input.months, input.startDate);
 
     const plan: MSIPlan = {

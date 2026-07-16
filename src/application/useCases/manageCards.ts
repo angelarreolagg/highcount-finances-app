@@ -2,6 +2,7 @@ import type { Card, CardType } from "../../domain/entities/Card";
 import type { CardRepository } from "../../domain/repositories/CardRepository";
 import type { MSIPlanRepository } from "../../domain/repositories/MSIPlanRepository";
 import type { TransactionRepository } from "../../domain/repositories/TransactionRepository";
+import { Money } from "../../domain/value-objects/Money";
 
 export interface AddCardInput {
   name: string;
@@ -12,6 +13,8 @@ export interface AddCardInput {
   color?: string;
   /** Last four digits (optional display hint). */
   last4?: string;
+  /** Decimal string; required for credit cards. */
+  creditLimit?: string;
 }
 
 /** Keep only digits, capped at four. */
@@ -39,6 +42,18 @@ function assertValidDay(label: string, day: number | undefined): asserts day is 
   }
 }
 
+/** Credit cards must carry a positive credit limit. */
+function parseCreditLimit(value: string | undefined): Money {
+  if (value == null || value.trim() === "") {
+    throw new Error("Credit limit is required for credit cards");
+  }
+  const limit = Money.from(value);
+  if (!limit.isPositive()) {
+    throw new Error("Credit limit must be greater than zero");
+  }
+  return limit;
+}
+
 export function makeAddCard(deps: ManageCardsDeps) {
   return async function addCard(input: AddCardInput): Promise<Card> {
     const name = input.name.trim();
@@ -56,6 +71,7 @@ export function makeAddCard(deps: ManageCardsDeps) {
       assertValidDay("Payment due day", input.paymentDueDay);
       card.cutDay = input.cutDay;
       card.paymentDueDay = input.paymentDueDay;
+      card.creditLimit = parseCreditLimit(input.creditLimit);
     }
     await deps.cardRepository.add(card);
     return card;
@@ -84,6 +100,7 @@ export function makeUpdateCard(deps: ManageCardsDeps) {
       assertValidDay("Payment due day", input.paymentDueDay);
       card.cutDay = input.cutDay;
       card.paymentDueDay = input.paymentDueDay;
+      card.creditLimit = parseCreditLimit(input.creditLimit);
     }
     await deps.cardRepository.update(card);
     return card;

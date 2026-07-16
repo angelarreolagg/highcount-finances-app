@@ -15,7 +15,13 @@ export interface Balances {
   realBalance: Money;
 }
 
-export function computeBalances(transactions: Transaction[], today: Date): Balances {
+export function computeBalances(
+  transactions: Transaction[],
+  today: Date,
+  /** Ids of credit cards. Income logged to these is a card payment, not cash income,
+   *  so it's excluded from `totalIncome` (and thus the balances). */
+  creditCardIds: Set<string> = new Set(),
+): Balances {
   const todayIso = toISODate(today);
 
   let totalIncome = Money.zero();
@@ -24,7 +30,9 @@ export function computeBalances(transactions: Transaction[], today: Date): Balan
 
   for (const t of transactions) {
     if (t.type === "income") {
-      if (t.date <= todayIso) totalIncome = totalIncome.add(t.amount);
+      if (t.date <= todayIso && !creditCardIds.has(t.cardId)) {
+        totalIncome = totalIncome.add(t.amount);
+      }
     } else {
       totalCommittedExpenses = totalCommittedExpenses.add(t.amount);
       if (t.date <= todayIso) totalExpensesToDate = totalExpensesToDate.add(t.amount);

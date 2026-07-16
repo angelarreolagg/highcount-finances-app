@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCases, repositories } from "../../infrastructure/di/container";
+import { computeCreditUsage } from "../../domain/services/creditAvailability";
+import type { CreditUsage } from "../../domain/services/creditAvailability";
 import type { AddTransactionInput } from "../../application/useCases/addTransaction";
 import type { RegisterMSIPurchaseInput } from "../../application/useCases/registerMSIPurchase";
 import type { LogSavingsGrowthInput } from "../../application/useCases/logSavingsGrowth";
@@ -180,6 +182,25 @@ export function useRemoveSavingsEntry() {
   return useMutation({
     mutationFn: (id: string) => useCases.removeSavingsEntry(id),
     onSuccess: invalidateAll,
+  });
+}
+
+/** Available-credit usage per credit card (with a limit), keyed by card id. */
+export function useCreditByCard() {
+  return useQuery({
+    queryKey: ["creditByCard"],
+    queryFn: async (): Promise<Map<string, CreditUsage>> => {
+      const [transactions, cards] = await Promise.all([
+        repositories.transactionRepository.getAll(),
+        repositories.cardRepository.getAll(),
+      ]);
+      const byCard = new Map<string, CreditUsage>();
+      for (const card of cards) {
+        const usage = computeCreditUsage(card, transactions);
+        if (usage) byCard.set(card.id, usage);
+      }
+      return byCard;
+    },
   });
 }
 

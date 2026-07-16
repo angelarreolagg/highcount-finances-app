@@ -3,17 +3,19 @@ import { RouteHero } from "../components/layout/RouteHero";
 import { BalanceLineChart, ReturnsBarChart } from "../components/savings/SavingsCharts";
 import { Button } from "../components/shared/Button";
 import { GlassCard } from "../components/shared/GlassCard";
-import { useSavingsOverview } from "../hooks/useDashboardData";
+import { useCards, useSavingsOverview } from "../hooks/useDashboardData";
 import { useUiStore } from "../../state/uiStore";
 import { RowActions } from "../components/shared/RowActions";
 import { chipClassFor } from "../utils/chips";
 
 export function SavingsPage() {
   const { data, isLoading } = useSavingsOverview();
+  const { data: cards = [] } = useCards();
   const openModal = useUiStore((s) => s.openModal);
   const openEdit = useUiStore((s) => s.openEdit);
   const openDelete = useUiStore((s) => s.openDelete);
 
+  const cardNameById = new Map(cards.map((c) => [c.id, c.name]));
   const summary = data?.summary ?? null;
   const timeline = summary?.timeline ?? [];
   const newestFirst = [...timeline].reverse();
@@ -95,6 +97,11 @@ export function SavingsPage() {
                           >
                             {p.kind}
                           </span>
+                          {p.cardId && cardNameById.has(p.cardId) && (
+                            <span className="truncate text-xs text-white/50">
+                              · {cardNameById.get(p.cardId)}
+                            </span>
+                          )}
                         </span>
                         {p.note && (
                           <span className="block truncate text-xs text-white/50">{p.note}</span>

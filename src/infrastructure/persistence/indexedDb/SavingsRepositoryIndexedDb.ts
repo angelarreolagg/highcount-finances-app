@@ -11,6 +11,7 @@ interface SavingsRecord {
   kind?: SavingsEntryKind;
   note?: string;
   color?: ChipColor;
+  cardId?: string;
   /** Legacy field from the balance-snapshot era; read as a deposit of that amount. */
   balance?: string;
 }
@@ -23,6 +24,7 @@ function toEntity(record: SavingsRecord): SavingsEntry {
     kind: record.kind ?? "deposit",
     note: record.note,
     color: record.color,
+    cardId: record.cardId,
   };
 }
 
@@ -35,6 +37,7 @@ export class SavingsRepositoryIndexedDb implements SavingsRepository {
       kind: entry.kind,
       note: entry.note,
       color: entry.color,
+      cardId: entry.cardId,
     };
     await idbPut(STORES.savings, record);
   }
@@ -52,6 +55,7 @@ export class SavingsRepositoryIndexedDb implements SavingsRepository {
       kind: entry.kind,
       note: entry.note,
       color: entry.color,
+      cardId: entry.cardId,
     };
     await idbPut(STORES.savings, record);
   }

@@ -12,6 +12,8 @@ export interface SavingsTimelinePoint {
   note?: string;
   /** User-assigned chip color; undefined = automatic hue. */
   color?: ChipColor;
+  /** Optional debit/cash account this movement is held in. */
+  cardId?: string;
 }
 
 export interface SavingsSummary {
@@ -48,6 +50,7 @@ export function buildSavingsSummary(entries: SavingsEntry[]): SavingsSummary {
       balanceAfter: balance,
       note: entry.note,
       color: entry.color,
+      cardId: entry.cardId,
     });
   }
 

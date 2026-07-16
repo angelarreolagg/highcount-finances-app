@@ -17,4 +17,6 @@ export interface SavingsEntry {
   note?: string;
   /** User-assigned chip color; undefined = automatic hue. */
   color?: ChipColor;
+  /** Optional debit/cash account this movement is held in (a label only). */
+  cardId?: string;
 }

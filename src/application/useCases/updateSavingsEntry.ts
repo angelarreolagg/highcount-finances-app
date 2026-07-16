@@ -32,6 +32,7 @@ export function makeUpdateSavingsEntry(deps: UpdateSavingsEntryDeps) {
       kind: input.kind,
       note: input.note?.trim() || undefined,
       color: input.color,
+      cardId: input.cardId || undefined,
     };
     await deps.savingsRepository.update(entry);
     return entry;

@@ -52,4 +52,15 @@ describe("computeBalances", () => {
     expect(balances.currentBalance.isZero()).toBe(true);
     expect(balances.realBalance.isZero()).toBe(true);
   });
+
+  it("excludes income on a credit card (a card payment, not cash income)", () => {
+    const transactions = [
+      { ...tx("income", "2026-06-15", "3000"), cardId: "debit-1" },
+      { ...tx("income", "2026-06-16", "2000"), cardId: "credit-1" }, // payment to a credit card
+    ];
+    const balances = computeBalances(transactions, today, new Set(["credit-1"]));
+    // Only the debit income counts toward cash income.
+    expect(balances.totalIncome.toStorage()).toBe("3000");
+    expect(balances.currentBalance.toStorage()).toBe("3000");
+  });
 });

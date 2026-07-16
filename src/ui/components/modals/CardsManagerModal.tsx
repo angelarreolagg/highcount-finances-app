@@ -21,7 +21,10 @@ interface FormValues {
   paymentDueDay: string;
   color?: string;
   last4?: string;
+  creditLimit: string;
 }
+
+const AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
 
 const TYPE_OPTIONS: { value: CardType; label: string }[] = [
   { value: "credit", label: "Credit" },
@@ -49,7 +52,15 @@ export function CardsManagerModal() {
     setValue,
     formState: { errors },
   } = useForm<FormValues>({
-    defaultValues: { name: "", type: "credit", cutDay: "", paymentDueDay: "", color: undefined, last4: "" },
+    defaultValues: {
+      name: "",
+      type: "credit",
+      cutDay: "",
+      paymentDueDay: "",
+      color: undefined,
+      last4: "",
+      creditLimit: "",
+    },
   });
 
   const name = watch("name");
@@ -81,7 +92,15 @@ export function CardsManagerModal() {
   const startNew = () => {
     setEditingCard(null);
     // A fresh random color each time a new card is started (edits keep their own color).
-    reset({ name: "", type: "credit", cutDay: "", paymentDueDay: "", color: randomCardColor(), last4: "" });
+    reset({
+      name: "",
+      type: "credit",
+      cutDay: "",
+      paymentDueDay: "",
+      color: randomCardColor(),
+      last4: "",
+      creditLimit: "",
+    });
     setView("form");
   };
 
@@ -94,6 +113,7 @@ export function CardsManagerModal() {
       paymentDueDay: card.paymentDueDay != null ? String(card.paymentDueDay) : "",
       color: card.color,
       last4: card.last4 ?? "",
+      creditLimit: card.creditLimit?.toStorage() ?? "",
     });
     setView("form");
   };
@@ -109,6 +129,7 @@ export function CardsManagerModal() {
       paymentDueDay: values.type === "credit" ? Number(values.paymentDueDay) : undefined,
       color: values.color,
       last4: values.last4,
+      creditLimit: values.type === "credit" ? values.creditLimit : undefined,
     };
     if (editingCard) {
       updateCard.mutate({ id: editingCard.id, ...input }, { onSuccess: backToList });
@@ -190,6 +211,8 @@ export function CardsManagerModal() {
               All cards & accounts
             </button>
 
+            {/* Cap the preview to a real card size so it doesn't stretch to the wide
+                modal width (which made it huge at lg/2xl). */}
             <CardVisual
               name={name}
               type={type}
@@ -197,6 +220,7 @@ export function CardsManagerModal() {
               last4={last4}
               cutDay={type === "credit" ? cutDay : undefined}
               paymentDueDay={type === "credit" ? paymentDueDay : undefined}
+              className="mx-auto w-full max-w-xs"
             />
 
             {/* Segmented type control with a sliding highlight (drives the RHF `type` value). */}
@@ -280,6 +304,25 @@ export function CardsManagerModal() {
                         {...register("paymentDueDay", dayRules)}
                         inputMode="numeric"
                         placeholder="17"
+                        className={control}
+                      />
+                    </Field>
+                    <Field
+                      label="Credit limit"
+                      error={errors.creditLimit?.message}
+                      className="col-span-2 pb-4"
+                    >
+                      <input
+                        {...register("creditLimit", {
+                          required: "Credit limit is required",
+                          pattern: {
+                            value: AMOUNT_PATTERN,
+                            message: "Enter an amount like 50000 or 50000.00",
+                          },
+                          validate: (v) => Number(v) > 0 || "Must be greater than zero",
+                        })}
+                        inputMode="decimal"
+                        placeholder="50000"
                         className={control}
                       />
                     </Field>

@@ -1,3 +1,6 @@
+import { Percent, PiggyBank } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { motion } from "motion/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { ChipColor } from "../../../domain/entities/ChipColor";
@@ -6,15 +9,19 @@ import { useUiStore } from "../../../state/uiStore";
 import {
   useCards,
   useCategories,
+  useCreditByCard,
   useRegisterMSIPurchase,
   useUpdateMSIPlan,
 } from "../../hooks/useDashboardData";
+import { categoryIcon } from "../../utils/categoryIcons";
 import { Button } from "../shared/Button";
+import { CardSelect } from "../shared/CardSelect";
 import { ColorSwatchPicker } from "../shared/ColorSwatchPicker";
+import { DatePicker } from "../shared/DatePicker";
 import { Field } from "../shared/Field";
+import { IconSelect } from "../shared/IconSelect";
 import { control } from "../shared/formStyles";
 import { Modal } from "../shared/Modal";
-import { Select } from "../shared/Select";
 
 interface FormValues {
   description: string;
@@ -29,6 +36,15 @@ interface FormValues {
 
 const AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
 
+const INTEREST_OPTIONS: { value: boolean; label: string; icon: LucideIcon }[] = [
+  { value: false, label: "MSI · no interest", icon: PiggyBank },
+  { value: true, label: "MCI · with interest", icon: Percent },
+];
+
+/** MSI (no interest) reads as the "free" option (mint); MCI costs interest (coral). */
+const INTEREST_TEXT_CLASSES = ["text-mint", "text-coral"]; // [MSI, MCI]
+const INTEREST_HIGHLIGHT_CLASSES = ["border-mint/30 bg-mint/15", "border-coral/30 bg-coral/15"];
+
 export function RegisterMsiModal() {
   const addOpen = useUiStore((s) => s.activeModal === "registerMsi");
   const closeModal = useUiStore((s) => s.closeModal);
@@ -38,11 +54,15 @@ export function RegisterMsiModal() {
   const open = addOpen || editing !== null;
   const { data: cards = [] } = useCards();
   const { data: categories = [] } = useCategories();
+  const { data: creditByCard } = useCreditByCard();
   const registerPurchase = useRegisterMSIPurchase();
   const updatePlan = useUpdateMSIPlan();
 
   const creditCards = cards.filter((c) => c.type === "credit");
   const expenseCategories = categories.filter((c) => c.kind === "expense");
+  const availableByCard = creditByCard
+    ? new Map([...creditByCard].map(([id, u]) => [id, u.available]))
+    : undefined;
 
   const {
     register,
@@ -56,6 +76,10 @@ export function RegisterMsiModal() {
   });
 
   const color = watch("color");
+  const startDate = watch("startDate");
+  const cardId = watch("cardId");
+  const categoryId = watch("categoryId");
+  const withInterest = watch("withInterest");
 
   // Edit mode: prefill the same form with the plan being edited.
   useEffect(() => {
@@ -115,6 +139,40 @@ export function RegisterMsiModal() {
         </p>
       ) : (
         <form onSubmit={onSubmit} className="space-y-3">
+          <Field label="Interest">
+            <div
+              className="flex rounded-full border border-white/10 bg-white/5 p-1"
+              role="radiogroup"
+              aria-label="Interest"
+            >
+              {INTEREST_OPTIONS.map((option, i) => {
+                const active = withInterest === option.value;
+                const Icon = option.icon;
+                return (
+                  <button
+                    key={option.label}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => setValue("withInterest", option.value)}
+                    className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                      active ? INTEREST_TEXT_CLASSES[i] : "text-white/50 hover:text-white/80"
+                    }`}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="msiInterestHighlight"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                        className={`absolute inset-0 rounded-full border transition-colors ${INTEREST_HIGHLIGHT_CLASSES[i]}`}
+                      />
+                    )}
+                    <Icon size={14} strokeWidth={2} className="relative shrink-0" />
+                    <span className="relative">{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
           <Field label="Description" error={errors.description?.message}>
             <input
               {...register("description", { required: "Description is required" })}
@@ -151,35 +209,42 @@ export function RegisterMsiModal() {
             </Field>
           </div>
           <Field label="Credit card" error={errors.cardId?.message}>
-            <Select {...register("cardId", { required: "Card is required" })}>
-              <option value="">Select a card</option>
-              {creditCards.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
+            <input type="hidden" {...register("cardId", { required: "Card is required" })} />
+            <CardSelect
+              value={cardId}
+              onChange={(v) => setValue("cardId", v, { shouldValidate: true })}
+              placeholder="Select a card"
+              aria-label="Credit card"
+              cards={creditCards}
+              availableByCard={availableByCard}
+            />
           </Field>
           <Field label="Category" error={errors.categoryId?.message}>
-            <Select {...register("categoryId", { required: "Category is required" })}>
-              <option value="">Select a category</option>
-              {expenseCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
+            <input type="hidden" {...register("categoryId", { required: "Category is required" })} />
+            <IconSelect
+              value={categoryId}
+              onChange={(v) => setValue("categoryId", v, { shouldValidate: true })}
+              placeholder="Select a category"
+              aria-label="Category"
+              options={expenseCategories.map((c) => ({
+                value: c.id,
+                label: c.name,
+                icon: categoryIcon(c.name),
+              }))}
+            />
           </Field>
-          <Field label="Purchase date">
-            <input type="date" {...register("startDate", { required: true })} className={control} />
+          <Field label="Purchase date" error={errors.startDate?.message}>
+            <input type="hidden" {...register("startDate", { required: "Purchase date is required" })} />
+            <DatePicker
+              value={startDate}
+              onChange={(iso) => setValue("startDate", iso, { shouldValidate: true })}
+              aria-label="Purchase date"
+            />
           </Field>
-          <Field label="Color">
+          <Field label="Color" className="pb-3">
             <ColorSwatchPicker value={color} onChange={(c) => setValue("color", c)} />
           </Field>
-          <label className="flex items-center gap-2 text-sm text-white/80">
-            <input type="checkbox" {...register("withInterest")} className="size-4 accent-[#818cf8]" />
-            With interest (MCI)
-          </label>
+          
           {editing && (
             <p className="text-xs text-white/50">
               Saving regenerates the installment schedule from the new values.

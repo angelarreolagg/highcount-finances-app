@@ -1,25 +1,29 @@
+import { Trans, useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
-import { MONTH_NAMES } from "../../shared/utils/months";
+import { monthName } from "../../shared/utils/months";
 import { PageShell } from "../components/layout/PageShell";
 import { GlassCard } from "../components/shared/GlassCard";
+import { CardVisual } from "../components/shared/CardVisual";
 import { ArrowLeftIcon } from "../components/shared/icons";
 import { useAnnualSummary, useCards } from "../hooks/useDashboardData";
-import { cardChipStyle, chipClass } from "../utils/chips";
+import { seedLabel } from "../i18n/labels";
+import { categoryIcon } from "../utils/categoryIcons";
 import { splitFormattedMoney } from "../utils/money";
 
 export function AnnualSummaryPage() {
+  const { t, i18n } = useTranslation();
   const params = useParams();
   const year = Number(params.year);
   const { data, isLoading } = useAnnualSummary(year);
   const { data: cards = [] } = useCards();
-  const cardColors = new Map(cards.map((c) => [c.id, c.color]));
+  const cardById = new Map(cards.map((c) => [c.id, c]));
 
   if (!Number.isInteger(year)) {
     return (
       <main className="mx-auto max-w-md p-4">
-        <p className="text-sm text-white/60">That year doesn't look right.</p>
+        <p className="text-sm text-white/60">{t("summary.badYear")}</p>
         <Link to="/" className="text-sm text-peri underline">
-          Back to dashboard
+          {t("common.backToDashboard")}
         </Link>
       </main>
     );
@@ -35,7 +39,7 @@ export function AnnualSummaryPage() {
           <div className="flex items-center justify-between">
             <Link
               to="/"
-              aria-label="Back to dashboard"
+              aria-label={t("common.backToDashboard")}
               className="flex size-9 items-center justify-center rounded-full bg-white/10 text-white/80 hover:bg-white/20"
             >
               <ArrowLeftIcon size={18} />
@@ -52,7 +56,7 @@ export function AnnualSummaryPage() {
           </div>
 
           <div className="mt-8">
-            <p className="text-sm text-white/50">Year in Review · spent in {year}</p>
+            <p className="text-sm text-white/50">{t("summary.heroLabel", { year })}</p>
             {spent ? (
               <p className="mt-1 font-bold tabular-nums">
                 <span className="text-5xl">{spent.main}</span>
@@ -63,8 +67,16 @@ export function AnnualSummaryPage() {
             )}
             {summary && (
               <p className="mt-2 text-sm tabular-nums text-white/60">
-                <span className="text-mint">+{summary.totalIncome.format()}</span> income · net{" "}
-                {summary.net.format()} · {summary.transactionCount} transactions
+                <Trans
+                  i18nKey="summary.heroBreakdown"
+                  count={summary.transactionCount}
+                  values={{
+                    income: summary.totalIncome.format(),
+                    net: summary.net.format(),
+                    count: summary.transactionCount,
+                  }}
+                  components={{ inc: <span className="text-mint" /> }}
+                />
               </p>
             )}
           </div>
@@ -72,38 +84,36 @@ export function AnnualSummaryPage() {
       }
     >
       <div className="pt-2">
-        {isLoading && <p className="text-sm text-white/50">Loading…</p>}
+        {isLoading && <p className="text-sm text-white/50">{t("common.loading")}</p>}
 
         {data && !data.unlocked && (
           <GlassCard className="text-center">
-            <p className="text-sm text-white/60">
-              {year} hasn't started yet — its Year in Review will be here when it does.
-            </p>
+            <p className="text-sm text-white/60">{t("summary.locked", { year })}</p>
           </GlassCard>
         )}
 
         {summary && (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <GlassCard title="Highlights" className="md:col-span-2 xl:col-span-4">
+            <GlassCard title={t("summary.highlights")} className="md:col-span-2 xl:col-span-4">
               <ul className="space-y-3 text-sm">
                 <li className="flex items-center justify-between gap-3">
-                  <span className="text-white/60">Largest expense</span>
+                  <span className="text-white/60">{t("common.largestExpense")}</span>
                   {summary.largestExpense ? (
                     <span className="text-right">
                       <span className="block tabular-nums">
                         −{summary.largestExpense.amount.format()}
                       </span>
                       <span className="block text-xs text-white/50">
-                        {summary.largestExpense.description || "No description"} ·{" "}
+                        {summary.largestExpense.description || t("summary.noDescription")} ·{" "}
                         {summary.largestExpense.date}
                       </span>
                     </span>
                   ) : (
-                    <span className="text-white/40">No expenses</span>
+                    <span className="text-white/40">{t("summary.noExpenses")}</span>
                   )}
                 </li>
                 <li className="flex items-center justify-between">
-                  <span className="text-white/60">Savings change</span>
+                  <span className="text-white/60">{t("summary.savingsChange")}</span>
                   {summary.savingsChange ? (
                     <span
                       className={`tabular-nums ${summary.savingsChange.isNegative() ? "" : "text-mint"}`}
@@ -112,7 +122,7 @@ export function AnnualSummaryPage() {
                       {summary.savingsChange.format()}
                     </span>
                   ) : (
-                    <span className="text-white/40">No snapshots</span>
+                    <span className="text-white/40">{t("summary.noSnapshots")}</span>
                   )}
                 </li>
                 {summary.savingsStart && summary.savingsEnd && (
@@ -124,19 +134,19 @@ export function AnnualSummaryPage() {
               </ul>
             </GlassCard>
 
-            <GlassCard title="By category" className="h-full xl:col-span-2 xl:row-span-2">
+            <GlassCard title={t("summary.byCategory")} className="h-full xl:col-span-2 xl:row-span-2">
               {summary.expensesByCategory.length === 0 ? (
-                <p className="text-sm text-white/40">No expenses recorded.</p>
+                <p className="text-sm text-white/40">{t("summary.noExpensesRecorded")}</p>
               ) : (
                 <ul className="space-y-3 text-sm">
                   {summary.expensesByCategory.map((c) => (
                     <li key={c.categoryId} className="flex items-center gap-3">
-                      <span
-                        className={`flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${chipClass(c.categoryName)}`}
-                      >
-                        {c.categoryName[0]}
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/70">
+                        {categoryIcon(c.categoryName, { size: 16 })}
                       </span>
-                      <span className="min-w-0 flex-1 truncate">{c.categoryName}</span>
+                      <span className="min-w-0 flex-1 truncate">
+                        {seedLabel(t, c.categoryId, c.categoryName)}
+                      </span>
                       <span className="shrink-0 tabular-nums">−{c.total.format()}</span>
                     </li>
                   ))}
@@ -144,33 +154,37 @@ export function AnnualSummaryPage() {
               )}
             </GlassCard>
 
-            <GlassCard title="By card / account" className="h-full xl:col-span-2">
+            <GlassCard title={t("summary.byCard")} className="h-full xl:col-span-2">
               {summary.expensesByCard.length === 0 ? (
-                <p className="text-sm text-white/40">No expenses recorded.</p>
+                <p className="text-sm text-white/40">{t("summary.noExpensesRecorded")}</p>
               ) : (
                 <ul className="space-y-3 text-sm">
-                  {summary.expensesByCard.map((c) => (
-                    <li key={c.cardId} className="flex items-center gap-3">
-                      <span
-                        className={`flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${cardChipStyle(cardColors.get(c.cardId)) ? "" : chipClass(c.cardId)}`}
-                        style={cardChipStyle(cardColors.get(c.cardId))}
-                      >
-                        {c.cardName[0]}
-                      </span>
-                      <span className="min-w-0 flex-1 truncate">{c.cardName}</span>
-                      <span className="shrink-0 tabular-nums">−{c.total.format()}</span>
-                    </li>
-                  ))}
+                  {summary.expensesByCard.map((c) => {
+                    const card = cardById.get(c.cardId);
+                    return (
+                      <li key={c.cardId} className="flex items-center gap-3">
+                        <CardVisual
+                          name={seedLabel(t, c.cardId, card?.name ?? c.cardName)}
+                          type={card?.type ?? "debit"}
+                          color={card?.color}
+                          last4={card?.last4}
+                          className="w-28 shrink-0"
+                        />
+                        <span className="flex-1" />
+                        <span className="shrink-0 tabular-nums">−{c.total.format()}</span>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </GlassCard>
 
-            <GlassCard title="Month by month" className="h-full xl:col-span-2">
+            <GlassCard title={t("summary.monthByMonth")} className="h-full xl:col-span-2">
               <ul className="space-y-2 text-sm">
                 {summary.byMonth.map((m) => (
                   <li key={m.monthIndex} className="flex items-center justify-between">
                     <span className="w-10 shrink-0 text-white/60">
-                      {MONTH_NAMES[m.monthIndex].slice(0, 3)}
+                      {monthName(m.monthIndex, i18n.language, { short: true })}
                     </span>
                     <span className="tabular-nums text-mint">
                       {m.income.isZero() ? "" : `+${m.income.format()}`}

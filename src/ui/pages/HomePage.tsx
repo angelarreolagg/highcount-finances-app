@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import type { DashboardSummaryDTO } from "../../application/dto/dashboard";
 import { RUNWAY_WARNING_THRESHOLD_MONTHS } from "../../domain/services/riskIndicator";
 import { PageShell } from "../components/layout/PageShell";
@@ -11,10 +13,11 @@ import { MonthDetailModal } from "../components/modals/MonthDetailModal";
 import { useDashboardSummary, useYearMonthGrid } from "../hooks/useDashboardData";
 
 function RunwayChip({ summary }: { summary: DashboardSummaryDTO }) {
+  const { t } = useTranslation();
   if (summary.riskLevel === "unknown") {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-white/70 backdrop-blur">
-        Runway unknown — log savings and an income
+        {t("runway.unknown")}
       </span>
     );
   }
@@ -26,13 +29,15 @@ function RunwayChip({ summary }: { summary: DashboardSummaryDTO }) {
       }`}
     >
       <span className={`size-1.5 rounded-full ${warning ? "bg-coral" : "bg-mint"}`} />
-      {summary.monthsOfRunway} months of runway
-      {warning && ` — below ${RUNWAY_WARNING_THRESHOLD_MONTHS}`}
+      {t("runway.months", { count: Number(summary.monthsOfRunway) })}
+      {warning &&
+        ` — ${t("runway.belowThreshold", { threshold: RUNWAY_WARNING_THRESHOLD_MONTHS })}`}
     </span>
   );
 }
 
 export function HomePage() {
+  const { t } = useTranslation();
   const today = new Date();
   const year = today.getFullYear();
   const monthIndex = today.getMonth();
@@ -48,24 +53,36 @@ export function HomePage() {
       hero={
         summary ? (
           <RouteHero
-            label="Total money · all accounts"
+            label={t("home.heroLabel")}
             amount={summary.overview.currentBalance}
             roll="pachinko"
           >
             <p className="mt-2 text-sm tabular-nums text-white/70">
-              <span className="text-mint">+{summary.overview.totalIncome.format()}</span> income ·{" "}
-              −{summary.overview.totalExpensesToDate.format()} expenses
+              <Trans
+                i18nKey="home.balanceBreakdown"
+                values={{
+                  income: summary.overview.totalIncome.format(),
+                  expenses: summary.overview.totalExpensesToDate.format(),
+                }}
+                components={{ inc: <span className="text-mint" /> }}
+              />
             </p>
             <p className="mt-1 text-sm tabular-nums text-white/70">
-              Real total (all MSI committed):{" "}
+              {t("home.realTotal")}{" "}
               <span
                 className={summary.overview.realBalance.isNegative() ? "text-coral" : "text-white"}
               >
                 {summary.overview.realBalance.format()}
               </span>
             </p>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
               <RunwayChip summary={summary} />
+              <Link
+                to={`/summary/${year}`}
+                className="text-xs text-white/50 underline-offset-2 transition-colors hover:text-white hover:underline"
+              >
+                {t("common.yearInReview")} →
+              </Link>
             </div>
           </RouteHero>
         ) : (
@@ -73,7 +90,7 @@ export function HomePage() {
             {isError ? (
               <p className="text-sm text-coral">{(error as Error).message}</p>
             ) : (
-              <p className="text-sm text-white/60">Loading…</p>
+              <p className="text-sm text-white/60">{t("common.loading")}</p>
             )}
           </div>
         )

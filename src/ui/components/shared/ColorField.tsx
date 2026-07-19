@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { isHexColor } from "../../utils/chips";
 
 interface ColorFieldProps {
@@ -10,6 +11,7 @@ const DEFAULT_WELL = "#2536e8";
 
 /** Free color picker: a native color well that opens the OS picker for any hex. */
 export function ColorField({ value, onChange }: ColorFieldProps) {
+  const { t } = useTranslation();
   const active = isHexColor(value) ? value : undefined;
 
   return (
@@ -18,14 +20,14 @@ export function ColorField({ value, onChange }: ColorFieldProps) {
         <span className="absolute inset-0" style={{ backgroundColor: active ?? DEFAULT_WELL }} />
         <input
           type="color"
-          aria-label="Card color"
+          aria-label={t("cardFace.cardColor")}
           value={active ?? DEFAULT_WELL}
           onChange={(e) => onChange(e.target.value)}
           className="absolute inset-0 size-full cursor-pointer opacity-0"
         />
       </label>
       <span className="font-mono text-xs tracking-wide text-white/70 uppercase">
-        {active ?? "Auto"}
+        {active ?? t("common.auto")}
       </span>
     </div>
   );

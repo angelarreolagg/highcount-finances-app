@@ -1,11 +1,7 @@
+import { useTranslation } from "react-i18next";
 import type { CardType } from "../../../domain/entities/Card";
+import { cardTypeLabel } from "../../i18n/labels";
 import { cardSurface } from "../../utils/chips";
-
-const TYPE_LABEL: Record<CardType, string> = {
-  credit: "Credit",
-  debit: "Debit",
-  cash: "Cash",
-};
 
 interface CardVisualProps {
   name: string;
@@ -31,6 +27,7 @@ export function CardVisual({
   className = "",
   contentClassName = "",
 }: CardVisualProps) {
+  const { t } = useTranslation();
   const trimmed = name.trim();
   const showDays = type === "credit" && (cutDay !== undefined || paymentDueDay !== undefined);
 
@@ -41,19 +38,19 @@ export function CardVisual({
     >
       <div className="flex justify-end">
         <span className="text-[9px] font-semibold tracking-widest text-white/70 uppercase">
-          {TYPE_LABEL[type]}
+          {cardTypeLabel(t, type)}
         </span>
       </div>
       <div className={`min-w-0 ${contentClassName}`}>
         <p className={`truncate text-sm font-semibold ${trimmed ? "text-white" : "text-white/50"}`}>
-          {trimmed || "Card name"}
+          {trimmed || t("cardFace.cardName")}
         </p>
         {/* Each detail on its own truncating line so the due date is never clipped
             just because a last-4 is also present. */}
         {last4 && <p className="truncate text-[11px] tabular-nums text-white/70">·{last4}</p>}
         {showDays && (
           <p className="truncate text-[11px] tabular-nums text-white/70">
-            cuts {cutDay || "—"} · due {paymentDueDay || "—"}
+            {t("cardFace.cutsDue", { cut: cutDay || "—", due: paymentDueDay || "—" })}
           </p>
         )}
       </div>

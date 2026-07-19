@@ -1,13 +1,19 @@
+import { Settings } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useUiStore } from "../../../state/uiStore";
+import { useSettingsStore } from "../../../state/settingsStore";
 import { CardIcon, CoinsIcon, StarIcon, UserIcon } from "./icons";
 
 /** Avatar button + dropdown: the home of account-level actions (per docs/DESIGN.md). */
 export function ProfileMenu({ year }: { year: number }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const openModal = useUiStore((s) => s.openModal);
+  const displayName = useSettingsStore((s) => s.displayName);
+  const initial = displayName.trim().charAt(0).toUpperCase();
 
   useEffect(() => {
     if (!open) return;
@@ -27,11 +33,11 @@ export function ProfileMenu({ year }: { year: number }) {
         type="button"
         whileTap={{ scale: 0.94 }}
         onClick={() => setOpen((v) => !v)}
-        aria-label="Profile menu"
+        aria-label={t("profileMenu.label")}
         aria-expanded={open}
-        className="flex size-9 items-center justify-center rounded-full border border-white/15 bg-white/15 text-white/90 backdrop-blur hover:bg-white/25"
+        className="flex size-9 items-center justify-center rounded-full border border-white/15 bg-white/15 text-sm font-semibold text-white/90 backdrop-blur hover:bg-white/25"
       >
-        <UserIcon size={18} />
+        {initial || <UserIcon size={18} />}
       </motion.button>
 
       <AnimatePresence>
@@ -54,7 +60,7 @@ export function ProfileMenu({ year }: { year: number }) {
                 }}
               >
                 <CardIcon size={16} className="text-white/60" />
-                Cards & accounts
+                {t("profileMenu.cardsAccounts")}
               </button>
               <button
                 type="button"
@@ -65,12 +71,16 @@ export function ProfileMenu({ year }: { year: number }) {
                 }}
               >
                 <CoinsIcon size={16} className="text-white/60" />
-                Log savings
+                {t("profileMenu.logSavings")}
               </button>
               <div className="mx-3 my-1 border-t border-white/10" />
               <Link to={`/summary/${year}`} className={itemClass} onClick={() => setOpen(false)}>
                 <StarIcon size={16} className="text-white/60" />
-                Year in Review
+                {t("common.yearInReview")}
+              </Link>
+              <Link to="/settings" className={itemClass} onClick={() => setOpen(false)}>
+                <Settings size={16} strokeWidth={1.8} className="text-white/60" />
+                {t("nav.settings")}
               </Link>
             </motion.div>
           </>

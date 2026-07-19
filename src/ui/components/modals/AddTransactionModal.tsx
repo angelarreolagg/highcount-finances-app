@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import type { ChipColor } from "../../../domain/entities/ChipColor";
 import type { TransactionType } from "../../../domain/entities/Transaction";
 import { Money } from "../../../domain/value-objects/Money";
@@ -15,6 +16,7 @@ import {
   useCreditByCard,
   useUpdateTransaction,
 } from "../../hooks/useDashboardData";
+import { seedLabel } from "../../i18n/labels";
 import { categoryIcon } from "../../utils/categoryIcons";
 import { Button } from "../shared/Button";
 import { CardSelect } from "../shared/CardSelect";
@@ -38,9 +40,9 @@ interface FormValues {
 const AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
 const QUICK_AMOUNTS = [10, 100, 200, 500, 1000];
 
-const TYPE_OPTIONS: { value: TransactionType; label: string; icon: LucideIcon }[] = [
-  { value: "expense", label: "Expense", icon: ArrowDown },
-  { value: "income", label: "Income", icon: ArrowUp },
+const TYPE_OPTIONS: { value: TransactionType; labelKey: string; icon: LucideIcon }[] = [
+  { value: "expense", labelKey: "common.expense", icon: ArrowDown },
+  { value: "income", labelKey: "common.income", icon: ArrowUp },
 ];
 
 /** Discreet, per-option selected-state tint — reuses the app's existing coral/mint tokens. */
@@ -62,6 +64,7 @@ const DEFAULT_VALUES = {
 };
 
 export function AddTransactionModal() {
+  const { t } = useTranslation();
   const addOpen = useUiStore((s) => s.activeModal === "addTransaction");
   const closeModal = useUiStore((s) => s.closeModal);
   const editTarget = useUiStore((s) => s.editTarget);
@@ -143,15 +146,15 @@ export function AddTransactionModal() {
   return (
     <Modal
       open={open}
-      title={editing ? "Edit expense / income" : "Add expense / income"}
+      title={t(editing ? "modals.addTransaction.titleEdit" : "modals.addTransaction.titleAdd")}
       onClose={handleClose}
     >
       <form onSubmit={onSubmit} className="space-y-3">
-        <Field label="Type">
+        <Field label={t("fields.type")}>
           <div
             className="flex rounded-full border border-white/10 bg-white/5 p-1"
             role="radiogroup"
-            aria-label="Type"
+            aria-label={t("fields.type")}
           >
             {TYPE_OPTIONS.map((option) => {
               const active = type === option.value;
@@ -175,22 +178,22 @@ export function AddTransactionModal() {
                     />
                   )}
                   <Icon size={14} strokeWidth={2} className="relative shrink-0" />
-                  <span className="relative">{option.label}</span>
+                  <span className="relative">{t(option.labelKey)}</span>
                 </button>
               );
             })}
           </div>
         </Field>
 
-        <Field label="Amount" error={errors.amount?.message}>
+        <Field label={t("fields.amount")} error={errors.amount?.message}>
           <input
             {...register("amount", {
-              required: "Amount is required",
-              pattern: { value: AMOUNT_PATTERN, message: "Enter a positive amount like 123.45" },
-              validate: (v) => Number(v) > 0 || "Amount must be greater than zero",
+              required: t("validation.amountRequired"),
+              pattern: { value: AMOUNT_PATTERN, message: t("validation.positiveAmount") },
+              validate: (v) => Number(v) > 0 || t("validation.amountPositive"),
             })}
             inputMode="decimal"
-            placeholder="0.00"
+            placeholder={t("placeholders.amount")}
             className={control}
           />
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -207,55 +210,65 @@ export function AddTransactionModal() {
           </div>
         </Field>
 
-        <Field label="Category" error={errors.categoryId?.message}>
-          <input type="hidden" {...register("categoryId", { required: "Category is required" })} />
+        <Field label={t("fields.category")} error={errors.categoryId?.message}>
+          <input
+            type="hidden"
+            {...register("categoryId", { required: t("validation.categoryRequired") })}
+          />
           <IconSelect
             value={categoryId}
             onChange={(v) => setValue("categoryId", v, { shouldValidate: true })}
-            placeholder="Select a category"
-            aria-label="Category"
+            placeholder={t("placeholders.selectCategory")}
+            aria-label={t("fields.category")}
             options={typeCategories.map((c) => ({
               value: c.id,
-              label: c.name,
+              label: seedLabel(t, c.id, c.name),
               icon: categoryIcon(c.name),
             }))}
           />
         </Field>
 
-        <Field label="Card / account" error={errors.cardId?.message}>
-          <input type="hidden" {...register("cardId", { required: "Card/account is required" })} />
+        <Field label={t("fields.cardAccount")} error={errors.cardId?.message}>
+          <input
+            type="hidden"
+            {...register("cardId", { required: t("validation.cardRequired") })}
+          />
           <CardSelect
             value={cardId}
             onChange={(v) => setValue("cardId", v, { shouldValidate: true })}
-            placeholder="Select an account"
-            aria-label="Card / account"
+            placeholder={t("placeholders.selectAccount")}
+            aria-label={t("fields.cardAccount")}
             cards={cards}
             availableByCard={availableByCard}
           />
         </Field>
 
-        <Field label="Date" error={errors.date?.message}>
-          <input type="hidden" {...register("date", { required: "Date is required" })} />
+        <Field label={t("fields.date")} error={errors.date?.message}>
+          <input type="hidden" {...register("date", { required: t("validation.dateRequired") })} />
           <DatePicker
             value={date}
             onChange={(iso) => setValue("date", iso, { shouldValidate: true })}
-            aria-label="Date"
+            aria-label={t("fields.date")}
           />
         </Field>
-        <Field label="Description">
-          <input {...register("description")} placeholder="What was it?" className={control} />
+        <Field label={t("fields.description")}>
+          <input
+            {...register("description")}
+            placeholder={t("placeholders.descriptionWhat")}
+            className={control}
+          />
         </Field>
-        <Field label="Color" className="pb-3">
+        <Field label={t("fields.color")} className="pb-3">
           <ColorSwatchPicker value={color} onChange={(c) => setValue("color", c)} />
         </Field>
         <Button type="submit" variant="primary" disabled={pending} className="w-full">
           {pending
-            ? "Saving…"
+            ? t("common.saving")
             : editing
-              ? "Save changes"
+              ? t("common.saveChanges")
               : type === "expense"
-                ? "Add expense"
-                : "Add income"}
+                ? t("modals.addTransaction.submitExpense")
+                : t("modals.addTransaction.submitIncome")}
         </Button>
         {mutationError != null && (
           <p className="text-xs text-coral">{(mutationError as Error).message}</p>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useUiStore } from "../../../state/uiStore";
 import { useMsiPlans } from "../../hooks/useDashboardData";
 import { chipClassFor } from "../../utils/chips";
@@ -6,6 +7,7 @@ import { GlassCard } from "../shared/GlassCard";
 import { RowActions } from "../shared/RowActions";
 
 export function MSISection() {
+  const { t } = useTranslation();
   const { data: plans = [] } = useMsiPlans();
   const openModal = useUiStore((s) => s.openModal);
   const openEdit = useUiStore((s) => s.openEdit);
@@ -13,18 +15,16 @@ export function MSISection() {
 
   return (
     <GlassCard
-      title="MSI / MCI plans"
+      title={t("dashboard.msiPlans")}
       className="h-full"
       action={
         <Button variant="ghost" className="px-2 py-1" onClick={() => openModal("registerMsi")}>
-          + New plan
+          {t("dashboard.newPlan")}
         </Button>
       }
     >
       {plans.length === 0 ? (
-        <p className="text-sm text-white/40">
-          Register an installment purchase and every monthly charge is logged for you.
-        </p>
+        <p className="text-sm text-white/40">{t("dashboard.msiEmpty")}</p>
       ) : (
         <ul className="space-y-3">
           {plans.map((p) => (
@@ -37,13 +37,16 @@ export function MSISection() {
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-medium">{p.description}</span>
                 <span className="block text-xs text-white/50">
-                  {p.months} months · {p.withInterest ? "with interest" : "interest-free"} · from{" "}
-                  {p.startDate}
+                  {t("dashboard.msiMonths", { count: p.months })} ·{" "}
+                  {p.withInterest ? t("dashboard.withInterest") : t("dashboard.interestFree")} ·{" "}
+                  {t("dashboard.msiFrom", { date: p.startDate })}
                 </span>
               </span>
               <span className="text-right tabular-nums">
                 <span className="block">{p.monthlyAmount.format()}</span>
-                <span className="block text-xs text-white/50">of {p.totalAmount.format()}</span>
+                <span className="block text-xs text-white/50">
+                  {t("dashboard.msiOf", { amount: p.totalAmount.format() })}
+                </span>
               </span>
               <RowActions
                 label={p.description}

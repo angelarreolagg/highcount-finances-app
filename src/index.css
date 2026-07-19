@@ -178,6 +178,19 @@
   animation-duration: 6s;
 }
 
+/* "Log movement" (savings): a calm mint → sky sweep, slowest. */
+.dock-ring-savings::before {
+  background: conic-gradient(
+    from var(--dock-angle),
+    transparent 0deg,
+    var(--color-mint) 60deg,
+    #38bdf8 120deg,
+    transparent 180deg,
+    transparent 360deg
+  );
+  animation-duration: 7s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .app-backdrop,
   .hero-blob {

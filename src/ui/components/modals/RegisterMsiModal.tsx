@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import type { ChipColor } from "../../../domain/entities/ChipColor";
 import { toISODate } from "../../../domain/value-objects/calendar";
 import { useUiStore } from "../../../state/uiStore";
@@ -13,6 +14,7 @@ import {
   useRegisterMSIPurchase,
   useUpdateMSIPlan,
 } from "../../hooks/useDashboardData";
+import { seedLabel } from "../../i18n/labels";
 import { categoryIcon } from "../../utils/categoryIcons";
 import { Button } from "../shared/Button";
 import { CardSelect } from "../shared/CardSelect";
@@ -36,9 +38,9 @@ interface FormValues {
 
 const AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
 
-const INTEREST_OPTIONS: { value: boolean; label: string; icon: LucideIcon }[] = [
-  { value: false, label: "MSI · no interest", icon: PiggyBank },
-  { value: true, label: "MCI · with interest", icon: Percent },
+const INTEREST_OPTIONS: { value: boolean; labelKey: string; icon: LucideIcon }[] = [
+  { value: false, labelKey: "modals.registerMsi.interestNo", icon: PiggyBank },
+  { value: true, labelKey: "modals.registerMsi.interestYes", icon: Percent },
 ];
 
 /** MSI (no interest) reads as the "free" option (mint); MCI costs interest (coral). */
@@ -46,6 +48,7 @@ const INTEREST_TEXT_CLASSES = ["text-mint", "text-coral"]; // [MSI, MCI]
 const INTEREST_HIGHLIGHT_CLASSES = ["border-mint/30 bg-mint/15", "border-coral/30 bg-coral/15"];
 
 export function RegisterMsiModal() {
+  const { t } = useTranslation();
   const addOpen = useUiStore((s) => s.activeModal === "registerMsi");
   const closeModal = useUiStore((s) => s.closeModal);
   const editTarget = useUiStore((s) => s.editTarget);
@@ -130,27 +133,25 @@ export function RegisterMsiModal() {
   return (
     <Modal
       open={open}
-      title={editing ? "Edit MSI / MCI plan" : "Register MSI / MCI plan"}
+      title={t(editing ? "modals.registerMsi.titleEdit" : "modals.registerMsi.titleAdd")}
       onClose={handleClose}
     >
       {creditCards.length === 0 ? (
-        <p className="text-sm text-white/60">
-          Installment plans live on credit cards — add a credit card first.
-        </p>
+        <p className="text-sm text-white/60">{t("modals.registerMsi.noCreditCard")}</p>
       ) : (
         <form onSubmit={onSubmit} className="space-y-3">
-          <Field label="Interest">
+          <Field label={t("fields.interest")}>
             <div
               className="flex rounded-full border border-white/10 bg-white/5 p-1"
               role="radiogroup"
-              aria-label="Interest"
+              aria-label={t("fields.interest")}
             >
               {INTEREST_OPTIONS.map((option, i) => {
                 const active = withInterest === option.value;
                 const Icon = option.icon;
                 return (
                   <button
-                    key={option.label}
+                    key={option.labelKey}
                     type="button"
                     role="radio"
                     aria-checked={active}
@@ -167,91 +168,102 @@ export function RegisterMsiModal() {
                       />
                     )}
                     <Icon size={14} strokeWidth={2} className="relative shrink-0" />
-                    <span className="relative">{option.label}</span>
+                    <span className="relative">{t(option.labelKey)}</span>
                   </button>
                 );
               })}
             </div>
           </Field>
-          <Field label="Description" error={errors.description?.message}>
+          <Field label={t("fields.description")} error={errors.description?.message}>
             <input
-              {...register("description", { required: "Description is required" })}
-              placeholder="e.g. Laptop"
+              {...register("description", { required: t("validation.descriptionRequired") })}
+              placeholder={t("placeholders.msiDescription")}
               className={control}
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Total (incl. interest)" error={errors.totalAmount?.message}>
+            <Field label={t("fields.total")} error={errors.totalAmount?.message}>
               <input
                 {...register("totalAmount", {
-                  required: "Total is required",
-                  pattern: { value: AMOUNT_PATTERN, message: "Positive amount like 123.45" },
-                  validate: (v) => Number(v) > 0 || "Must be greater than zero",
+                  required: t("validation.totalRequired"),
+                  pattern: { value: AMOUNT_PATTERN, message: t("validation.positiveAmountShort") },
+                  validate: (v) => Number(v) > 0 || t("validation.greaterThanZero"),
                 })}
                 inputMode="decimal"
-                placeholder="0.00"
+                placeholder={t("placeholders.amount")}
                 className={control}
               />
             </Field>
-            <Field label="Months" error={errors.months?.message}>
+            <Field label={t("fields.months")} error={errors.months?.message}>
               <input
                 {...register("months", {
-                  required: "Months is required",
+                  required: t("validation.monthsRequired"),
                   validate: (v) => {
                     const n = Number(v);
-                    return (Number.isInteger(n) && n >= 1 && n <= 60) || "Whole number 1–60";
+                    return (
+                      (Number.isInteger(n) && n >= 1 && n <= 60) || t("validation.monthsRange")
+                    );
                   },
                 })}
                 inputMode="numeric"
-                placeholder="12"
+                placeholder={t("placeholders.months")}
                 className={control}
               />
             </Field>
           </div>
-          <Field label="Credit card" error={errors.cardId?.message}>
-            <input type="hidden" {...register("cardId", { required: "Card is required" })} />
+          <Field label={t("fields.creditCard")} error={errors.cardId?.message}>
+            <input
+              type="hidden"
+              {...register("cardId", { required: t("validation.cardRequiredShort") })}
+            />
             <CardSelect
               value={cardId}
               onChange={(v) => setValue("cardId", v, { shouldValidate: true })}
-              placeholder="Select a card"
-              aria-label="Credit card"
+              placeholder={t("placeholders.selectCard")}
+              aria-label={t("fields.creditCard")}
               cards={creditCards}
               availableByCard={availableByCard}
             />
           </Field>
-          <Field label="Category" error={errors.categoryId?.message}>
-            <input type="hidden" {...register("categoryId", { required: "Category is required" })} />
+          <Field label={t("fields.category")} error={errors.categoryId?.message}>
+            <input
+              type="hidden"
+              {...register("categoryId", { required: t("validation.categoryRequired") })}
+            />
             <IconSelect
               value={categoryId}
               onChange={(v) => setValue("categoryId", v, { shouldValidate: true })}
-              placeholder="Select a category"
-              aria-label="Category"
+              placeholder={t("placeholders.selectCategory")}
+              aria-label={t("fields.category")}
               options={expenseCategories.map((c) => ({
                 value: c.id,
-                label: c.name,
+                label: seedLabel(t, c.id, c.name),
                 icon: categoryIcon(c.name),
               }))}
             />
           </Field>
-          <Field label="Purchase date" error={errors.startDate?.message}>
-            <input type="hidden" {...register("startDate", { required: "Purchase date is required" })} />
+          <Field label={t("fields.purchaseDate")} error={errors.startDate?.message}>
+            <input
+              type="hidden"
+              {...register("startDate", { required: t("validation.purchaseDateRequired") })}
+            />
             <DatePicker
               value={startDate}
               onChange={(iso) => setValue("startDate", iso, { shouldValidate: true })}
-              aria-label="Purchase date"
+              aria-label={t("fields.purchaseDate")}
             />
           </Field>
-          <Field label="Color" className="pb-3">
+          <Field label={t("fields.color")} className="pb-3">
             <ColorSwatchPicker value={color} onChange={(c) => setValue("color", c)} />
           </Field>
-          
-          {editing && (
-            <p className="text-xs text-white/50">
-              Saving regenerates the installment schedule from the new values.
-            </p>
-          )}
+
+          {editing && <p className="text-xs text-white/50">{t("modals.registerMsi.regenNote")}</p>}
           <Button type="submit" variant="primary" disabled={pending} className="w-full">
-            {pending ? "Saving…" : editing ? "Save changes" : "Register plan"}
+            {pending
+              ? t("common.saving")
+              : editing
+                ? t("common.saveChanges")
+                : t("modals.registerMsi.submit")}
           </Button>
           {mutationError != null && (
             <p className="text-xs text-coral">{(mutationError as Error).message}</p>

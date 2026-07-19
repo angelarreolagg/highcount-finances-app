@@ -1,5 +1,6 @@
 import { Calendar } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   addMonths,
   daysInMonth,
@@ -9,12 +10,10 @@ import {
   toISODate,
 } from "../../../domain/value-objects/calendar";
 import { useClickOutside } from "../../hooks/useClickOutside";
-import { MONTH_NAMES } from "../../../shared/utils/months";
+import { monthName, weekdayNarrow } from "../../../shared/utils/months";
 import { FloatingPanel } from "./FloatingPanel";
 import { control } from "./formStyles";
 import { ChevronDownIcon } from "./icons";
-
-const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
 interface DatePickerProps {
   value: string;
@@ -22,15 +21,16 @@ interface DatePickerProps {
   "aria-label"?: string;
 }
 
-function formatDisplay(iso: string): string {
+function formatDisplay(iso: string, locale: string): string {
   const { year, monthIndex, day } = parseISODate(iso);
-  return `${day} ${MONTH_NAMES[monthIndex].slice(0, 3)} ${year}`;
+  return `${day} ${monthName(monthIndex, locale, { short: true })} ${year}`;
 }
 
 /** Shared date picker: a glass month-grid popover replacing the native `<input type="date">`.
  *  Single-date mode only for now — nothing in the app needs a range yet, but the same
  *  building blocks (calendar.ts helpers, useClickOutside) make one a natural follow-up. */
 export function DatePicker({ value, onChange, "aria-label": ariaLabel }: DatePickerProps) {
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const selected = value ? parseISODate(value) : null;
   const today = startOfDay(new Date());
@@ -67,6 +67,7 @@ export function DatePicker({ value, onChange, "aria-label": ariaLabel }: DatePic
   const firstWeekday = makeLocalDate(viewYear, viewMonth, 1).getDay();
   const total = daysInMonth(viewYear, viewMonth);
   const days = Array.from({ length: total }, (_, i) => i + 1);
+  const weekdayLabels = weekdayNarrow(i18n.language);
 
   return (
     <div className="relative">
@@ -81,7 +82,11 @@ export function DatePicker({ value, onChange, "aria-label": ariaLabel }: DatePic
       >
         <Calendar size={16} strokeWidth={1.8} className="shrink-0 text-white/50" />
         <span className="min-w-0 flex-1 truncate">
-          {value ? formatDisplay(value) : <span className="text-white/30">Select a date</span>}
+          {value ? (
+            formatDisplay(value, i18n.language)
+          ) : (
+            <span className="text-white/30">{t("placeholders.selectDate")}</span>
+          )}
         </span>
       </button>
 
@@ -93,23 +98,23 @@ export function DatePicker({ value, onChange, "aria-label": ariaLabel }: DatePic
         matchTriggerWidth={false}
         className="w-60 p-2.5"
       >
-        <div role="dialog" aria-label="Choose a date">
+        <div role="dialog" aria-label={t("cardFace.chooseDate")}>
           <div className="mb-2 flex items-center justify-between">
             <button
               type="button"
               onClick={() => goMonth(-1)}
-              aria-label="Previous month"
+              aria-label={t("cardFace.prevMonth")}
               className="flex size-6 items-center justify-center rounded-full text-white/70 hover:bg-white/10 hover:text-white"
             >
               <ChevronDownIcon size={14} className="rotate-90" />
             </button>
             <span className="text-sm font-medium">
-              {MONTH_NAMES[viewMonth]} {viewYear}
+              {monthName(viewMonth, i18n.language)} {viewYear}
             </span>
             <button
               type="button"
               onClick={() => goMonth(1)}
-              aria-label="Next month"
+              aria-label={t("cardFace.nextMonth")}
               className="flex size-6 items-center justify-center rounded-full text-white/70 hover:bg-white/10 hover:text-white"
             >
               <ChevronDownIcon size={14} className="-rotate-90" />
@@ -117,7 +122,7 @@ export function DatePicker({ value, onChange, "aria-label": ariaLabel }: DatePic
           </div>
 
           <div className="grid grid-cols-7 gap-1 text-center text-[10px] text-white/40">
-            {WEEKDAY_LABELS.map((label, i) => (
+            {weekdayLabels.map((label, i) => (
               <span key={i} className="py-0.5">
                 {label}
               </span>

@@ -1,0 +1,296 @@
+{
+  "common": {
+    "appName": "High Count",
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "saveChanges": "Save changes",
+    "saving": "Saving…",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "close": "Close",
+    "auto": "Auto",
+    "income": "Income",
+    "expense": "Expense",
+    "spent": "Spent",
+    "net": "Net",
+    "largestExpense": "Largest expense",
+    "backToDashboard": "Back to dashboard",
+    "yearInReview": "Year in Review"
+  },
+  "nav": {
+    "home": "Home",
+    "expenses": "Expenses",
+    "savings": "Savings",
+    "settings": "Settings"
+  },
+  "profileMenu": {
+    "label": "Profile menu",
+    "cardsAccounts": "Cards & accounts",
+    "logSavings": "Log savings"
+  },
+  "dock": {
+    "quickActions": "Quick actions",
+    "addTransaction": "Add expense / income",
+    "registerMsi": "Register MSI plan",
+    "logSavings": "Log savings movement"
+  },
+  "rowActions": {
+    "edit": "Edit {{label}}",
+    "delete": "Delete {{label}}"
+  },
+  "home": {
+    "heroLabel": "Total money · all accounts",
+    "balanceBreakdown": "<inc>+{{income}}</inc> income · −{{expenses}} expenses",
+    "realTotal": "Real total (all MSI committed):"
+  },
+  "runway": {
+    "unknown": "Runway unknown — log savings and an income",
+    "months_one": "{{count}} month of runway",
+    "months_other": "{{count}} months of runway",
+    "belowThreshold": "below {{threshold}}"
+  },
+  "expenses": {
+    "heroLabel": "Spent · {{month}} {{year}}",
+    "breakdown": "<inc>+{{income}}</inc> income · net {{net}}",
+    "filterType": "Filter by type",
+    "filterCategory": "Filter by category",
+    "filterCard": "Filter by card",
+    "filterMonth": "Filter by month",
+    "filterColor": "Filter by color",
+    "type": "Type",
+    "category": "Category",
+    "card": "Card",
+    "month": "Month",
+    "color": "Color",
+    "typeExpenses": "Expenses",
+    "typeIncome": "Income",
+    "allTypes": "All types",
+    "allCategories": "All categories",
+    "allCards": "All cards",
+    "allOpenMonths": "All open months",
+    "allColors": "All colors",
+    "monthCurrent": "{{month}} {{year}} (current)",
+    "monthOpen": "{{month}} {{year}} (still open)",
+    "count_one": "{{count}} transaction",
+    "count_other": "{{count}} transactions",
+    "empty": "Nothing matches these filters — add an expense or loosen a filter."
+  },
+  "savings": {
+    "heroLabel": "Total savings · net",
+    "breakdown": "Total saved {{saved}} · <ret>+{{returns}} returns</ret>",
+    "empty": "No savings movements yet — log your first deposit to start tracking growth.",
+    "logMovement": "Log a movement",
+    "balanceOverTime": "Balance over time",
+    "returnsPerEntry": "Returns per entry",
+    "noReturns": "No returns logged yet — when your account pays interest, log it as a \"returns\" movement and it will chart here.",
+    "history": "History",
+    "addMovement": "+ Log movement",
+    "balanceAfter": "balance {{amount}}",
+    "rowLabel": "{{kind}} · {{date}}",
+    "chartBalanceAria": "Savings balance over time",
+    "chartReturnsAria": "Returns per entry",
+    "tooltipBalance": "Balance {{amount}}",
+    "tooltipReturns": "Returns +{{amount}}",
+    "tooltipDeposit": "Deposit +{{amount}}"
+  },
+  "summary": {
+    "badYear": "That year doesn't look right.",
+    "heroLabel": "Year in Review · spent in {{year}}",
+    "heroBreakdown_one": "<inc>+{{income}}</inc> income · net {{net}} · {{count}} transaction",
+    "heroBreakdown_other": "<inc>+{{income}}</inc> income · net {{net}} · {{count}} transactions",
+    "locked": "{{year}} hasn't started yet — its Year in Review will be here when it does.",
+    "highlights": "Highlights",
+    "noDescription": "No description",
+    "noExpenses": "No expenses",
+    "savingsChange": "Savings change",
+    "noSnapshots": "No snapshots",
+    "byCategory": "By category",
+    "byCard": "By card / account",
+    "monthByMonth": "Month by month",
+    "noExpensesRecorded": "No expenses recorded."
+  },
+  "dashboard": {
+    "months": "Months",
+    "prevYear": "Previous year",
+    "nextYear": "Next year",
+    "openForLogging": "Open for logging",
+    "openForLoggingLegend": "open for logging expenses",
+    "net": "net {{amount}}",
+    "thisMonth": "This month",
+    "noExpensesYet": "No expenses yet",
+    "msiPlans": "MSI / MCI plans",
+    "newPlan": "+ New plan",
+    "msiEmpty": "Register an installment purchase and every monthly charge is logged for you.",
+    "msiMonths_one": "{{count}} month",
+    "msiMonths_other": "{{count}} months",
+    "withInterest": "with interest",
+    "interestFree": "interest-free",
+    "msiFrom": "from {{date}}",
+    "msiOf": "of {{amount}}",
+    "savings": "Savings",
+    "savingsEmpty": "Log a deposit or the interest your account produced to track growth and runway."
+  },
+  "fields": {
+    "amount": "Amount",
+    "category": "Category",
+    "cardAccount": "Card / account",
+    "date": "Date",
+    "description": "Description",
+    "color": "Color",
+    "note": "Note",
+    "name": "Name",
+    "last4": "Last 4",
+    "creditLimit": "Credit limit",
+    "cutDay": "Cut day",
+    "paymentDueDay": "Payment due day",
+    "months": "Months",
+    "interest": "Interest",
+    "kind": "Kind",
+    "account": "Account",
+    "type": "Type",
+    "creditCard": "Credit card",
+    "total": "Total (incl. interest)",
+    "purchaseDate": "Purchase date"
+  },
+  "placeholders": {
+    "amount": "0.00",
+    "selectCategory": "Select a category",
+    "selectAccount": "Select an account",
+    "selectCard": "Select a card",
+    "selectAccountOptional": "Select an account · optional",
+    "descriptionWhat": "What was it?",
+    "msiDescription": "e.g. Laptop",
+    "months": "12",
+    "note": "e.g. CETES monthly interest",
+    "name": "e.g. BBVA Azul",
+    "last4": "1234",
+    "cutDay": "28",
+    "paymentDueDay": "17",
+    "creditLimit": "50000",
+    "selectDate": "Select a date"
+  },
+  "validation": {
+    "amountRequired": "Amount is required",
+    "positiveAmount": "Enter a positive amount like 123.45",
+    "amountPositive": "Amount must be greater than zero",
+    "positiveAmountShort": "Positive amount like 123.45",
+    "greaterThanZero": "Must be greater than zero",
+    "categoryRequired": "Category is required",
+    "cardRequired": "Card/account is required",
+    "cardRequiredShort": "Card is required",
+    "dateRequired": "Date is required",
+    "descriptionRequired": "Description is required",
+    "totalRequired": "Total is required",
+    "monthsRequired": "Months is required",
+    "monthsRange": "Whole number 1–60",
+    "purchaseDateRequired": "Purchase date is required",
+    "nameRequired": "Name is required",
+    "dayRequiredCredit": "Required for credit cards",
+    "dayRange": "Day must be 1–31",
+    "creditLimitRequired": "Credit limit is required",
+    "creditLimitPattern": "Enter an amount like 50000 or 50000.00"
+  },
+  "modals": {
+    "addTransaction": {
+      "titleAdd": "Add expense / income",
+      "titleEdit": "Edit expense / income",
+      "submitExpense": "Add expense",
+      "submitIncome": "Add income"
+    },
+    "registerMsi": {
+      "titleAdd": "Register MSI / MCI plan",
+      "titleEdit": "Edit MSI / MCI plan",
+      "noCreditCard": "Installment plans live on credit cards — add a credit card first.",
+      "interestNo": "MSI · no interest",
+      "interestYes": "MCI · with interest",
+      "regenNote": "Saving regenerates the installment schedule from the new values.",
+      "submit": "Register plan"
+    },
+    "logSavings": {
+      "titleAdd": "Log savings movement",
+      "titleEdit": "Edit savings movement",
+      "submit": "Log movement"
+    },
+    "cards": {
+      "titleList": "Cards & accounts",
+      "titleEdit": "Edit card / account",
+      "titleNew": "New card / account",
+      "addTile": "Add",
+      "allCardsAccounts": "All cards & accounts",
+      "submitAdd": "Add card"
+    },
+    "delete": {
+      "title": "Delete \"{{name}}\"?",
+      "transaction": "This removes the movement from its month and every total. This can't be undone.",
+      "savings": "This removes the movement and recalculates your savings balance. This can't be undone.",
+      "msiPlan_one": "This also deletes the plan's {{count}} installment transaction. This can't be undone.",
+      "msiPlan_other": "This also deletes the plan's {{count}} installment transactions. This can't be undone.",
+      "cardTransactions_one": "This card still has {{count}} transaction",
+      "cardTransactions_other": "This card still has {{count}} transactions",
+      "cardPlans_one": " and {{count}} MSI plan",
+      "cardPlans_other": " and {{count}} MSI plans",
+      "cardInUseSuffix": ". Delete or move them first — deleting the card would orphan your history.",
+      "cardNotInUse": "The card/account will be removed. This can't be undone."
+    },
+    "monthDetail": {
+      "empty": "Nothing logged this month yet — add an expense or income to see it here."
+    }
+  },
+  "cardFace": {
+    "cardName": "Card name",
+    "left": "{{amount}} left",
+    "cutsDue": "cuts {{cut}} · due {{due}}",
+    "cardColor": "Card color",
+    "chooseDate": "Choose a date",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month"
+  },
+  "enums": {
+    "cardType": {
+      "credit": "Credit",
+      "debit": "Debit",
+      "cash": "Cash"
+    },
+    "savingsKind": {
+      "deposit": "Deposit",
+      "returns": "Returns"
+    },
+    "chipColor": {
+      "indigo": "Indigo",
+      "sky": "Sky",
+      "emerald": "Emerald",
+      "amber": "Amber",
+      "rose": "Rose",
+      "violet": "Violet",
+      "cyan": "Cyan",
+      "fuchsia": "Fuchsia"
+    }
+  },
+  "categories": {
+    "cat-food": "Food",
+    "cat-transport": "Transport",
+    "cat-housing": "Housing",
+    "cat-services": "Services",
+    "cat-health": "Health",
+    "cat-entertainment": "Entertainment",
+    "cat-shopping": "Shopping",
+    "cat-other-expense": "Other expense",
+    "cat-salary": "Salary",
+    "cat-other-income": "Other income",
+    "account-cash": "Cash"
+  },
+  "settings": {
+    "heroLabel": "Preferences & profile",
+    "title": "Settings",
+    "profile": "Profile",
+    "displayName": "Display name",
+    "displayNamePlaceholder": "Your name",
+    "displayNameHint": "Shows on your avatar.",
+    "preferences": "Preferences",
+    "language": "Language",
+    "english": "English",
+    "spanish": "Español",
+    "about": "About",
+    "aboutText": "High Count — a local-only personal finance tracker. Your data never leaves this device."
+  }
+}

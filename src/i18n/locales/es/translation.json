@@ -1,0 +1,296 @@
+{
+  "common": {
+    "appName": "High Count",
+    "loading": "Cargando…",
+    "cancel": "Cancelar",
+    "saveChanges": "Guardar cambios",
+    "saving": "Guardando…",
+    "delete": "Eliminar",
+    "deleting": "Eliminando…",
+    "close": "Cerrar",
+    "auto": "Auto",
+    "income": "Ingresos",
+    "expense": "Gasto",
+    "spent": "Gastado",
+    "net": "Neto",
+    "largestExpense": "Mayor gasto",
+    "backToDashboard": "Volver al inicio",
+    "yearInReview": "Resumen del año"
+  },
+  "nav": {
+    "home": "Inicio",
+    "expenses": "Gastos",
+    "savings": "Ahorros",
+    "settings": "Ajustes"
+  },
+  "profileMenu": {
+    "label": "Menú de perfil",
+    "cardsAccounts": "Tarjetas y cuentas",
+    "logSavings": "Registrar ahorro"
+  },
+  "dock": {
+    "quickActions": "Acciones rápidas",
+    "addTransaction": "Agregar gasto / ingreso",
+    "registerMsi": "Registrar plan MSI",
+    "logSavings": "Registrar movimiento de ahorro"
+  },
+  "rowActions": {
+    "edit": "Editar {{label}}",
+    "delete": "Eliminar {{label}}"
+  },
+  "home": {
+    "heroLabel": "Dinero total · todas las cuentas",
+    "balanceBreakdown": "<inc>+{{income}}</inc> de ingresos · −{{expenses}} de gastos",
+    "realTotal": "Total real (todo MSI comprometido):"
+  },
+  "runway": {
+    "unknown": "Autonomía desconocida — registra ahorros y un ingreso",
+    "months_one": "{{count}} mes de autonomía",
+    "months_other": "{{count}} meses de autonomía",
+    "belowThreshold": "por debajo de {{threshold}}"
+  },
+  "expenses": {
+    "heroLabel": "Gastado · {{month}} {{year}}",
+    "breakdown": "<inc>+{{income}}</inc> de ingresos · neto {{net}}",
+    "filterType": "Filtrar por tipo",
+    "filterCategory": "Filtrar por categoría",
+    "filterCard": "Filtrar por tarjeta",
+    "filterMonth": "Filtrar por mes",
+    "filterColor": "Filtrar por color",
+    "type": "Tipo",
+    "category": "Categoría",
+    "card": "Tarjeta",
+    "month": "Mes",
+    "color": "Color",
+    "typeExpenses": "Gastos",
+    "typeIncome": "Ingresos",
+    "allTypes": "Todos los tipos",
+    "allCategories": "Todas las categorías",
+    "allCards": "Todas las tarjetas",
+    "allOpenMonths": "Todos los meses abiertos",
+    "allColors": "Todos los colores",
+    "monthCurrent": "{{month}} {{year}} (actual)",
+    "monthOpen": "{{month}} {{year}} (aún abierto)",
+    "count_one": "{{count}} movimiento",
+    "count_other": "{{count}} movimientos",
+    "empty": "Nada coincide con estos filtros — agrega un gasto o afloja un filtro."
+  },
+  "savings": {
+    "heroLabel": "Ahorros totales · neto",
+    "breakdown": "Total ahorrado {{saved}} · <ret>+{{returns}} de rendimientos</ret>",
+    "empty": "Aún no hay movimientos de ahorro — registra tu primer depósito para seguir el crecimiento.",
+    "logMovement": "Registrar un movimiento",
+    "balanceOverTime": "Saldo en el tiempo",
+    "returnsPerEntry": "Rendimientos por registro",
+    "noReturns": "Aún no hay rendimientos registrados — cuando tu cuenta pague intereses, regístralos como movimiento de \"rendimientos\" y aparecerán aquí.",
+    "history": "Historial",
+    "addMovement": "+ Registrar movimiento",
+    "balanceAfter": "saldo {{amount}}",
+    "rowLabel": "{{kind}} · {{date}}",
+    "chartBalanceAria": "Saldo de ahorros en el tiempo",
+    "chartReturnsAria": "Rendimientos por registro",
+    "tooltipBalance": "Saldo {{amount}}",
+    "tooltipReturns": "Rendimientos +{{amount}}",
+    "tooltipDeposit": "Depósito +{{amount}}"
+  },
+  "summary": {
+    "badYear": "Ese año no parece correcto.",
+    "heroLabel": "Resumen del año · gastado en {{year}}",
+    "heroBreakdown_one": "<inc>+{{income}}</inc> de ingresos · neto {{net}} · {{count}} movimiento",
+    "heroBreakdown_other": "<inc>+{{income}}</inc> de ingresos · neto {{net}} · {{count}} movimientos",
+    "locked": "{{year}} aún no comienza — su Resumen del año estará aquí cuando lo haga.",
+    "highlights": "Destacados",
+    "noDescription": "Sin descripción",
+    "noExpenses": "Sin gastos",
+    "savingsChange": "Cambio en ahorros",
+    "noSnapshots": "Sin registros",
+    "byCategory": "Por categoría",
+    "byCard": "Por tarjeta / cuenta",
+    "monthByMonth": "Mes a mes",
+    "noExpensesRecorded": "No hay gastos registrados."
+  },
+  "dashboard": {
+    "months": "Meses",
+    "prevYear": "Año anterior",
+    "nextYear": "Año siguiente",
+    "openForLogging": "Abierto para registrar",
+    "openForLoggingLegend": "abierto para registrar gastos",
+    "net": "neto {{amount}}",
+    "thisMonth": "Este mes",
+    "noExpensesYet": "Aún sin gastos",
+    "msiPlans": "Planes MSI / MCI",
+    "newPlan": "+ Nuevo plan",
+    "msiEmpty": "Registra una compra a plazos y cada cargo mensual se registra por ti.",
+    "msiMonths_one": "{{count}} mes",
+    "msiMonths_other": "{{count}} meses",
+    "withInterest": "con intereses",
+    "interestFree": "sin intereses",
+    "msiFrom": "desde {{date}}",
+    "msiOf": "de {{amount}}",
+    "savings": "Ahorros",
+    "savingsEmpty": "Registra un depósito o los intereses que produjo tu cuenta para seguir el crecimiento y la autonomía."
+  },
+  "fields": {
+    "amount": "Monto",
+    "category": "Categoría",
+    "cardAccount": "Tarjeta / cuenta",
+    "date": "Fecha",
+    "description": "Descripción",
+    "color": "Color",
+    "note": "Nota",
+    "name": "Nombre",
+    "last4": "Últimos 4",
+    "creditLimit": "Límite de crédito",
+    "cutDay": "Día de corte",
+    "paymentDueDay": "Día de pago",
+    "months": "Meses",
+    "interest": "Interés",
+    "kind": "Tipo",
+    "account": "Cuenta",
+    "type": "Tipo",
+    "creditCard": "Tarjeta de crédito",
+    "total": "Total (incl. intereses)",
+    "purchaseDate": "Fecha de compra"
+  },
+  "placeholders": {
+    "amount": "0.00",
+    "selectCategory": "Selecciona una categoría",
+    "selectAccount": "Selecciona una cuenta",
+    "selectCard": "Selecciona una tarjeta",
+    "selectAccountOptional": "Selecciona una cuenta · opcional",
+    "descriptionWhat": "¿Qué fue?",
+    "msiDescription": "ej. Laptop",
+    "months": "12",
+    "note": "ej. interés mensual de CETES",
+    "name": "ej. BBVA Azul",
+    "last4": "1234",
+    "cutDay": "28",
+    "paymentDueDay": "17",
+    "creditLimit": "50000",
+    "selectDate": "Selecciona una fecha"
+  },
+  "validation": {
+    "amountRequired": "El monto es obligatorio",
+    "positiveAmount": "Ingresa un monto positivo como 123.45",
+    "amountPositive": "El monto debe ser mayor que cero",
+    "positiveAmountShort": "Monto positivo como 123.45",
+    "greaterThanZero": "Debe ser mayor que cero",
+    "categoryRequired": "La categoría es obligatoria",
+    "cardRequired": "La tarjeta/cuenta es obligatoria",
+    "cardRequiredShort": "La tarjeta es obligatoria",
+    "dateRequired": "La fecha es obligatoria",
+    "descriptionRequired": "La descripción es obligatoria",
+    "totalRequired": "El total es obligatorio",
+    "monthsRequired": "Los meses son obligatorios",
+    "monthsRange": "Número entero 1–60",
+    "purchaseDateRequired": "La fecha de compra es obligatoria",
+    "nameRequired": "El nombre es obligatorio",
+    "dayRequiredCredit": "Obligatorio para tarjetas de crédito",
+    "dayRange": "El día debe ser 1–31",
+    "creditLimitRequired": "El límite de crédito es obligatorio",
+    "creditLimitPattern": "Ingresa un monto como 50000 o 50000.00"
+  },
+  "modals": {
+    "addTransaction": {
+      "titleAdd": "Agregar gasto / ingreso",
+      "titleEdit": "Editar gasto / ingreso",
+      "submitExpense": "Agregar gasto",
+      "submitIncome": "Agregar ingreso"
+    },
+    "registerMsi": {
+      "titleAdd": "Registrar plan MSI / MCI",
+      "titleEdit": "Editar plan MSI / MCI",
+      "noCreditCard": "Los planes a plazos viven en tarjetas de crédito — agrega una tarjeta de crédito primero.",
+      "interestNo": "MSI · sin intereses",
+      "interestYes": "MCI · con intereses",
+      "regenNote": "Guardar regenera el calendario de mensualidades con los nuevos valores.",
+      "submit": "Registrar plan"
+    },
+    "logSavings": {
+      "titleAdd": "Registrar movimiento de ahorro",
+      "titleEdit": "Editar movimiento de ahorro",
+      "submit": "Registrar movimiento"
+    },
+    "cards": {
+      "titleList": "Tarjetas y cuentas",
+      "titleEdit": "Editar tarjeta / cuenta",
+      "titleNew": "Nueva tarjeta / cuenta",
+      "addTile": "Agregar",
+      "allCardsAccounts": "Todas las tarjetas y cuentas",
+      "submitAdd": "Agregar tarjeta"
+    },
+    "delete": {
+      "title": "¿Eliminar \"{{name}}\"?",
+      "transaction": "Esto elimina el movimiento de su mes y de todos los totales. No se puede deshacer.",
+      "savings": "Esto elimina el movimiento y recalcula tu saldo de ahorros. No se puede deshacer.",
+      "msiPlan_one": "Esto también elimina la {{count}} transacción de mensualidad del plan. No se puede deshacer.",
+      "msiPlan_other": "Esto también elimina las {{count}} transacciones de mensualidad del plan. No se puede deshacer.",
+      "cardTransactions_one": "Esta tarjeta todavía tiene {{count}} movimiento",
+      "cardTransactions_other": "Esta tarjeta todavía tiene {{count}} movimientos",
+      "cardPlans_one": " y {{count}} plan MSI",
+      "cardPlans_other": " y {{count}} planes MSI",
+      "cardInUseSuffix": ". Elimínalos o muévelos primero — eliminar la tarjeta dejaría tu historial huérfano.",
+      "cardNotInUse": "La tarjeta/cuenta se eliminará. No se puede deshacer."
+    },
+    "monthDetail": {
+      "empty": "Aún no hay nada registrado este mes — agrega un gasto o ingreso para verlo aquí."
+    }
+  },
+  "cardFace": {
+    "cardName": "Nombre de tarjeta",
+    "left": "{{amount}} disponible",
+    "cutsDue": "corte {{cut}} · pago {{due}}",
+    "cardColor": "Color de tarjeta",
+    "chooseDate": "Elegir una fecha",
+    "prevMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente"
+  },
+  "enums": {
+    "cardType": {
+      "credit": "Crédito",
+      "debit": "Débito",
+      "cash": "Efectivo"
+    },
+    "savingsKind": {
+      "deposit": "Depósito",
+      "returns": "Rendimientos"
+    },
+    "chipColor": {
+      "indigo": "Índigo",
+      "sky": "Cielo",
+      "emerald": "Esmeralda",
+      "amber": "Ámbar",
+      "rose": "Rosa",
+      "violet": "Violeta",
+      "cyan": "Cian",
+      "fuchsia": "Fucsia"
+    }
+  },
+  "categories": {
+    "cat-food": "Comida",
+    "cat-transport": "Transporte",
+    "cat-housing": "Vivienda",
+    "cat-services": "Servicios",
+    "cat-health": "Salud",
+    "cat-entertainment": "Entretenimiento",
+    "cat-shopping": "Compras",
+    "cat-other-expense": "Otro gasto",
+    "cat-salary": "Salario",
+    "cat-other-income": "Otro ingreso",
+    "account-cash": "Efectivo"
+  },
+  "settings": {
+    "heroLabel": "Preferencias y perfil",
+    "title": "Ajustes",
+    "profile": "Perfil",
+    "displayName": "Nombre para mostrar",
+    "displayNamePlaceholder": "Tu nombre",
+    "displayNameHint": "Se muestra en tu avatar.",
+    "preferences": "Preferencias",
+    "language": "Idioma",
+    "english": "English",
+    "spanish": "Español",
+    "about": "Acerca de",
+    "aboutText": "High Count — un gestor de finanzas personales solo local. Tus datos nunca salen de este dispositivo."
+  }
+}

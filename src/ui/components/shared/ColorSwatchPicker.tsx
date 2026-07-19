@@ -1,5 +1,7 @@
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import type { ChipColor } from "../../../domain/entities/ChipColor";
+import { chipColorLabel } from "../../i18n/labels";
 import { CHIP_COLOR_OPTIONS } from "../../utils/chips";
 
 interface ColorSwatchPickerProps {
@@ -11,8 +13,9 @@ interface ColorSwatchPickerProps {
 
 /** Row of curated color dots; the selected one gets a springy peri ring. Optional — tap again to clear. */
 export function ColorSwatchPicker({ value, onChange }: ColorSwatchPickerProps) {
+  const { t } = useTranslation();
   return (
-    <div className="flex flex-wrap items-center gap-2.5" role="radiogroup" aria-label="Color">
+    <div className="flex flex-wrap items-center gap-2.5" role="radiogroup" aria-label={t("fields.color")}>
       {CHIP_COLOR_OPTIONS.map(({ color, className }) => {
         const selected = value === color;
         return (
@@ -21,7 +24,7 @@ export function ColorSwatchPicker({ value, onChange }: ColorSwatchPickerProps) {
             type="button"
             role="radio"
             aria-checked={selected}
-            aria-label={color}
+            aria-label={chipColorLabel(t, color)}
             whileHover={{ scale: 1.15 }}
             whileTap={{ scale: 0.9 }}
             transition={{ type: "spring", bounce: 0.2 }}

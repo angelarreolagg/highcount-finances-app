@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { SavingsTimelinePoint } from "../../../domain/services/savingsSummary";
 
 /**
@@ -83,6 +84,7 @@ function ChartTooltip({ title, lines }: { title: string; lines: string[] }) {
 
 /** Cumulative balance over time: 2px periwinkle line + soft area, ≥8px markers. */
 export function BalanceLineChart({ timeline }: { timeline: SavingsTimelinePoint[] }) {
+  const { t } = useTranslation();
   const [hover, setHover] = useState<TooltipState | null>(null);
   if (timeline.length === 0) return null;
 
@@ -119,7 +121,7 @@ export function BalanceLineChart({ timeline }: { timeline: SavingsTimelinePoint[
         viewBox={`0 0 ${W} ${H}`}
         className="h-auto w-full"
         role="img"
-        aria-label="Savings balance over time"
+        aria-label={t("savings.chartBalanceAria")}
         onMouseMove={onMove}
         onMouseLeave={() => setHover(null)}
       >
@@ -157,8 +159,10 @@ export function BalanceLineChart({ timeline }: { timeline: SavingsTimelinePoint[
           <ChartTooltip
             title={timeline[hover.index].date}
             lines={[
-              `Balance ${timeline[hover.index].balanceAfter.format()}`,
-              `${timeline[hover.index].kind === "returns" ? "Returns" : "Deposit"} +${timeline[hover.index].amount.format()}`,
+              t("savings.tooltipBalance", { amount: timeline[hover.index].balanceAfter.format() }),
+              timeline[hover.index].kind === "returns"
+                ? t("savings.tooltipReturns", { amount: timeline[hover.index].amount.format() })
+                : t("savings.tooltipDeposit", { amount: timeline[hover.index].amount.format() }),
             ]}
           />
         </div>
@@ -178,6 +182,7 @@ function roundedTopBar(x: number, yTop: number, width: number, yBase: number, r 
 
 /** Returns per entry: thin mint bars, 4px rounded data-end, anchored to the baseline. */
 export function ReturnsBarChart({ timeline }: { timeline: SavingsTimelinePoint[] }) {
+  const { t } = useTranslation();
   const [hover, setHover] = useState<TooltipState | null>(null);
   const returns = timeline.filter((p) => p.kind === "returns");
   if (returns.length === 0) return null;
@@ -195,7 +200,7 @@ export function ReturnsBarChart({ timeline }: { timeline: SavingsTimelinePoint[]
         viewBox={`0 0 ${W} ${H}`}
         className="h-auto w-full"
         role="img"
-        aria-label="Returns per entry"
+        aria-label={t("savings.chartReturnsAria")}
         onMouseLeave={() => setHover(null)}
       >
         <GridLines max={max} />
@@ -245,7 +250,7 @@ export function ReturnsBarChart({ timeline }: { timeline: SavingsTimelinePoint[]
         >
           <ChartTooltip
             title={returns[hover.index].date}
-            lines={[`Returns +${returns[hover.index].amount.format()}`]}
+            lines={[t("savings.tooltipReturns", { amount: returns[hover.index].amount.format() })]}
           />
         </div>
       )}

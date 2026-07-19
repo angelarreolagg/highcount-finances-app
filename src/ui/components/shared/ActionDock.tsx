@@ -9,8 +9,9 @@ import {
 import type { MotionValue, SpringOptions } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useUiStore } from "../../../state/uiStore";
-import { LayersIcon, PlusIcon } from "./icons";
+import { CoinsIcon, LayersIcon, PlusIcon } from "./icons";
 
 /** macOS-style magnification (adapted from the ReactBits Dock): items swell as the cursor nears. */
 const SPRING: SpringOptions = { mass: 0.1, stiffness: 150, damping: 12 };
@@ -18,7 +19,7 @@ const BASE_SIZE = 48;
 const MAGNIFIED_SIZE = 68;
 const DISTANCE = 140;
 
-type DockVariant = "primary" | "glass";
+type DockVariant = "primary" | "glass" | "savings";
 
 /**
  * Transparent liquid glass with an animated glow border: a dark frosted fill, a
@@ -31,6 +32,8 @@ const itemStyles: Record<DockVariant, string> = {
   primary: "dock-ring dock-ring-primary bg-white/[0.06] shadow-lg shadow-black/30 backdrop-blur-xl",
   /** "MSI" — quieter white/peri ring. */
   glass: "dock-ring dock-ring-glass bg-white/[0.06] shadow-lg shadow-black/30 backdrop-blur-xl",
+  /** "Log movement" — calm mint/sky ring. */
+  savings: "dock-ring dock-ring-savings bg-white/[0.06] shadow-lg shadow-black/30 backdrop-blur-xl",
 };
 
 /** Glass tooltip that reveals the action's name above the button on hover/focus. */
@@ -111,6 +114,7 @@ function DockItem({
 
 /** Floating bottom-center dock with the everyday actions, visible on every route. */
 export function ActionDock() {
+  const { t } = useTranslation();
   const openModal = useUiStore((s) => s.openModal);
   const mouseX = useMotionValue(Infinity);
 
@@ -120,11 +124,11 @@ export function ActionDock() {
         onMouseMove={(e) => mouseX.set(e.clientX)}
         onMouseLeave={() => mouseX.set(Infinity)}
         role="toolbar"
-        aria-label="Quick actions"
+        aria-label={t("dock.quickActions")}
         className="flex items-end gap-3 rounded-3xl border border-white/10 bg-panel/70 px-4 py-3 shadow-xl shadow-black/40 backdrop-blur-2xl"
       >
         <DockItem
-          label="Add expense / income"
+          label={t("dock.addTransaction")}
           variant="primary"
           mouseX={mouseX}
           onClick={() => openModal("addTransaction")}
@@ -132,12 +136,20 @@ export function ActionDock() {
           <PlusIcon size={22} />
         </DockItem>
         <DockItem
-          label="Register MSI plan"
+          label={t("dock.registerMsi")}
           variant="glass"
           mouseX={mouseX}
           onClick={() => openModal("registerMsi")}
         >
           <LayersIcon size={20} />
+        </DockItem>
+        <DockItem
+          label={t("dock.logSavings")}
+          variant="savings"
+          mouseX={mouseX}
+          onClick={() => openModal("logSavings")}
+        >
+          <CoinsIcon size={20} />
         </DockItem>
       </motion.div>
     </div>

@@ -21,6 +21,7 @@ export interface MonthTotalsDTO {
 
 export interface LargestExpenseDTO {
   amount: Money;
+  categoryId: string;
   categoryName: string;
   description: string;
   date: string;

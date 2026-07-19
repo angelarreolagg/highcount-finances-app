@@ -1,9 +1,11 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import type { Card, CardType } from "../../../domain/entities/Card";
 import { useUiStore } from "../../../state/uiStore";
 import { useAddCard, useCards, useUpdateCard } from "../../hooks/useDashboardData";
+import { cardTypeLabel, seedLabel } from "../../i18n/labels";
 import { randomCardColor } from "../../utils/chips";
 import { Button } from "../shared/Button";
 import { CardVisual } from "../shared/CardVisual";
@@ -26,15 +28,12 @@ interface FormValues {
 
 const AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
 
-const TYPE_OPTIONS: { value: CardType; label: string }[] = [
-  { value: "credit", label: "Credit" },
-  { value: "debit", label: "Debit" },
-  { value: "cash", label: "Cash" },
-];
+const TYPE_VALUES: CardType[] = ["credit", "debit", "cash"];
 
 const viewTransition = { type: "spring", bounce: 0.2, duration: 0.4 } as const;
 
 export function CardsManagerModal() {
+  const { t } = useTranslation();
   const open = useUiStore((s) => s.activeModal === "manageCards");
   const closeModal = useUiStore((s) => s.closeModal);
   const openDelete = useUiStore((s) => s.openDelete);
@@ -71,10 +70,10 @@ export function CardsManagerModal() {
   const last4 = watch("last4");
 
   const dayRules = {
-    required: "Required for credit cards",
+    required: t("validation.dayRequiredCredit"),
     validate: (v: string) => {
       const n = Number(v);
-      return (Number.isInteger(n) && n >= 1 && n <= 31) || "Day must be 1–31";
+      return (Number.isInteger(n) && n >= 1 && n <= 31) || t("validation.dayRange");
     },
   };
 
@@ -144,10 +143,10 @@ export function CardsManagerModal() {
       size="wide"
       title={
         view === "list"
-          ? "Cards & accounts"
+          ? t("modals.cards.titleList")
           : editingCard
-            ? "Edit card / account"
-            : "New card / account"
+            ? t("modals.cards.titleEdit")
+            : t("modals.cards.titleNew")
       }
       onClose={handleClose}
     >
@@ -164,7 +163,7 @@ export function CardsManagerModal() {
               {cards.map((c) => (
                 <div key={c.id} className="group relative">
                   <CardVisual
-                    name={c.name}
+                    name={seedLabel(t, c.id, c.name)}
                     type={c.type}
                     color={c.color}
                     last4={c.last4}
@@ -174,7 +173,7 @@ export function CardsManagerModal() {
                   />
                   <div className="absolute right-2 bottom-2">
                     <RowActions
-                      label={c.name}
+                      label={seedLabel(t, c.id, c.name)}
                       onEdit={() => startEdit(c)}
                       onDelete={() => openDelete({ type: "card", card: c })}
                     />
@@ -188,7 +187,7 @@ export function CardsManagerModal() {
                 className="flex aspect-[16/10] flex-col items-center justify-center gap-1 rounded-2xl border border-dashed border-white/20 text-white/60 transition-colors hover:border-white/40 hover:text-white"
               >
                 <PlusIcon size={20} />
-                <span className="text-xs font-medium">Add</span>
+                <span className="text-xs font-medium">{t("modals.cards.addTile")}</span>
               </button>
             </div>
           </motion.div>
@@ -208,7 +207,7 @@ export function CardsManagerModal() {
               className="flex items-center gap-1.5 text-xs font-medium text-white/60 hover:text-white"
             >
               <ArrowLeftIcon size={14} />
-              All cards & accounts
+              {t("modals.cards.allCardsAccounts")}
             </button>
 
             {/* Cap the preview to a real card size so it doesn't stretch to the wide
@@ -227,17 +226,17 @@ export function CardsManagerModal() {
             <div
               className="flex rounded-full border border-white/10 bg-white/5 p-1"
               role="radiogroup"
-              aria-label="Type"
+              aria-label={t("fields.type")}
             >
-              {TYPE_OPTIONS.map((option) => {
-                const active = type === option.value;
+              {TYPE_VALUES.map((value) => {
+                const active = type === value;
                 return (
                   <button
-                    key={option.value}
+                    key={value}
                     type="button"
                     role="radio"
                     aria-checked={active}
-                    onClick={() => setValue("type", option.value, { shouldValidate: true })}
+                    onClick={() => setValue("type", value, { shouldValidate: true })}
                     className={`relative flex-1 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                       active ? "text-white" : "text-white/50 hover:text-white/80"
                     }`}
@@ -249,34 +248,34 @@ export function CardsManagerModal() {
                         className="absolute inset-0 rounded-full border border-peri/40 bg-peri/25"
                       />
                     )}
-                    <span className="relative">{option.label}</span>
+                    <span className="relative">{cardTypeLabel(t, value)}</span>
                   </button>
                 );
               })}
             </div>
 
             <div className="grid grid-cols-[1fr_auto] gap-3">
-              <Field label="Name" error={errors.name?.message}>
+              <Field label={t("fields.name")} error={errors.name?.message}>
                 <input
-                  {...register("name", { required: "Name is required" })}
-                  placeholder="e.g. BBVA Azul"
+                  {...register("name", { required: t("validation.nameRequired") })}
+                  placeholder={t("placeholders.name")}
                   autoComplete="off"
                   className={control}
                 />
               </Field>
-              <Field label="Last 4">
+              <Field label={t("fields.last4")}>
                 <input
                   {...register("last4")}
                   inputMode="numeric"
                   maxLength={4}
-                  placeholder="1234"
+                  placeholder={t("placeholders.last4")}
                   autoComplete="off"
                   className={`${control} w-24 text-center tabular-nums`}
                 />
               </Field>
             </div>
 
-            <Field label="Color">
+            <Field label={t("fields.color")}>
               <ColorField value={color} onChange={(c) => setValue("color", c)} />
             </Field>
 
@@ -291,38 +290,38 @@ export function CardsManagerModal() {
                   className="overflow-hidden"
                 >
                   <div className="grid grid-cols-2 gap-3 pb-1">
-                    <Field label="Cut day" error={errors.cutDay?.message}>
+                    <Field label={t("fields.cutDay")} error={errors.cutDay?.message}>
                       <input
                         {...register("cutDay", dayRules)}
                         inputMode="numeric"
-                        placeholder="28"
+                        placeholder={t("placeholders.cutDay")}
                         className={control}
                       />
                     </Field>
-                    <Field label="Payment due day" error={errors.paymentDueDay?.message}>
+                    <Field label={t("fields.paymentDueDay")} error={errors.paymentDueDay?.message}>
                       <input
                         {...register("paymentDueDay", dayRules)}
                         inputMode="numeric"
-                        placeholder="17"
+                        placeholder={t("placeholders.paymentDueDay")}
                         className={control}
                       />
                     </Field>
                     <Field
-                      label="Credit limit"
+                      label={t("fields.creditLimit")}
                       error={errors.creditLimit?.message}
                       className="col-span-2 pb-4"
                     >
                       <input
                         {...register("creditLimit", {
-                          required: "Credit limit is required",
+                          required: t("validation.creditLimitRequired"),
                           pattern: {
                             value: AMOUNT_PATTERN,
-                            message: "Enter an amount like 50000 or 50000.00",
+                            message: t("validation.creditLimitPattern"),
                           },
-                          validate: (v) => Number(v) > 0 || "Must be greater than zero",
+                          validate: (v) => Number(v) > 0 || t("validation.greaterThanZero"),
                         })}
                         inputMode="decimal"
-                        placeholder="50000"
+                        placeholder={t("placeholders.creditLimit")}
                         className={control}
                       />
                     </Field>
@@ -333,10 +332,14 @@ export function CardsManagerModal() {
 
             <div className="flex gap-2">
               <Button type="submit" variant="primary" disabled={pending} className="flex-1">
-                {pending ? "Saving…" : editingCard ? "Save changes" : "Add card"}
+                {pending
+                  ? t("common.saving")
+                  : editingCard
+                    ? t("common.saveChanges")
+                    : t("modals.cards.submitAdd")}
               </Button>
               <Button type="button" onClick={backToList}>
-                Cancel
+                {t("common.cancel")}
               </Button>
             </div>
             {mutationError != null && (

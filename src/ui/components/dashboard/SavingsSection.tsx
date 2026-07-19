@@ -1,27 +1,28 @@
+import { useTranslation } from "react-i18next";
 import { useUiStore } from "../../../state/uiStore";
 import { useSavingsEntries } from "../../hooks/useDashboardData";
+import { savingsKindLabel } from "../../i18n/labels";
 import { Button } from "../shared/Button";
 import { GlassCard } from "../shared/GlassCard";
 
 export function SavingsSection() {
+  const { t } = useTranslation();
   const { data: entries = [] } = useSavingsEntries();
   const openModal = useUiStore((s) => s.openModal);
   const newestFirst = [...entries].reverse();
 
   return (
     <GlassCard
-      title="Savings"
+      title={t("dashboard.savings")}
       className="h-full"
       action={
         <Button variant="ghost" className="px-2 py-1" onClick={() => openModal("logSavings")}>
-          + Log movement
+          {t("savings.addMovement")}
         </Button>
       }
     >
       {newestFirst.length === 0 ? (
-        <p className="text-sm text-white/40">
-          Log a deposit or the interest your account produced to track growth and runway.
-        </p>
+        <p className="text-sm text-white/40">{t("dashboard.savingsEmpty")}</p>
       ) : (
         <ul className="space-y-3">
           {newestFirst.map((e) => (
@@ -34,7 +35,7 @@ export function SavingsSection() {
                       e.kind === "returns" ? "bg-mint/15 text-mint" : "bg-white/10 text-white/70"
                     }`}
                   >
-                    {e.kind}
+                    {savingsKindLabel(t, e.kind)}
                   </span>
                 </span>
                 {e.note && <span className="block truncate text-xs text-white/50">{e.note}</span>}

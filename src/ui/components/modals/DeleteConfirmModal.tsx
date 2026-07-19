@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 import { useUiStore } from "../../../state/uiStore";
 import type { DeleteTarget } from "../../../state/uiStore";
 import {
@@ -7,16 +9,17 @@ import {
   useRemoveSavingsEntry,
   useRemoveTransaction,
 } from "../../hooks/useDashboardData";
+import { seedLabel } from "../../i18n/labels";
 import { Button } from "../shared/Button";
 import { Modal } from "../shared/Modal";
 
-function targetName(target: DeleteTarget): string {
+function targetName(target: DeleteTarget, t: TFunction): string {
   switch (target.type) {
     case "transaction":
     case "savings":
       return target.label;
     case "card":
-      return target.card.name;
+      return seedLabel(t, target.card.id, target.card.name);
     case "msiPlan":
       return target.plan.description;
   }
@@ -24,6 +27,7 @@ function targetName(target: DeleteTarget): string {
 
 /** Intermediate confirmation for every destructive action. */
 export function DeleteConfirmModal() {
+  const { t } = useTranslation();
   const target = useUiStore((s) => s.deleteTarget);
   const closeDelete = useUiStore((s) => s.closeDelete);
 
@@ -58,39 +62,34 @@ export function DeleteConfirmModal() {
   };
 
   return (
-    <Modal open={target !== null} title={target ? `Delete "${targetName(target)}"?` : ""} onClose={closeDelete}>
+    <Modal
+      open={target !== null}
+      title={target ? t("modals.delete.title", { name: targetName(target, t) }) : ""}
+      onClose={closeDelete}
+    >
       {target && (
         <div className="space-y-4">
           {target.type === "transaction" && (
-            <p className="text-sm text-white/60">
-              This removes the movement from its month and every total. This can't be undone.
-            </p>
+            <p className="text-sm text-white/60">{t("modals.delete.transaction")}</p>
           )}
           {target.type === "savings" && (
-            <p className="text-sm text-white/60">
-              This removes the movement and recalculates your savings balance. This can't be
-              undone.
-            </p>
+            <p className="text-sm text-white/60">{t("modals.delete.savings")}</p>
           )}
           {target.type === "msiPlan" && (
             <p className="text-sm text-white/60">
-              This also deletes the plan's {target.plan.months} installment transaction
-              {target.plan.months === 1 ? "" : "s"}. This can't be undone.
+              {t("modals.delete.msiPlan", { count: target.plan.months })}
             </p>
           )}
           {target.type === "card" &&
             (cardInUse ? (
               <p className="text-sm text-coral">
-                This card still has {usage.transactionCount} transaction
-                {usage.transactionCount === 1 ? "" : "s"}
+                {t("modals.delete.cardTransactions", { count: usage.transactionCount })}
                 {usage.planCount > 0 &&
-                  ` and ${usage.planCount} MSI plan${usage.planCount === 1 ? "" : "s"}`}
-                . Delete or move them first — deleting the card would orphan your history.
+                  t("modals.delete.cardPlans", { count: usage.planCount })}
+                {t("modals.delete.cardInUseSuffix")}
               </p>
             ) : (
-              <p className="text-sm text-white/60">
-                The card/account will be removed. This can't be undone.
-              </p>
+              <p className="text-sm text-white/60">{t("modals.delete.cardNotInUse")}</p>
             ))}
 
           <div className="flex gap-2">
@@ -100,10 +99,10 @@ export function DeleteConfirmModal() {
               disabled={mutation.isPending || cardInUse}
               onClick={onConfirm}
             >
-              {mutation.isPending ? "Deleting…" : "Delete"}
+              {mutation.isPending ? t("common.deleting") : t("common.delete")}
             </Button>
             <Button type="button" onClick={closeDelete}>
-              Cancel
+              {t("common.cancel")}
             </Button>
           </div>
           {mutation.isError && (

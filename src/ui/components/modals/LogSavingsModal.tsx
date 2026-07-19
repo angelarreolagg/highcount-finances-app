@@ -3,11 +3,13 @@ import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import type { ChipColor } from "../../../domain/entities/ChipColor";
 import type { SavingsEntryKind } from "../../../domain/entities/SavingsEntry";
 import { toISODate } from "../../../domain/value-objects/calendar";
 import { useUiStore } from "../../../state/uiStore";
 import { useCards, useLogSavingsGrowth, useUpdateSavingsEntry } from "../../hooks/useDashboardData";
+import { savingsKindLabel } from "../../i18n/labels";
 import { Button } from "../shared/Button";
 import { CardSelect } from "../shared/CardSelect";
 import { ColorSwatchPicker } from "../shared/ColorSwatchPicker";
@@ -27,9 +29,9 @@ interface FormValues {
 
 const AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
 
-const KIND_OPTIONS: { value: SavingsEntryKind; label: string; icon: LucideIcon }[] = [
-  { value: "deposit", label: "Deposit", icon: ArrowDownToLine },
-  { value: "returns", label: "Returns", icon: TrendingUp },
+const KIND_OPTIONS: { value: SavingsEntryKind; icon: LucideIcon }[] = [
+  { value: "deposit", icon: ArrowDownToLine },
+  { value: "returns", icon: TrendingUp },
 ];
 
 /** Deposit is neutral (money put in); returns render in mint (interest produced). */
@@ -51,6 +53,7 @@ const DEFAULT_VALUES = {
 };
 
 export function LogSavingsModal() {
+  const { t } = useTranslation();
   const addOpen = useUiStore((s) => s.activeModal === "logSavings");
   const closeModal = useUiStore((s) => s.closeModal);
   const editTarget = useUiStore((s) => s.editTarget);
@@ -120,15 +123,15 @@ export function LogSavingsModal() {
   return (
     <Modal
       open={open}
-      title={editing ? "Edit savings movement" : "Log savings movement"}
+      title={t(editing ? "modals.logSavings.titleEdit" : "modals.logSavings.titleAdd")}
       onClose={handleClose}
     >
       <form onSubmit={onSubmit} className="space-y-3">
-        <Field label="Kind">
+        <Field label={t("fields.kind")}>
           <div
             className="flex rounded-full border border-white/10 bg-white/5 p-1"
             role="radiogroup"
-            aria-label="Kind"
+            aria-label={t("fields.kind")}
           >
             {KIND_OPTIONS.map((option) => {
               const active = kind === option.value;
@@ -152,53 +155,61 @@ export function LogSavingsModal() {
                     />
                   )}
                   <Icon size={14} strokeWidth={2} className="relative shrink-0" />
-                  <span className="relative">{option.label}</span>
+                  <span className="relative">{savingsKindLabel(t, option.value)}</span>
                 </button>
               );
             })}
           </div>
         </Field>
 
-        <Field label="Amount" error={errors.amount?.message}>
+        <Field label={t("fields.amount")} error={errors.amount?.message}>
           <input
             {...register("amount", {
-              required: "Amount is required",
-              pattern: { value: AMOUNT_PATTERN, message: "Positive amount like 123.45" },
-              validate: (v) => Number(v) > 0 || "Amount must be greater than zero",
+              required: t("validation.amountRequired"),
+              pattern: { value: AMOUNT_PATTERN, message: t("validation.positiveAmountShort") },
+              validate: (v) => Number(v) > 0 || t("validation.amountPositive"),
             })}
             inputMode="decimal"
-            placeholder="0.00"
+            placeholder={t("placeholders.amount")}
             className={control}
           />
         </Field>
 
-        <Field label="Account">
+        <Field label={t("fields.account")}>
           <input type="hidden" {...register("cardId")} />
           <CardSelect
             value={cardId}
             onChange={(v) => setValue("cardId", v, { shouldValidate: true })}
-            placeholder="Select an account · optional"
-            aria-label="Account"
+            placeholder={t("placeholders.selectAccountOptional")}
+            aria-label={t("fields.account")}
             cards={accounts}
           />
         </Field>
 
-        <Field label="Date" error={errors.date?.message}>
-          <input type="hidden" {...register("date", { required: "Date is required" })} />
+        <Field label={t("fields.date")} error={errors.date?.message}>
+          <input type="hidden" {...register("date", { required: t("validation.dateRequired") })} />
           <DatePicker
             value={date}
             onChange={(iso) => setValue("date", iso, { shouldValidate: true })}
-            aria-label="Date"
+            aria-label={t("fields.date")}
           />
         </Field>
-        <Field label="Note">
-          <input {...register("note")} placeholder="e.g. CETES monthly interest" className={control} />
+        <Field label={t("fields.note")}>
+          <input
+            {...register("note")}
+            placeholder={t("placeholders.note")}
+            className={control}
+          />
         </Field>
-        <Field label="Color" className="pb-3">
+        <Field label={t("fields.color")} className="pb-3">
           <ColorSwatchPicker value={color} onChange={(c) => setValue("color", c)} />
         </Field>
         <Button type="submit" variant="primary" disabled={pending} className="w-full">
-          {pending ? "Saving…" : editing ? "Save changes" : "Log movement"}
+          {pending
+            ? t("common.saving")
+            : editing
+              ? t("common.saveChanges")
+              : t("modals.logSavings.submit")}
         </Button>
         {mutationError != null && (
           <p className="text-xs text-coral">{(mutationError as Error).message}</p>

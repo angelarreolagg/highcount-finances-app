@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { PencilIcon, TrashIcon } from "./icons";
 
 interface RowActionsProps {
@@ -13,13 +14,14 @@ interface RowActionsProps {
  * `group` class: faintly visible on touch, revealed on hover/focus on desktop.
  */
 export function RowActions({ label, onEdit, onDelete }: RowActionsProps) {
+  const { t } = useTranslation();
   return (
     <span className="flex shrink-0 items-center gap-1 opacity-60 transition-opacity md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100">
       <motion.button
         type="button"
         whileTap={{ scale: 0.9 }}
         onClick={onEdit}
-        aria-label={`Edit ${label}`}
+        aria-label={t("rowActions.edit", { label })}
         className="flex size-7 items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
       >
         <PencilIcon size={14} />
@@ -28,7 +30,7 @@ export function RowActions({ label, onEdit, onDelete }: RowActionsProps) {
         type="button"
         whileTap={{ scale: 0.9 }}
         onClick={onDelete}
-        aria-label={`Delete ${label}`}
+        aria-label={t("rowActions.delete", { label })}
         className="flex size-7 items-center justify-center rounded-full bg-white/10 text-coral/80 hover:bg-coral/20 hover:text-coral"
       >
         <TrashIcon size={14} />

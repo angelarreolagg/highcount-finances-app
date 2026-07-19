@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { XIcon } from "./icons";
 
 interface ModalProps {
@@ -19,6 +20,7 @@ const SIZE_CLASSES: Record<NonNullable<ModalProps["size"]>, string> = {
 
 /** Frosted glass modal: backdrop fades, panel springs up. Closes on backdrop click or Escape. */
 export function Modal({ open, title, onClose, size = "default", children }: ModalProps) {
+  const { t } = useTranslation();
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -54,7 +56,7 @@ export function Modal({ open, title, onClose, size = "default", children }: Moda
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Close"
+                aria-label={t("common.close")}
                 className="flex size-8 items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20"
               >
                 <XIcon size={16} />

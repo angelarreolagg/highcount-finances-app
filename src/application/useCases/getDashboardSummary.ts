@@ -62,6 +62,7 @@ export function makeGetDashboardSummary(deps: GetDashboardSummaryDeps) {
       largestExpense: largest
         ? {
             amount: largest.amount,
+            categoryId: largest.categoryId,
             categoryName:
               categories.find((c) => c.id === largest.categoryId)?.name ?? "Unknown category",
             description: largest.description,

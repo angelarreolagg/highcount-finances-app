@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router";
 import { AddTransactionModal } from "../modals/AddTransactionModal";
 import { CardsManagerModal } from "../modals/CardsManagerModal";
@@ -11,9 +12,9 @@ import { ProfileMenu } from "../shared/ProfileMenu";
 import { riseIn } from "../shared/motionPresets";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Home" },
-  { to: "/expenses", label: "Expenses" },
-  { to: "/savings", label: "Savings" },
+  { to: "/", labelKey: "nav.home" },
+  { to: "/expenses", labelKey: "nav.expenses" },
+  { to: "/savings", labelKey: "nav.savings" },
 ];
 
 interface PageShellProps {
@@ -25,6 +26,7 @@ interface PageShellProps {
 }
 
 export function PageShell({ hero, lockDesktop = false, children }: PageShellProps) {
+  const { t } = useTranslation();
   const year = new Date().getFullYear();
 
   return (
@@ -44,7 +46,11 @@ export function PageShell({ hero, lockDesktop = false, children }: PageShellProp
             3-column grid so the nav pills sit dead-center regardless of the
             wordmark/avatar widths on either side. */}
         <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 pt-5 lg:px-8">
-          <div className="flex min-w-0 items-center gap-2">
+          <NavLink
+            to="/"
+            aria-label="High Count — home"
+            className="flex min-w-0 items-center gap-2 rounded-lg transition-opacity hover:opacity-80"
+          >
             <img
               src="/favicon/favicon-128x128.png"
               alt=""
@@ -52,7 +58,7 @@ export function PageShell({ hero, lockDesktop = false, children }: PageShellProp
             />
             {/* Hidden on the narrowest screens so the centered nav never squeezes it into a wrap. */}
             <h1 className="hidden truncate text-lg font-bold tracking-tight sm:block">High Count</h1>
-          </div>
+          </NavLink>
           <nav className="flex items-center gap-1 rounded-full border border-white/10 bg-white/10 p-1 text-xs backdrop-blur">
             {NAV_ITEMS.map((item) => (
               <NavLink
@@ -64,7 +70,7 @@ export function PageShell({ hero, lockDesktop = false, children }: PageShellProp
                   }`
                 }
               >
-                {item.label}
+                {t(item.labelKey)}
               </NavLink>
             ))}
           </nav>

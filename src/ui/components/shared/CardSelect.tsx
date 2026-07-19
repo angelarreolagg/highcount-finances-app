@@ -1,17 +1,14 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import type { Card } from "../../../domain/entities/Card";
 import type { Money } from "../../../domain/value-objects/Money";
 import { useClickOutside } from "../../hooks/useClickOutside";
+import { cardTypeLabel } from "../../i18n/labels";
 import { cardSurface } from "../../utils/chips";
 import { FloatingPanel } from "./FloatingPanel";
 import { control } from "./formStyles";
 import { ChevronDownIcon } from "./icons";
-
-const TYPE_LABEL: Record<Card["type"], string> = {
-  credit: "Credit",
-  debit: "Debit",
-  cash: "Cash",
-};
 
 interface CardSelectProps {
   value: string;
@@ -25,7 +22,7 @@ interface CardSelectProps {
 
 /** A dense mini-tile for the picker grid — a true miniature of CardVisual: text sits
  *  directly over the gradient (no dark scrim overlay, which read as a hard seam). */
-function MiniCardTile({ card, available }: { card: Card; available?: Money }) {
+function MiniCardTile({ card, available, t }: { card: Card; available?: Money; t: TFunction }) {
   const showDays = card.type === "credit" && card.cutDay != null && card.paymentDueDay != null;
   return (
     <div
@@ -33,13 +30,13 @@ function MiniCardTile({ card, available }: { card: Card; available?: Money }) {
       style={{ backgroundImage: cardSurface(card.color) }}
     >
       <span className="self-end text-[8px] font-semibold tracking-widest text-white/70 uppercase">
-        {TYPE_LABEL[card.type]}
+        {cardTypeLabel(t, card.type)}
       </span>
       <span className="block">
         <span className="block truncate text-[11px] font-semibold text-white">{card.name}</span>
         {available ? (
           <span className={`block text-[9px] tabular-nums ${available.isNegative() ? "text-coral" : "text-white/80"}`}>
-            {available.format()} left
+            {t("cardFace.left", { amount: available.format() })}
           </span>
         ) : (
           showDays && (
@@ -63,6 +60,7 @@ export function CardSelect({
   "aria-label": ariaLabel,
   availableByCard,
 }: CardSelectProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const selected = cards.find((c) => c.id === value);
   const selectedAvailable = selected ? availableByCard?.get(selected.id) : undefined;
@@ -103,17 +101,17 @@ export function CardSelect({
                   selected.cutDay != null &&
                   selected.paymentDueDay != null && (
                     <span className="shrink-0 text-[11px] tabular-nums text-white/50">
-                      cuts {selected.cutDay} · due {selected.paymentDueDay}
+                      {t("cardFace.cutsDue", { cut: selected.cutDay, due: selected.paymentDueDay })}
                     </span>
                   )}
               </span>
               <span className="block text-[11px] text-white/50">
-                {TYPE_LABEL[selected.type]}
+                {cardTypeLabel(t, selected.type)}
                 {selectedAvailable && (
                   <>
                     {" · "}
                     <span className={selectedAvailable.isNegative() ? "text-coral" : "text-white/70"}>
-                      {selectedAvailable.format()} left
+                      {t("cardFace.left", { amount: selectedAvailable.format() })}
                     </span>
                   </>
                 )}
@@ -152,7 +150,7 @@ export function CardSelect({
                 }}
                 className={`rounded-xl transition-shadow ${active ? "ring-2 ring-peri" : ""}`}
               >
-                <MiniCardTile card={card} available={availableByCard?.get(card.id)} />
+                <MiniCardTile card={card} available={availableByCard?.get(card.id)} t={t} />
               </button>
             );
           })}

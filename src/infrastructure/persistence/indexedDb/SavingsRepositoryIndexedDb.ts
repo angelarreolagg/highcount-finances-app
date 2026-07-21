@@ -1,45 +1,12 @@
-import type { ChipColor } from "../../../domain/entities/ChipColor";
-import type { SavingsEntry, SavingsEntryKind } from "../../../domain/entities/SavingsEntry";
+import type { SavingsEntry } from "../../../domain/entities/SavingsEntry";
 import type { SavingsRepository } from "../../../domain/repositories/SavingsRepository";
-import { Money } from "../../../domain/value-objects/Money";
+import type { SavingsRecord } from "../records";
+import { savingsFromRecord as toEntity, savingsToRecord as toRecord } from "../records";
 import { STORES, idbDelete, idbGetAll, idbPut } from "./db";
-
-interface SavingsRecord {
-  id: string;
-  date: string;
-  amount?: string;
-  kind?: SavingsEntryKind;
-  note?: string;
-  color?: ChipColor;
-  cardId?: string;
-  /** Legacy field from the balance-snapshot era; read as a deposit of that amount. */
-  balance?: string;
-}
-
-function toEntity(record: SavingsRecord): SavingsEntry {
-  return {
-    id: record.id,
-    date: record.date,
-    amount: Money.from(record.amount ?? record.balance ?? "0"),
-    kind: record.kind ?? "deposit",
-    note: record.note,
-    color: record.color,
-    cardId: record.cardId,
-  };
-}
 
 export class SavingsRepositoryIndexedDb implements SavingsRepository {
   async add(entry: SavingsEntry): Promise<void> {
-    const record: SavingsRecord = {
-      id: entry.id,
-      date: entry.date,
-      amount: entry.amount.toStorage(),
-      kind: entry.kind,
-      note: entry.note,
-      color: entry.color,
-      cardId: entry.cardId,
-    };
-    await idbPut(STORES.savings, record);
+    await idbPut(STORES.savings, toRecord(entry));
   }
 
   async getAll(): Promise<SavingsEntry[]> {
@@ -48,16 +15,7 @@ export class SavingsRepositoryIndexedDb implements SavingsRepository {
   }
 
   async update(entry: SavingsEntry): Promise<void> {
-    const record: SavingsRecord = {
-      id: entry.id,
-      date: entry.date,
-      amount: entry.amount.toStorage(),
-      kind: entry.kind,
-      note: entry.note,
-      color: entry.color,
-      cardId: entry.cardId,
-    };
-    await idbPut(STORES.savings, record);
+    await idbPut(STORES.savings, toRecord(entry));
   }
 
   async remove(id: string): Promise<void> {

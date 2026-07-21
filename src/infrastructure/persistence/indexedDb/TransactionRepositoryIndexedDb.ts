@@ -1,32 +1,9 @@
-import type { ChipColor } from "../../../domain/entities/ChipColor";
-import type { Transaction, TransactionType } from "../../../domain/entities/Transaction";
+import type { Transaction } from "../../../domain/entities/Transaction";
 import type { TransactionRepository } from "../../../domain/repositories/TransactionRepository";
-import { Money } from "../../../domain/value-objects/Money";
 import { monthPrefix } from "../../../domain/value-objects/calendar";
+import type { TransactionRecord } from "../records";
+import { transactionFromRecord as toEntity, transactionToRecord as toRecord } from "../records";
 import { STORES, idbBulkDelete, idbBulkPut, idbDelete, idbGetAll, idbPut } from "./db";
-
-/** Persistence shape: Money is stored as an exact decimal string. */
-interface TransactionRecord {
-  id: string;
-  type: TransactionType;
-  amount: string;
-  categoryId: string;
-  cardId: string;
-  date: string;
-  description: string;
-  msiPlanId?: string;
-  installmentNumber?: number;
-  installmentCount?: number;
-  color?: ChipColor;
-}
-
-function toRecord(t: Transaction): TransactionRecord {
-  return { ...t, amount: t.amount.toStorage() };
-}
-
-function toEntity(r: TransactionRecord): Transaction {
-  return { ...r, amount: Money.from(r.amount) };
-}
 
 export class TransactionRepositoryIndexedDb implements TransactionRepository {
   async add(transaction: Transaction): Promise<void> {

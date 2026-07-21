@@ -1,30 +1,8 @@
-import type { Card, CardType } from "../../../domain/entities/Card";
+import type { Card } from "../../../domain/entities/Card";
 import type { CardRepository } from "../../../domain/repositories/CardRepository";
-import { Money } from "../../../domain/value-objects/Money";
+import type { CardRecord } from "../records";
+import { cardFromRecord as toEntity, cardToRecord as toRecord } from "../records";
 import { STORES, idbBulkPut, idbCount, idbDelete, idbGetAll, idbPut } from "./db";
-
-/** Persistence shape: creditLimit is stored as an exact decimal string. */
-interface CardRecord {
-  id: string;
-  name: string;
-  type: CardType;
-  cutDay?: number;
-  paymentDueDay?: number;
-  color?: string;
-  last4?: string;
-  creditLimit?: string;
-}
-
-function toRecord(card: Card): CardRecord {
-  return { ...card, creditLimit: card.creditLimit?.toStorage() };
-}
-
-function toEntity(record: CardRecord): Card {
-  return {
-    ...record,
-    creditLimit: record.creditLimit != null ? Money.from(record.creditLimit) : undefined,
-  };
-}
 
 export class CardRepositoryIndexedDb implements CardRepository {
   async add(card: Card): Promise<void> {

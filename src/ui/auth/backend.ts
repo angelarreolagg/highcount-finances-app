@@ -3,6 +3,7 @@ import { copyDataset } from "../../infrastructure/backup";
 import {
   createIndexedDbRepositories,
   initializeBackend,
+  setActiveUserId,
   setBackend,
 } from "../../infrastructure/di/container";
 import { supabase } from "../../infrastructure/supabase/client";
@@ -23,6 +24,7 @@ export async function activateBackendForSession(session: Session | null): Promis
     const userId = session.user.id;
     const cloud = createSupabaseRepositories(supabase, userId);
     setBackend(cloud);
+    setActiveUserId(userId);
     await initializeBackend(); // seed default categories + Cash account for a new account
 
     // First sign-in to a fresh account: copy the existing local dataset up, once.
@@ -34,5 +36,6 @@ export async function activateBackendForSession(session: Session | null): Promis
   }
 
   setBackend(createIndexedDbRepositories());
+  setActiveUserId(null);
   await initializeBackend();
 }

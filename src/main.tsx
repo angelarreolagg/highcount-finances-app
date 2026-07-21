@@ -18,13 +18,14 @@ bootstrapBackend().then(() => {
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <I18nextProvider i18n={i18n}>
-          <AuthProvider>
-            <MotionConfig reducedMotion="user">
-              <BrowserRouter>
+          <MotionConfig reducedMotion="user">
+            <BrowserRouter>
+              {/* AuthProvider sits inside the router so it can navigate on sign in / out. */}
+              <AuthProvider>
                 <App />
-              </BrowserRouter>
-            </MotionConfig>
-          </AuthProvider>
+              </AuthProvider>
+            </BrowserRouter>
+          </MotionConfig>
         </I18nextProvider>
       </QueryClientProvider>
     </StrictMode>,

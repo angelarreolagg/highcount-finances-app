@@ -4,9 +4,15 @@ import { ExpensesPage } from "./ui/pages/ExpensesPage";
 import { HomePage } from "./ui/pages/HomePage";
 import { SavingsPage } from "./ui/pages/SavingsPage";
 import { SettingsPage } from "./ui/pages/SettingsPage";
+import { LoginPage } from "./ui/auth/LoginPage";
 import { OnboardingGate } from "./ui/onboarding/OnboardingGate";
 import { OnboardingPage } from "./ui/onboarding/OnboardingPage";
 
+/**
+ * Plain routes — tab navigation is instant (no whole-page transition). The auth flow animates
+ * via each page's own entrance: `/login` fades in (logout), and the dashboard's staged build
+ * plays on sign-in. A future React Native / Expo port would use the navigator's screen transitions.
+ */
 function App() {
   return (
     <OnboardingGate>
@@ -16,6 +22,7 @@ function App() {
         <Route path="/savings" element={<SavingsPage />} />
         <Route path="/summary/:year" element={<AnnualSummaryPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/welcome" element={<OnboardingPage />} />
       </Routes>
     </OnboardingGate>

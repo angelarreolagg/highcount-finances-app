@@ -4,6 +4,8 @@ import type { Session, User } from "@supabase/supabase-js";
 export interface AuthContextValue {
   /** Whether Supabase env is configured at all (else the app is local-only). */
   isCloudEnabled: boolean;
+  /** True once the initial session has loaded (always true when cloud is disabled). */
+  authReady: boolean;
   session: Session | null;
   user: User | null;
   signInWithGoogle: () => Promise<void>;

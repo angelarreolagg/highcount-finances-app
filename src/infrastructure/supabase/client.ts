@@ -18,6 +18,9 @@ export const supabase: SupabaseClient | null = isCloudEnabled
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
+        // PKCE returns OAuth via a ?code= param (auto-exchanged + cleaned) instead of a
+        // #access_token hash — no stray "#" left in the URL.
+        flowType: "pkce",
       },
     })
   : null;

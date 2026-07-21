@@ -83,6 +83,19 @@ function buildUseCases(repos: Repositories) {
 export let repositories: Repositories = createIndexedDbRepositories();
 export let useCases = buildUseCases(repositories);
 
+/**
+ * The user id backing the currently-active store (null = local). Set whenever a backend is
+ * activated for a session, so the auth layer can tell "already active" from a real transition
+ * and avoid a redundant re-activation/cache-clear (which deadlocks against Supabase's auth lock).
+ */
+let activeUserId: string | null = null;
+export function getActiveUserId(): string | null {
+  return activeUserId;
+}
+export function setActiveUserId(id: string | null): void {
+  activeUserId = id;
+}
+
 /** Swap the active backend (called by the auth layer on sign in / out). */
 export function setBackend(repos: Repositories): void {
   repositories = repos;

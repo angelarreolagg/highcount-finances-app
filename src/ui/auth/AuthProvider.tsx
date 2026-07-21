@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { useNavigate } from "react-router";
 import type { Session } from "@supabase/supabase-js";
+import { getActiveUserId } from "../../infrastructure/di/container";
 import { queryClient } from "../../infrastructure/queryClient";
 import { isCloudEnabled, supabase } from "../../infrastructure/supabase/client";
 import { AuthContext } from "./authContext";
@@ -14,43 +16,58 @@ import { activateBackendForSession } from "./backend";
  * observation here is skipped. Safe no-op when cloud is disabled.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
-  const seenInitial = useRef(false);
+  // With cloud disabled there's no session to load, so we're hydrated from the start.
+  const [hydrated, setHydrated] = useState(() => !supabase);
 
   useEffect(() => {
     if (!supabase) return;
-    void supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    void supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setHydrated(true);
+    });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
     return () => sub.subscription.unsubscribe();
   }, []);
 
   const userId = session?.user.id ?? null;
   useEffect(() => {
-    if (!supabase) return;
-    if (!seenInitial.current) {
-      // Startup bootstrap already activated the initial backend — don't redo it.
-      seenInitial.current = true;
-      return;
-    }
+    // Wait for the initial session to load; React's session starts null, so acting earlier
+    // would mis-fire a "sign-out".
+    if (!supabase || !hydrated) return;
+    // If the live backend already matches this session, there's nothing to do. This is exactly
+    // the OAuth-return case (bootstrap already activated it) — skipping avoids the redundant
+    // queryClient.clear() whose refetch would deadlock against Supabase's still-held auth lock.
+    if (userId === getActiveUserId()) return;
+
     let cancelled = false;
-    void (async () => {
-      try {
-        await activateBackendForSession(session);
-      } catch (error) {
-        console.error("Backend activation failed.", error);
-      }
-      if (!cancelled) queryClient.clear();
-    })();
+    // Defer off the auth-event tick (Supabase deadlock avoidance) before touching the client.
+    const timer = setTimeout(() => {
+      void (async () => {
+        try {
+          await activateBackendForSession(session);
+        } catch (error) {
+          console.error("Backend activation failed.", error);
+        }
+        if (cancelled) return;
+        queryClient.clear();
+        // On sign-out, deterministically land on the login screen.
+        if (!userId) navigate("/login", { replace: true });
+      })();
+    }, 0);
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
     // Re-activate only when the signed-in identity changes — not on token refreshes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, [hydrated, userId]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       isCloudEnabled,
+      authReady: hydrated,
       session,
       user: session?.user ?? null,
       signInWithGoogle: async () => {
@@ -77,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) throw new Error(error.message);
       },
     }),
-    [session],
+    [session, hydrated],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -353,5 +353,14 @@
     "congratsBody": "Felicidades — ahora sabes cómo cuidar tu dinero. Y esto es solo el comienzo.",
     "signUpTitle": "Guarda tu progreso",
     "signUpBody": "Ahora mismo todo se guarda solo en este dispositivo — si borras tu navegador, se pierde. Crea una cuenta para respaldarlo y sincronizarlo entre tus dispositivos."
+  },
+  "login": {
+    "title": "Inicia sesión en High Count",
+    "subtitle": "Tu dinero, bajo control — tarjetas, ciclos, mensualidades y ahorros, todo en un solo lugar.",
+    "continueLocal": "Continuar sin cuenta",
+    "reconsiderTitle": "¿Seguro que quieres omitir el inicio de sesión?",
+    "reconsiderBody": "Puedes usar High Count sin cuenta — todo se guarda en este dispositivo. Pero al iniciar sesión respaldas tus datos, los sincronizas entre tus dispositivos y desbloqueas más funciones que vienen pronto.",
+    "reconsiderStay": "Llévame a iniciar sesión",
+    "reconsiderContinue": "Continuar sin cuenta"
   }
 }

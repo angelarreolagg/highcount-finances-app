@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "motion/react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import type { DashboardSummaryDTO } from "../../application/dto/dashboard";
@@ -11,6 +12,25 @@ import { SavingsSection } from "../components/dashboard/SavingsSection";
 import { StatsPanel } from "../components/dashboard/StatsPanel";
 import { MonthDetailModal } from "../components/modals/MonthDetailModal";
 import { useDashboardSummary, useYearMonthGrid } from "../hooks/useDashboardData";
+
+/**
+ * Staged "being built" reveal for the dashboard — variant-driven so the cells AND the GlassCards
+ * nested inside them both resolve to `visible` (an explicit-object animate would break that chain
+ * and leave the cards stuck at `hidden`). The grid drives its own children on mount.
+ */
+const gridReveal = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.08 } },
+};
+const cellReveal = {
+  hidden: { opacity: 0, y: 24, scale: 0.94 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring" as const, bounce: 0.28, duration: 0.7 },
+  },
+};
 
 function RunwayChip({ summary }: { summary: DashboardSummaryDTO }) {
   const { t } = useTranslation();
@@ -97,8 +117,16 @@ export function HomePage() {
       }
     >
       {summary && (
-        <div className="grid grid-cols-1 gap-4 pt-4 md:grid-cols-2 xl:min-h-0 xl:flex-1 xl:grid-cols-4 xl:grid-rows-2">
-          <div className="min-h-0 md:col-span-2 xl:col-span-2 xl:row-span-2">
+        <motion.div
+          variants={gridReveal}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 gap-4 pt-4 md:grid-cols-2 xl:min-h-0 xl:flex-1 xl:grid-cols-4 xl:grid-rows-2"
+        >
+          <motion.div
+            variants={cellReveal}
+            className="min-h-0 md:col-span-2 xl:col-span-2 xl:row-span-2"
+          >
             <MonthGrid
               year={browsedYear}
               statuses={(yearGrid ?? summary).monthStatuses}
@@ -108,13 +136,17 @@ export function HomePage() {
               onNextYear={() => setBrowsedYear((y) => Math.min(y + 1, year))}
               canGoNext={browsedYear < year}
             />
-          </div>
-          <StatsPanel summary={summary} />
-          <SavingsSection />
-          <div className="min-h-0 xl:col-span-2">
+          </motion.div>
+          <motion.div variants={cellReveal} className="min-h-0">
+            <StatsPanel summary={summary} />
+          </motion.div>
+          <motion.div variants={cellReveal} className="min-h-0">
+            <SavingsSection />
+          </motion.div>
+          <motion.div variants={cellReveal} className="min-h-0 xl:col-span-2">
             <MSISection />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
       <MonthDetailModal />
     </PageShell>

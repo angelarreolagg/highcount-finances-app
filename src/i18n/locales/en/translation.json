@@ -353,5 +353,14 @@
     "congratsBody": "Congratulations — now you know how to take care of your money. And this is just the start.",
     "signUpTitle": "Save your progress",
     "signUpBody": "Right now everything is saved only on this device — clear your browser and it's gone. Create an account to back it up and sync across your devices."
+  },
+  "login": {
+    "title": "Sign in to High Count",
+    "subtitle": "Your money, tracked — cards, cycles, installments and savings, all in one place.",
+    "continueLocal": "Continue without an account",
+    "reconsiderTitle": "Sure you want to skip signing in?",
+    "reconsiderBody": "You can absolutely use High Count without an account — everything is saved on this device. But signing in backs up your data, syncs it across your devices, and unlocks more features coming soon.",
+    "reconsiderStay": "Take me to sign in",
+    "reconsiderContinue": "Continue without an account"
   }
 }

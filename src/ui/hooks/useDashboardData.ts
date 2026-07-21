@@ -88,6 +88,9 @@ export function useHasAnyData(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["hasAnyData"],
     enabled: options?.enabled ?? true,
+    // Don't hang on a transient signed-out/backend-swap error — settle fast; the gate treats
+    // an errored/undefined result as "no data" and routes to /login.
+    retry: false,
     queryFn: async () => {
       const [cards, transactions] = await Promise.all([
         repositories.cardRepository.getAll(),

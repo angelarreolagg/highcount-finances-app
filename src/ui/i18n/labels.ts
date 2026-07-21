@@ -4,11 +4,10 @@ import type { SavingsEntryKind } from "../../domain/entities/SavingsEntry";
 
 /**
  * `t`-aware label helpers (call from components with the `t` from useTranslation).
- * Default seed records (categories `cat-*`, the `account-cash` account) are stored
- * with English `name`s that stay the internal key (icon lookup / matching); these
- * helpers map their stable ids to a translated display label, falling back to the
- * raw stored name for anything user-created. Kept in a non-component file so the
- * react-refresh rule stays happy.
+ * The default categories (`cat-*`) are static constants stored/referenced by their English
+ * name / stable id; this maps those ids to a translated display label, falling back to the
+ * raw stored name for anything else. Kept in a non-component file so the react-refresh rule
+ * stays happy.
  */
 
 const DEFAULT_LABEL_IDS = new Set([
@@ -22,10 +21,9 @@ const DEFAULT_LABEL_IDS = new Set([
   "cat-other-expense",
   "cat-salary",
   "cat-other-income",
-  "account-cash",
 ]);
 
-/** Translated label for a default category/account by id; otherwise the stored name. */
+/** Translated label for a default category by id; otherwise the stored name. */
 export function seedLabel(t: TFunction, id: string | undefined, name: string): string {
   return id && DEFAULT_LABEL_IDS.has(id) ? t(`categories.${id}`) : name;
 }

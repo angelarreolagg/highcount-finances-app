@@ -3,6 +3,7 @@
     "appName": "High Count",
     "loading": "Cargando…",
     "cancel": "Cancelar",
+    "save": "Guardar",
     "saveChanges": "Guardar cambios",
     "saving": "Guardando…",
     "delete": "Eliminar",
@@ -26,7 +27,9 @@
   "profileMenu": {
     "label": "Menú de perfil",
     "cardsAccounts": "Tarjetas y cuentas",
-    "logSavings": "Registrar ahorro"
+    "logSavings": "Registrar ahorro",
+    "guest": "Invitado",
+    "localDevice": "Local · este dispositivo"
   },
   "dock": {
     "quickActions": "Acciones rápidas",
@@ -276,8 +279,7 @@
     "cat-shopping": "Compras",
     "cat-other-expense": "Otro gasto",
     "cat-salary": "Salario",
-    "cat-other-income": "Otro ingreso",
-    "account-cash": "Efectivo"
+    "cat-other-income": "Otro ingreso"
   },
   "settings": {
     "heroLabel": "Preferencias y perfil",
@@ -286,6 +288,7 @@
     "displayName": "Nombre para mostrar",
     "displayNamePlaceholder": "Tu nombre",
     "displayNameHint": "Se muestra en tu avatar.",
+    "saved": "Guardado",
     "preferences": "Preferencias",
     "language": "Idioma",
     "english": "English",
@@ -337,9 +340,8 @@
     "checkEmail": "Casi listo — revisa tu correo para confirmar tu cuenta y luego inicia sesión."
   },
   "onboarding": {
-    "welcomeTitle": "Bienvenido a High Count",
-    "welcomeSubtitle": "Vamos a configurarte — tres pasos rápidos y estarás cuidando tu dinero como todo un experto.",
-    "getStarted": "Comenzar",
+    "nameTitle": "¡Bienvenido! ¿Cómo te llamas?",
+    "nameSubtitle": "Usaremos tu nombre para personalizar tu espacio.",
     "continue": "Continuar",
     "skip": "Omitir por ahora",
     "maybeLater": "Quizá más tarde",

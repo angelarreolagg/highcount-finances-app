@@ -52,7 +52,7 @@ export function ExpenseStep({ onContinue }: { onContinue: () => void }) {
     setValue,
     formState: { errors },
   } = useForm<ExpenseForm>({
-    defaultValues: { amount: "", categoryId: "", cardId: "account-cash", date: toISODate(new Date()), description: "" },
+    defaultValues: { amount: "", categoryId: "", cardId: "", date: toISODate(new Date()), description: "" },
   });
 
   const categoryId = watch("categoryId");

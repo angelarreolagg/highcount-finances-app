@@ -17,6 +17,9 @@ dist-ssr
 .env.*
 !.env.example
 
+# Ad-hoc SQL migrations run manually against Supabase (schema.sql is the canonical schema).
+supabase/migrations/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

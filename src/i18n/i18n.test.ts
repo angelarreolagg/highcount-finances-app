@@ -32,7 +32,6 @@ describe("i18n translations", () => {
       "enums.chipColor.fuchsia",
       "categories.cat-food",
       "categories.cat-other-income",
-      "categories.account-cash",
     ];
     for (const key of required) {
       expect(enKeys.has(key), `en missing ${key}`).toBe(true);

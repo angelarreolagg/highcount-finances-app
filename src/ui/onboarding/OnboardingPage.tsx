@@ -5,18 +5,18 @@ import { useSettingsStore } from "../../state/settingsStore";
 import { OnboardingLayout } from "./OnboardingLayout";
 import { CardsStep } from "./steps/CardsStep";
 import { ExpenseStep } from "./steps/ExpenseStep";
-import { WelcomeStep } from "./steps/WelcomeStep";
+import { NameStep } from "./steps/NameStep";
 
 /**
- * Local setup wizard: welcome → cards → first expense → dashboard. Reached from /login's
- * "continue without an account". Auth lives up front on /login, so there's no sign-up step here.
+ * Setup wizard: your name → cards → first expense → dashboard. Reached from /login's
+ * "continue without an account" and for new signed-in accounts with no data.
  */
 export function OnboardingPage() {
   const navigate = useNavigate();
   const setOnboardingComplete = useSettingsStore((s) => s.setOnboardingComplete);
   const [step, setStep] = useState(0);
 
-  const steps = ["welcome", "cards", "expense"] as const;
+  const steps = ["name", "cards", "expense"] as const;
   const current = steps[Math.min(step, steps.length - 1)];
 
   const finish = () => {
@@ -28,8 +28,7 @@ export function OnboardingPage() {
     else setStep((s) => s + 1);
   };
 
-  // Welcome (step 0) shows no dots; the rest map onto a 1-based progress track.
-  const progress = step === 0 ? undefined : { current: step, total: steps.length - 1 };
+  const progress = { current: step + 1, total: steps.length };
 
   return (
     <OnboardingLayout progress={progress}>
@@ -41,7 +40,7 @@ export function OnboardingPage() {
           exit={{ opacity: 0, y: -8 }}
           transition={{ type: "spring", bounce: 0.2, duration: 0.35 }}
         >
-          {current === "welcome" && <WelcomeStep onContinue={next} />}
+          {current === "name" && <NameStep onContinue={next} />}
           {current === "cards" && <CardsStep onContinue={next} />}
           {current === "expense" && <ExpenseStep onContinue={next} />}
         </motion.div>

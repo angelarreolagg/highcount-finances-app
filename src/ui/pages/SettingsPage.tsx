@@ -7,9 +7,9 @@ import { GlassSelect } from "../components/shared/GlassSelect";
 import { Button } from "../components/shared/Button";
 import { Field } from "../components/shared/Field";
 import { control } from "../components/shared/formStyles";
-import { useSettingsStore } from "../../state/settingsStore";
 import { useUiStore } from "../../state/uiStore";
 import { useAuth } from "../auth/authContext";
+import { useProfile } from "../hooks/useProfile";
 import { repositories } from "../../infrastructure/di/container";
 import { exportDataset, importDataset } from "../../infrastructure/backup";
 import type { BackupDoc } from "../../infrastructure/backup";
@@ -30,17 +30,26 @@ function isBackupDoc(value: unknown): value is BackupDoc {
 
 export function SettingsPage() {
   const { t, i18n } = useTranslation();
-  const displayName = useSettingsStore((s) => s.displayName);
-  const setDisplayName = useSettingsStore((s) => s.setDisplayName);
+  const { displayName, setDisplayName } = useProfile();
   const openModal = useUiStore((s) => s.openModal);
   const { isCloudEnabled, user, signOut } = useAuth();
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
+  const nameInput = useRef<HTMLInputElement>(null);
+  const [nameSaved, setNameSaved] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const language = i18n.resolvedLanguage ?? "en";
   const signedIn = isCloudEnabled && !!user;
+
+  const saveName = async () => {
+    const next = (nameInput.current?.value ?? "").trim();
+    if (next !== displayName) {
+      await setDisplayName(next);
+      setNameSaved(true);
+    }
+  };
 
   const handleExport = async () => {
     setError(null);
@@ -91,15 +100,25 @@ export function SettingsPage() {
       <div className="mx-auto max-w-xl space-y-4 pt-2">
         <GlassCard title={t("settings.profile")}>
           <Field label={t("settings.displayName")}>
+            {/* Uncontrolled + keyed so it re-seeds when the value loads (e.g. cloud fetch); saved
+                only when the Save button is pressed. */}
             <input
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              key={displayName}
+              ref={nameInput}
+              defaultValue={displayName}
+              onChange={() => setNameSaved(false)}
               placeholder={t("settings.displayNamePlaceholder")}
               autoComplete="off"
               className={control}
             />
           </Field>
           <p className="mt-2 text-xs text-white/40">{t("settings.displayNameHint")}</p>
+          <div className="mt-3 flex items-center gap-3">
+            <Button variant="primary" onClick={() => void saveName()}>
+              {t("common.save")}
+            </Button>
+            {nameSaved && <span className="text-xs text-mint">{t("settings.saved")}</span>}
+          </div>
         </GlassCard>
 
         <GlassCard title={t("settings.preferences")}>

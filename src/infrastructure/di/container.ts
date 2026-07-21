@@ -1,4 +1,3 @@
-import { DEFAULT_CATEGORIES } from "../../domain/entities/Category";
 import type { Card } from "../../domain/entities/Card";
 import type { CardRepository } from "../../domain/repositories/CardRepository";
 import type { CategoryRepository } from "../../domain/repositories/CategoryRepository";
@@ -45,7 +44,10 @@ export interface Repositories {
   msiPlanRepository: MSIPlanRepository;
 }
 
-const DEFAULT_ACCOUNTS: Card[] = [{ id: "account-cash", name: "Cash", type: "cash" }];
+/** A fresh default Cash account with a normal UUID id (like any user-created card). */
+function defaultAccounts(): Card[] {
+  return [{ id: crypto.randomUUID(), name: "Cash", type: "cash" }];
+}
 
 export function createIndexedDbRepositories(): Repositories {
   return {
@@ -102,10 +104,9 @@ export function setBackend(repos: Repositories): void {
   useCases = buildUseCases(repos);
 }
 
-/** Seed reference data (default categories + a Cash account) into a given backend. */
+/** Seed reference data (a default Cash account) into a given backend. Categories are constants. */
 export async function seedRepositories(repos: Repositories): Promise<void> {
-  await repos.categoryRepository.ensureSeeded(DEFAULT_CATEGORIES);
-  await repos.cardRepository.ensureSeeded(DEFAULT_ACCOUNTS);
+  await repos.cardRepository.ensureSeeded(defaultAccounts());
 }
 
 /** Seed reference data on the ACTIVE backend. */

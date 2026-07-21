@@ -1,7 +1,6 @@
 import type { Category } from "../entities/Category";
 
 export interface CategoryRepository {
+  /** The fixed default categories — static constants, not stored per user. */
   getAll(): Promise<Category[]>;
-  /** Insert the given categories only when the store is empty (first run). */
-  ensureSeeded(defaults: Category[]): Promise<void>;
 }

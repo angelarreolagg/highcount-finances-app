@@ -11,7 +11,9 @@ import {
   createSupabaseRepositories,
   isBootstrapped,
   markBootstrapped,
+  setProfileName,
 } from "../../infrastructure/persistence/supabase/repositories";
+import { useSettingsStore } from "../../state/settingsStore";
 
 /**
  * Point the app's active backend at the right store for the given session:
@@ -25,13 +27,18 @@ export async function activateBackendForSession(session: Session | null): Promis
     const cloud = createSupabaseRepositories(supabase, userId);
     setBackend(cloud);
     setActiveUserId(userId);
-    await initializeBackend(); // seed default categories + Cash account for a new account
 
-    // First sign-in to a fresh account: copy the existing local dataset up, once.
+    // First sign-in to a fresh account: copy the existing local dataset up (it already includes
+    // a seeded Cash account) BEFORE seeding, so we don't end up with a duplicate Cash.
     if (!(await isBootstrapped(supabase, userId))) {
       await copyDataset(createIndexedDbRepositories(), cloud);
+      // Carry a locally-set profile name up to the cloud account.
+      const localName = useSettingsStore.getState().displayName.trim();
+      if (localName) await setProfileName(supabase, userId, localName);
       await markBootstrapped(supabase, userId);
     }
+    // Seed a default Cash account ONLY if the account is still empty (ensureSeeded is idempotent).
+    await initializeBackend();
     return;
   }
 

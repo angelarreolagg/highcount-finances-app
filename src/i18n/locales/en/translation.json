@@ -3,6 +3,7 @@
     "appName": "High Count",
     "loading": "Loading…",
     "cancel": "Cancel",
+    "save": "Save",
     "saveChanges": "Save changes",
     "saving": "Saving…",
     "delete": "Delete",
@@ -26,7 +27,9 @@
   "profileMenu": {
     "label": "Profile menu",
     "cardsAccounts": "Cards & accounts",
-    "logSavings": "Log savings"
+    "logSavings": "Log savings",
+    "guest": "Guest",
+    "localDevice": "Local · this device"
   },
   "dock": {
     "quickActions": "Quick actions",
@@ -276,8 +279,7 @@
     "cat-shopping": "Shopping",
     "cat-other-expense": "Other expense",
     "cat-salary": "Salary",
-    "cat-other-income": "Other income",
-    "account-cash": "Cash"
+    "cat-other-income": "Other income"
   },
   "settings": {
     "heroLabel": "Preferences & profile",
@@ -286,6 +288,7 @@
     "displayName": "Display name",
     "displayNamePlaceholder": "Your name",
     "displayNameHint": "Shows on your avatar.",
+    "saved": "Saved",
     "preferences": "Preferences",
     "language": "Language",
     "english": "English",
@@ -337,9 +340,8 @@
     "checkEmail": "Almost there — check your email to confirm your account, then sign in."
   },
   "onboarding": {
-    "welcomeTitle": "Welcome to High Count",
-    "welcomeSubtitle": "Let's set you up — three quick steps and you'll be tracking your money like a pro.",
-    "getStarted": "Get started",
+    "nameTitle": "Welcome! What should we call you?",
+    "nameSubtitle": "We'll use your name to personalize your space.",
     "continue": "Continue",
     "skip": "Skip for now",
     "maybeLater": "Maybe later",

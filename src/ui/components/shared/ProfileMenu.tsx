@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useUiStore } from "../../../state/uiStore";
-import { useSettingsStore } from "../../../state/settingsStore";
 import { useAuth } from "../../auth/authContext";
+import { useProfile } from "../../hooks/useProfile";
 import { CardIcon, CoinsIcon, StarIcon, UserIcon } from "./icons";
 
 /** Avatar button + dropdown: the home of account-level actions (per docs/DESIGN.md). */
@@ -13,10 +13,11 @@ export function ProfileMenu({ year }: { year: number }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const openModal = useUiStore((s) => s.openModal);
-  const displayName = useSettingsStore((s) => s.displayName);
   const { isCloudEnabled, user, signOut } = useAuth();
+  const { displayName, email, avatarUrl, signedIn } = useProfile();
   const initial =
-    displayName.trim().charAt(0).toUpperCase() || (user?.email?.charAt(0).toUpperCase() ?? "");
+    displayName.trim().charAt(0).toUpperCase() || (email?.charAt(0).toUpperCase() ?? "");
+  const secondary = signedIn ? (displayName ? email : null) : t("profileMenu.localDevice");
 
   useEffect(() => {
     if (!open) return;
@@ -38,9 +39,13 @@ export function ProfileMenu({ year }: { year: number }) {
         onClick={() => setOpen((v) => !v)}
         aria-label={t("profileMenu.label")}
         aria-expanded={open}
-        className="flex size-9 items-center justify-center rounded-full border border-white/15 bg-white/15 text-sm font-semibold text-white/90 backdrop-blur hover:bg-white/25"
+        className="flex size-9 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/15 text-sm font-semibold text-white/90 backdrop-blur hover:bg-white/25"
       >
-        {initial || <UserIcon size={18} />}
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="" className="size-full object-cover" />
+        ) : (
+          initial || <UserIcon size={18} />
+        )}
       </motion.button>
 
       <AnimatePresence>
@@ -52,8 +57,26 @@ export function ProfileMenu({ year }: { year: number }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -4, scale: 0.97 }}
               transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
-              className="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-2xl border border-white/10 bg-panel/90 p-1.5 shadow-xl shadow-black/40 backdrop-blur-2xl"
+              className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-2xl border border-white/10 bg-panel/90 p-1.5 shadow-xl shadow-black/40 backdrop-blur-2xl"
             >
+              <div className="flex items-center gap-2.5 px-2.5 py-2">
+                <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/15 text-sm font-semibold text-white/90">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="" className="size-full object-cover" />
+                  ) : (
+                    initial || <UserIcon size={18} />
+                  )}
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium">
+                    {displayName || email || t("profileMenu.guest")}
+                  </span>
+                  {secondary && (
+                    <span className="block truncate text-xs text-white/50">{secondary}</span>
+                  )}
+                </span>
+              </div>
+              <div className="mx-3 my-1 border-t border-white/10" />
               <button
                 type="button"
                 className={itemClass}

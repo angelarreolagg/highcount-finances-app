@@ -11,7 +11,7 @@ export function createSupabaseRepositories(client: SupabaseClient, userId: strin
   return {
     transactionRepository: new TransactionRepositorySupabase(client, userId),
     cardRepository: new CardRepositorySupabase(client, userId),
-    categoryRepository: new CategoryRepositorySupabase(client, userId),
+    categoryRepository: new CategoryRepositorySupabase(),
     savingsRepository: new SavingsRepositorySupabase(client, userId),
     msiPlanRepository: new MSIPlanRepositorySupabase(client, userId),
   };
@@ -33,5 +33,28 @@ export async function markBootstrapped(client: SupabaseClient, userId: string): 
   const { error } = await client
     .from("profiles")
     .upsert({ user_id: userId, bootstrapped: true });
+  if (error) throw new Error(error.message);
+}
+
+/** The user's saved profile name, or null if none set. */
+export async function getProfileName(client: SupabaseClient, userId: string): Promise<string | null> {
+  const { data, error } = await client
+    .from("profiles")
+    .select("display_name")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data as { display_name?: string | null } | null)?.display_name ?? null;
+}
+
+/** Save the user's profile name (upsert only touches display_name, leaving bootstrapped intact). */
+export async function setProfileName(
+  client: SupabaseClient,
+  userId: string,
+  name: string,
+): Promise<void> {
+  const { error } = await client
+    .from("profiles")
+    .upsert({ user_id: userId, display_name: name });
   if (error) throw new Error(error.message);
 }

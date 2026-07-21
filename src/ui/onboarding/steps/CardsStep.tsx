@@ -38,8 +38,7 @@ const freshDefaults = (): CardForm => ({
 export function CardsStep({ onContinue }: { onContinue: () => void }) {
   const { t } = useTranslation();
   const addCard = useAddCard();
-  const { data: cards = [] } = useCards();
-  const userCards = cards.filter((c) => c.id !== "account-cash");
+  const { data: userCards = [] } = useCards();
 
   const {
     register,

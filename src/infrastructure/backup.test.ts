@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import type { Card } from "../domain/entities/Card";
-import type { Category } from "../domain/entities/Category";
 import { DEFAULT_CATEGORIES } from "../domain/entities/Category";
 import type { MSIPlan } from "../domain/entities/MSIPlan";
 import type { SavingsEntry } from "../domain/entities/SavingsEntry";
@@ -12,7 +11,6 @@ import type { Repositories } from "./di/container";
 /** Minimal in-memory repositories implementing the domain ports, for backup tests. */
 function fakeRepositories(): Repositories {
   const cards = new Map<string, Card>();
-  const categories = new Map<string, Category>();
   const savings = new Map<string, SavingsEntry>();
   const plans = new Map<string, MSIPlan>();
   const transactions = new Map<string, Transaction>();
@@ -28,10 +26,7 @@ function fakeRepositories(): Repositories {
       },
     },
     categoryRepository: {
-      getAll: async () => [...categories.values()],
-      ensureSeeded: async (defaults) => {
-        if (categories.size === 0) for (const c of defaults) categories.set(c.id, c);
-      },
+      getAll: async () => DEFAULT_CATEGORIES,
     },
     savingsRepository: {
       add: async (e) => void savings.set(e.id, e),
@@ -65,7 +60,6 @@ function fakeRepositories(): Repositories {
 describe("backup export/import", () => {
   it("copyDataset moves the whole dataset losslessly", async () => {
     const from = fakeRepositories();
-    await from.categoryRepository.ensureSeeded(DEFAULT_CATEGORIES);
     await from.cardRepository.add({
       id: "card-1",
       name: "BBVA",
@@ -107,7 +101,6 @@ describe("backup export/import", () => {
     ]);
 
     const to = fakeRepositories();
-    await to.categoryRepository.ensureSeeded(DEFAULT_CATEGORIES);
     await copyDataset(from, to);
 
     const a = await exportDataset(from);

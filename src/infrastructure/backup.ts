@@ -54,12 +54,10 @@ export async function exportDataset(repos: Repositories): Promise<BackupDoc> {
 
 /**
  * Write a dataset into the target backend in FK dependency order
- * (categories → cards → msi plans → savings → transactions). Upserts by id, so
- * re-importing the same document is idempotent. Categories go through `ensureSeeded`
- * (they're the same fixed defaults on every backend).
+ * (cards → msi plans → savings → transactions). Upserts by id, so re-importing the same
+ * document is idempotent. Categories aren't stored (static constants), so they're skipped.
  */
 export async function importDataset(repos: Repositories, doc: BackupDoc): Promise<void> {
-  await repos.categoryRepository.ensureSeeded(doc.categories);
   for (const card of doc.cards) await repos.cardRepository.add(cardFromRecord(card));
   for (const plan of doc.msiPlans) await repos.msiPlanRepository.add(msiPlanFromRecord(plan));
   for (const entry of doc.savingsEntries) await repos.savingsRepository.add(savingsFromRecord(entry));

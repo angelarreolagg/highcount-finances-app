@@ -83,7 +83,7 @@ export function useMsiPlans() {
   });
 }
 
-/** True once the user has any real data (a non-default card or any transaction) — drives first-run onboarding. */
+/** True once the user has any real financial data — drives first-run onboarding. */
 export function useHasAnyData(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["hasAnyData"],
@@ -92,12 +92,13 @@ export function useHasAnyData(options?: { enabled?: boolean }) {
     // an errored/undefined result as "no data" and routes to /login.
     retry: false,
     queryFn: async () => {
-      const [cards, transactions] = await Promise.all([
-        repositories.cardRepository.getAll(),
+      // Cards alone (the seeded Cash account) aren't "data" — key off actual entries.
+      const [transactions, savings, plans] = await Promise.all([
         repositories.transactionRepository.getAll(),
+        repositories.savingsRepository.getAll(),
+        repositories.msiPlanRepository.getAll(),
       ]);
-      const userCards = cards.filter((c) => c.id !== "account-cash");
-      return userCards.length > 0 || transactions.length > 0;
+      return transactions.length > 0 || savings.length > 0 || plans.length > 0;
     },
   });
 }

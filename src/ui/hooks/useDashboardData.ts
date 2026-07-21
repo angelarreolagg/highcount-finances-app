@@ -83,6 +83,22 @@ export function useMsiPlans() {
   });
 }
 
+/** True once the user has any real data (a non-default card or any transaction) — drives first-run onboarding. */
+export function useHasAnyData(options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: ["hasAnyData"],
+    enabled: options?.enabled ?? true,
+    queryFn: async () => {
+      const [cards, transactions] = await Promise.all([
+        repositories.cardRepository.getAll(),
+        repositories.transactionRepository.getAll(),
+      ]);
+      const userCards = cards.filter((c) => c.id !== "account-cash");
+      return userCards.length > 0 || transactions.length > 0;
+    },
+  });
+}
+
 /** Local data is cheap to refetch; invalidate everything after any write. */
 function useInvalidateAll() {
   const queryClient = useQueryClient();

@@ -10,6 +10,9 @@ import { persist } from "zustand/middleware";
 interface SettingsState {
   displayName: string;
   setDisplayName: (name: string) => void;
+  /** True once the first-run onboarding wizard has been completed or skipped. */
+  onboardingComplete: boolean;
+  setOnboardingComplete: (done: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -17,6 +20,8 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       displayName: "",
       setDisplayName: (name) => set({ displayName: name }),
+      onboardingComplete: false,
+      setOnboardingComplete: (done) => set({ onboardingComplete: done }),
     }),
     { name: "highcount:settings" },
   ),

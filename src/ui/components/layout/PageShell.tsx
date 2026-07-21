@@ -7,6 +7,7 @@ import { CardsManagerModal } from "../modals/CardsManagerModal";
 import { DeleteConfirmModal } from "../modals/DeleteConfirmModal";
 import { LogSavingsModal } from "../modals/LogSavingsModal";
 import { RegisterMsiModal } from "../modals/RegisterMsiModal";
+import { SignInModal } from "../modals/SignInModal";
 import { ActionDock } from "../shared/ActionDock";
 import { ProfileMenu } from "../shared/ProfileMenu";
 import { riseIn } from "../shared/motionPresets";
@@ -101,6 +102,7 @@ export function PageShell({ hero, lockDesktop = false, children }: PageShellProp
       <RegisterMsiModal />
       <LogSavingsModal />
       <CardsManagerModal />
+      <SignInModal />
       {/* Rendered last so the confirmation stacks above any modal that triggered it. */}
       <DeleteConfirmModal />
     </div>

@@ -1,10 +1,11 @@
-import { Settings } from "lucide-react";
+import { LogIn, LogOut, Settings } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useUiStore } from "../../../state/uiStore";
 import { useSettingsStore } from "../../../state/settingsStore";
+import { useAuth } from "../../auth/authContext";
 import { CardIcon, CoinsIcon, StarIcon, UserIcon } from "./icons";
 
 /** Avatar button + dropdown: the home of account-level actions (per docs/DESIGN.md). */
@@ -13,7 +14,9 @@ export function ProfileMenu({ year }: { year: number }) {
   const [open, setOpen] = useState(false);
   const openModal = useUiStore((s) => s.openModal);
   const displayName = useSettingsStore((s) => s.displayName);
-  const initial = displayName.trim().charAt(0).toUpperCase();
+  const { isCloudEnabled, user, signOut } = useAuth();
+  const initial =
+    displayName.trim().charAt(0).toUpperCase() || (user?.email?.charAt(0).toUpperCase() ?? "");
 
   useEffect(() => {
     if (!open) return;
@@ -82,6 +85,36 @@ export function ProfileMenu({ year }: { year: number }) {
                 <Settings size={16} strokeWidth={1.8} className="text-white/60" />
                 {t("nav.settings")}
               </Link>
+              {isCloudEnabled && (
+                <>
+                  <div className="mx-3 my-1 border-t border-white/10" />
+                  {user ? (
+                    <button
+                      type="button"
+                      className={itemClass}
+                      onClick={() => {
+                        setOpen(false);
+                        void signOut();
+                      }}
+                    >
+                      <LogOut size={16} strokeWidth={1.8} className="text-white/60" />
+                      {t("auth.signOut")}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className={itemClass}
+                      onClick={() => {
+                        setOpen(false);
+                        openModal("signIn");
+                      }}
+                    >
+                      <LogIn size={16} strokeWidth={1.8} className="text-white/60" />
+                      {t("auth.signIn")}
+                    </button>
+                  )}
+                </>
+              )}
             </motion.div>
           </>
         )}

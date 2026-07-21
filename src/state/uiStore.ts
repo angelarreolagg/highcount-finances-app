@@ -15,7 +15,12 @@ interface MonthSelection {
   monthIndex: number;
 }
 
-export type ModalKind = "addTransaction" | "manageCards" | "registerMsi" | "logSavings";
+export type ModalKind =
+  | "addTransaction"
+  | "manageCards"
+  | "registerMsi"
+  | "logSavings"
+  | "signIn";
 
 /** Entity being edited — payloads are already-loaded query data, pure view state. */
 export type EditTarget =

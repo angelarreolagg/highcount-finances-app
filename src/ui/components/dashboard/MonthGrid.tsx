@@ -85,7 +85,9 @@ export function MonthGrid({
         <YearPager year={year} onPrevYear={onPrevYear} onNextYear={onNextYear} canGoNext={canGoNext} />
       }
     >
-      <div className="flex h-full flex-col">
+      {/* p-1 buffer keeps the cells inset from the GlassCard's overflow-y-auto clip edge, so a
+          hovered card's lift (y:-2) + scale (1.02) isn't cut off — especially the top row. */}
+      <div className="flex h-full flex-col p-1">
         <div className="grid grid-cols-4 gap-2 lg:gap-3 xl:flex-1 xl:grid-rows-3">
           {Array.from({ length: 12 }, (_, monthIndex) => {
             const shortName = monthName(monthIndex, i18n.language, { short: true });
@@ -106,14 +108,19 @@ export function MonthGrid({
                     ? "border-peri/40 bg-peri/25 text-white"
                     : status.isViewable
                       ? "border-white/5 bg-white/5 text-white/85 hover:border-white/10 hover:bg-white/10"
-                      : "border-transparent text-white/25"
+                      : "border-transparent text-white/25 opacity-40 cursor-not-allowed"
                 }`}
               >
                 <span className="block lg:pl-1">
-                  {shortName}
+                  {/* The running month simply reads bold, to stand out as the current one. */}
+                  <span className={isCurrent ? "text-sm font-bold tracking-tight text-white" : undefined}>
+                    {shortName}
+                  </span>
                   {status.isViewable && monthTotals && <MonthFigures totals={monthTotals} />}
                 </span>
-                {status.isOpenForLogging && (
+                {/* The current month is marked by its shining name, so only OTHER months that are
+                    still open for logging (the previous statement) carry the mint dot. */}
+                {status.isOpenForLogging && !isCurrent && (
                   <span
                     className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-mint"
                     title={t("dashboard.openForLogging")}
@@ -123,9 +130,6 @@ export function MonthGrid({
             );
           })}
         </div>
-        <p className="mt-3 flex shrink-0 items-center gap-1.5 text-[11px] text-white/40">
-          <span className="size-1.5 rounded-full bg-mint" /> {t("dashboard.openForLoggingLegend")}
-        </p>
       </div>
     </GlassCard>
   );

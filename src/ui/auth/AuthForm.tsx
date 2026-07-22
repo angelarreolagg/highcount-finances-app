@@ -14,8 +14,10 @@ interface FormValues {
 /**
  * Shared Google + email/password auth form (used by the /login page and the in-app SignInModal).
  * On a successful password sign-in it calls `onSignedIn` (e.g. to close the modal); the page
- * relies on AuthProvider to navigate after the session changes. Sign-up shows the confirm-email
- * notice; Google triggers the OAuth redirect.
+ * relies on AuthProvider to navigate after the session changes. Sign-up swaps in a dedicated
+ * "check your inbox" confirmation screen (email confirmation is ON, so no session exists yet —
+ * clicking the emailed link returns to the app and OnboardingGate takes over into setup).
+ * Google triggers the OAuth redirect.
  */
 export function AuthForm({ onSignedIn }: { onSignedIn?: () => void }) {
   const { t } = useTranslation();
@@ -23,24 +25,26 @@ export function AuthForm({ onSignedIn }: { onSignedIn?: () => void }) {
   const [mode, setMode] = useState<"signIn" | "signUp">("signIn");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  // Set once sign-up succeeds → renders the confirmation screen instead of the form.
+  const [confirmEmail, setConfirmEmail] = useState<string | null>(null);
+  const [resent, setResent] = useState(false);
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<FormValues>();
 
   const onSubmit = handleSubmit(async ({ email, password }) => {
     setPending(true);
     setError(null);
-    setNotice(null);
     try {
       if (mode === "signIn") {
         await signInWithPassword(email, password);
         onSignedIn?.();
       } else {
         await signUpWithPassword(email, password);
-        setNotice(t("auth.checkEmail"));
+        setConfirmEmail(email);
       }
     } catch (e) {
       setError((e as Error).message);
@@ -57,6 +61,52 @@ export function AuthForm({ onSignedIn }: { onSignedIn?: () => void }) {
       setError((e as Error).message);
     }
   };
+
+  const resend = async () => {
+    setError(null);
+    try {
+      // The useForm hook stays mounted while the confirmation screen shows, so the last-typed
+      // credentials are still available; re-issuing signUp re-sends the confirmation email.
+      const { email, password } = getValues();
+      await signUpWithPassword(email, password);
+      setResent(true);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
+
+  const backToSignIn = () => {
+    setConfirmEmail(null);
+    setResent(false);
+    setError(null);
+    setMode("signIn");
+  };
+
+  if (confirmEmail) {
+    return (
+      <div className="space-y-4 text-center">
+        <h2 className="text-lg font-semibold text-white">{t("auth.confirm.title")}</h2>
+        <p className="text-sm text-white/70">
+          {t("auth.confirm.body", { email: confirmEmail })}
+        </p>
+        <p className="text-xs text-white/40">{t("auth.confirm.hint")}</p>
+        <div className="space-y-2">
+          <Button type="button" onClick={() => void resend()} disabled={resent} className="w-full">
+            {t("auth.confirm.resend")}
+          </Button>
+          <button
+            type="button"
+            onClick={backToSignIn}
+            className="w-full text-center text-xs text-peri hover:underline"
+          >
+            {t("auth.confirm.back")}
+          </button>
+        </div>
+        {resent && <p className="text-xs text-mint">{t("auth.confirm.resent")}</p>}
+        {error && <p className="text-xs text-coral">{error}</p>}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -109,13 +159,11 @@ export function AuthForm({ onSignedIn }: { onSignedIn?: () => void }) {
         onClick={() => {
           setMode((m) => (m === "signIn" ? "signUp" : "signIn"));
           setError(null);
-          setNotice(null);
         }}
         className="w-full text-center text-xs text-peri hover:underline"
       >
         {t(mode === "signIn" ? "auth.toSignUp" : "auth.toSignIn")}
       </button>
-      {notice && <p className="text-xs text-mint">{notice}</p>}
       {error && <p className="text-xs text-coral">{error}</p>}
     </div>
   );

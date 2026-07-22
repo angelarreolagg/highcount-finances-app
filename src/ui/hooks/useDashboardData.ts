@@ -23,6 +23,7 @@ export function useYearMonthGrid(year: number) {
   return useQuery({
     queryKey: ["yearMonthGrid", year],
     queryFn: () => useCases.getYearMonthGrid(year),
+    retry: false,
   });
 }
 
@@ -31,6 +32,8 @@ export function useMonthDetail(year: number | null, monthIndex: number | null) {
     queryKey: ["monthDetail", year, monthIndex],
     queryFn: () => useCases.getMonthDetail(year!, monthIndex!),
     enabled: year !== null && monthIndex !== null,
+    // Surface a failed fetch immediately instead of churning retries behind an endless spinner.
+    retry: false,
   });
 }
 

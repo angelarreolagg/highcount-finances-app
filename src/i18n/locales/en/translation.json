@@ -118,6 +118,7 @@
     "nextYear": "Next year",
     "openForLogging": "Open for logging",
     "openForLoggingLegend": "open for logging expenses",
+    "loadError": "Couldn't load this month. Please try again.",
     "net": "net {{amount}}",
     "thisMonth": "This month",
     "noExpensesYet": "No expenses yet",
@@ -236,7 +237,8 @@
       "cardNotInUse": "The card/account will be removed. This can't be undone."
     },
     "monthDetail": {
-      "empty": "Nothing logged this month yet — add an expense or income to see it here."
+      "empty": "Nothing logged this month yet — add an expense or income to see it here.",
+      "addForgotten": "Add an expense you forgot"
     }
   },
   "cardFace": {
@@ -337,7 +339,15 @@
     "submitSignUp": "Create account",
     "toSignUp": "Need an account? Create one",
     "toSignIn": "Already have an account? Sign in",
-    "checkEmail": "Almost there — check your email to confirm your account, then sign in."
+    "checkEmail": "Almost there — check your email to confirm your account, then sign in.",
+    "confirm": {
+      "title": "Check your inbox",
+      "body": "We sent a confirmation link to {{email}}. Click it to verify your account, and we'll bring you right into setup.",
+      "hint": "Didn't get it? Check your spam folder, or resend below.",
+      "resend": "Resend email",
+      "resent": "Sent again — check your inbox.",
+      "back": "Back to sign in"
+    }
   },
   "onboarding": {
     "nameTitle": "Welcome! What should we call you?",
@@ -353,6 +363,14 @@
     "logExpense": "Log expense",
     "congratsTitle": "Nicely done!",
     "congratsBody": "Congratulations — now you know how to take care of your money. And this is just the start.",
+    "deposit": {
+      "title": "Add your starting savings",
+      "body": "Already have money set aside? Log it as your first deposit so your savings balance starts from the right place.",
+      "account": "Account (optional)",
+      "submit": "Add deposit",
+      "successTitle": "Savings started!",
+      "successBody": "Your starting balance is in. You can log deposits and returns any time."
+    },
     "signUpTitle": "Save your progress",
     "signUpBody": "Right now everything is saved only on this device — clear your browser and it's gone. Create an account to back it up and sync across your devices."
   },

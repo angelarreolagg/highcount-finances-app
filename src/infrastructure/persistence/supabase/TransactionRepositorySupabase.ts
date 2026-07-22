@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Transaction } from "../../../domain/entities/Transaction";
 import type { TransactionRepository } from "../../../domain/repositories/TransactionRepository";
-import { monthPrefix } from "../../../domain/value-objects/calendar";
+import { addMonths, monthPrefix } from "../../../domain/value-objects/calendar";
 import { transactionFromRecord, transactionToRecord } from "../records";
 import type { TransactionRow } from "./rows";
 import { transactionFromRow, transactionToRow } from "./rows";
@@ -44,12 +44,17 @@ export class TransactionRepositorySupabase implements TransactionRepository {
   }
 
   async getByMonth(year: number, monthIndex: number): Promise<Transaction[]> {
-    const prefix = monthPrefix(year, monthIndex);
+    // Half-open range [first day of month, first day of next month). Building an explicit
+    // last-day string risks invalid dates like "2026-06-31" (Postgres 22008); the next
+    // month's first day is always valid and never needs day-of-month clamping.
+    const start = `${monthPrefix(year, monthIndex)}-01`;
+    const next = addMonths(year, monthIndex, 1);
+    const nextStart = `${monthPrefix(next.year, next.monthIndex)}-01`;
     const { data, error } = await this.client
       .from(TABLE)
       .select("*")
-      .gte("date", `${prefix}-01`)
-      .lte("date", `${prefix}-31`);
+      .gte("date", start)
+      .lt("date", nextStart);
     if (error) throw new Error(error.message);
     return this.toEntities((data ?? []) as TransactionRow[]);
   }
@@ -59,7 +64,7 @@ export class TransactionRepositorySupabase implements TransactionRepository {
       .from(TABLE)
       .select("*")
       .gte("date", `${year}-01-01`)
-      .lte("date", `${year}-12-31`);
+      .lt("date", `${year + 1}-01-01`);
     if (error) throw new Error(error.message);
     return this.toEntities((data ?? []) as TransactionRow[]);
   }

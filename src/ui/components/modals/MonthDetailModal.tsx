@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowUpRight, Scale } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Plus, Scale } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { monthName } from "../../../shared/utils/months";
 import { useUiStore } from "../../../state/uiStore";
@@ -12,9 +12,10 @@ export function MonthDetailModal() {
   const { t, i18n } = useTranslation();
   const detailMonth = useUiStore((s) => s.detailMonth);
   const closeMonthDetail = useUiStore((s) => s.closeMonthDetail);
+  const openModal = useUiStore((s) => s.openModal);
   const openEdit = useUiStore((s) => s.openEdit);
   const openDelete = useUiStore((s) => s.openDelete);
-  const { data, isLoading } = useMonthDetail(
+  const { data, isLoading, isError } = useMonthDetail(
     detailMonth?.year ?? null,
     detailMonth?.monthIndex ?? null,
   );
@@ -26,6 +27,7 @@ export function MonthDetailModal() {
   return (
     <Modal open={detailMonth !== null} title={title} onClose={closeMonthDetail}>
       {isLoading && <p className="text-sm text-white/50">{t("common.loading")}</p>}
+      {isError && <p className="text-sm text-coral">{t("dashboard.loadError")}</p>}
       {data && (
         <>
           <div className="mb-4 grid grid-cols-3 gap-2 text-center">
@@ -57,7 +59,20 @@ export function MonthDetailModal() {
           </div>
 
           {data.transactions.length === 0 ? (
-            <p className="text-sm text-white/40">{t("modals.monthDetail.empty")}</p>
+            <div className="space-y-3">
+              <p className="text-sm text-white/40">{t("modals.monthDetail.empty")}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  closeMonthDetail();
+                  openModal("addTransaction");
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white"
+              >
+                <Plus size={13} strokeWidth={2} />
+                {t("modals.monthDetail.addForgotten")}
+              </button>
+            </div>
           ) : (
             <ul className="space-y-3">
               {data.transactions.map((tx) => {

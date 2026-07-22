@@ -85,7 +85,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       signUpWithPassword: async (email, password) => {
         if (!supabase) return;
-        const { error } = await supabase.auth.signUp({ email, password });
+        // emailRedirectTo brings the confirmation link back into the running app, where the
+        // hydrated session lets OnboardingGate route the new (data-less) user into /welcome.
+        // The origin must be listed under Supabase → Authentication → URL Configuration.
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: window.location.origin },
+        });
         if (error) throw new Error(error.message);
       },
       signOut: async () => {

@@ -118,6 +118,7 @@
     "nextYear": "Año siguiente",
     "openForLogging": "Abierto para registrar",
     "openForLoggingLegend": "abierto para registrar gastos",
+    "loadError": "No se pudo cargar este mes. Inténtalo de nuevo.",
     "net": "neto {{amount}}",
     "thisMonth": "Este mes",
     "noExpensesYet": "Aún sin gastos",
@@ -236,7 +237,8 @@
       "cardNotInUse": "La tarjeta/cuenta se eliminará. No se puede deshacer."
     },
     "monthDetail": {
-      "empty": "Aún no hay nada registrado este mes — agrega un gasto o ingreso para verlo aquí."
+      "empty": "Aún no hay nada registrado este mes — agrega un gasto o ingreso para verlo aquí.",
+      "addForgotten": "Registra un gasto que olvidaste"
     }
   },
   "cardFace": {
@@ -337,7 +339,15 @@
     "submitSignUp": "Crear cuenta",
     "toSignUp": "¿No tienes cuenta? Crea una",
     "toSignIn": "¿Ya tienes cuenta? Inicia sesión",
-    "checkEmail": "Casi listo — revisa tu correo para confirmar tu cuenta y luego inicia sesión."
+    "checkEmail": "Casi listo — revisa tu correo para confirmar tu cuenta y luego inicia sesión.",
+    "confirm": {
+      "title": "Revisa tu correo",
+      "body": "Enviamos un enlace de confirmación a {{email}}. Haz clic para verificar tu cuenta y te llevaremos directo a la configuración.",
+      "hint": "¿No llegó? Revisa tu carpeta de spam o reenvíalo abajo.",
+      "resend": "Reenviar correo",
+      "resent": "Enviado de nuevo — revisa tu correo.",
+      "back": "Volver a iniciar sesión"
+    }
   },
   "onboarding": {
     "nameTitle": "¡Bienvenido! ¿Cómo te llamas?",
@@ -353,6 +363,14 @@
     "logExpense": "Registrar gasto",
     "congratsTitle": "¡Bien hecho!",
     "congratsBody": "Felicidades — ahora sabes cómo cuidar tu dinero. Y esto es solo el comienzo.",
+    "deposit": {
+      "title": "Agrega tus ahorros iniciales",
+      "body": "¿Ya tienes dinero apartado? Regístralo como tu primer depósito para que tu saldo de ahorros empiece en el lugar correcto.",
+      "account": "Cuenta (opcional)",
+      "submit": "Agregar depósito",
+      "successTitle": "¡Ahorros iniciados!",
+      "successBody": "Tu saldo inicial está listo. Puedes registrar depósitos y rendimientos cuando quieras."
+    },
     "signUpTitle": "Guarda tu progreso",
     "signUpBody": "Ahora mismo todo se guarda solo en este dispositivo — si borras tu navegador, se pierde. Crea una cuenta para respaldarlo y sincronizarlo entre tus dispositivos."
   },

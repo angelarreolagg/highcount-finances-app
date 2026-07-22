@@ -29,7 +29,7 @@ export function ProfileMenu({ year }: { year: number }) {
   }, [open]);
 
   const itemClass =
-    "flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10";
+    "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm text-white/85 hover:bg-white/10";
 
   return (
     <div className="relative">
@@ -57,9 +57,9 @@ export function ProfileMenu({ year }: { year: number }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -4, scale: 0.97 }}
               transition={{ type: "spring", bounce: 0.2, duration: 0.3 }}
-              className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-2xl border border-white/10 bg-panel/90 p-1.5 shadow-xl shadow-black/40 backdrop-blur-2xl"
+              className="absolute right-0 z-50 mt-2 w-[18.5rem] origin-top-right rounded-2xl border border-white/10 bg-panel/90 p-2 shadow-xl shadow-black/40 backdrop-blur-2xl"
             >
-              <div className="flex items-center gap-2.5 px-2.5 py-2">
+              <div className="flex items-center gap-2.5 px-2.5 py-2.5">
                 <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/15 text-sm font-semibold text-white/90">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="" className="size-full object-cover" />

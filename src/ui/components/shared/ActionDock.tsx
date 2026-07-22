@@ -15,9 +15,10 @@ import { CoinsIcon, LayersIcon, PlusIcon } from "./icons";
 
 /** macOS-style magnification (adapted from the ReactBits Dock): items swell as the cursor nears. */
 const SPRING: SpringOptions = { mass: 0.1, stiffness: 150, damping: 12 };
-const BASE_SIZE = 48;
-const MAGNIFIED_SIZE = 68;
 const DISTANCE = 140;
+/** The center "Add" button is the primary action — larger; MSI/Savings flank it smaller. */
+const PRIMARY_SIZE = { base: 56, magnified: 76 };
+const FLANK_SIZE = { base: 44, magnified: 60 };
 
 type DockVariant = "primary" | "glass" | "savings";
 
@@ -66,6 +67,8 @@ function DockItem({
   variant,
   mouseX,
   onClick,
+  baseSize,
+  magnifiedSize,
   children,
 }: {
   /** Reveals above the button on hover; also the button's aria-label. */
@@ -73,18 +76,22 @@ function DockItem({
   variant: DockVariant;
   mouseX: MotionValue<number>;
   onClick: () => void;
+  /** Resting size in px. */
+  baseSize: number;
+  /** Peak size in px when the cursor is directly over the button. */
+  magnifiedSize: number;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
   const isHovered = useMotionValue(0);
   const reduceMotion = useReducedMotion();
-  const maxSize = reduceMotion ? BASE_SIZE : MAGNIFIED_SIZE;
+  const maxSize = reduceMotion ? baseSize : magnifiedSize;
 
   const mouseDistance = useTransform(mouseX, (val) => {
-    const rect = ref.current?.getBoundingClientRect() ?? { x: 0, width: BASE_SIZE };
+    const rect = ref.current?.getBoundingClientRect() ?? { x: 0, width: baseSize };
     return val - rect.x - rect.width / 2;
   });
-  const targetSize = useTransform(mouseDistance, [-DISTANCE, 0, DISTANCE], [BASE_SIZE, maxSize, BASE_SIZE]);
+  const targetSize = useTransform(mouseDistance, [-DISTANCE, 0, DISTANCE], [baseSize, maxSize, baseSize]);
   const size = useSpring(targetSize, SPRING);
 
   return (
@@ -127,26 +134,33 @@ export function ActionDock() {
         aria-label={t("dock.quickActions")}
         className="flex items-end gap-3 rounded-3xl border border-white/10 bg-panel/70 px-4 py-3 shadow-xl shadow-black/40 backdrop-blur-2xl"
       >
-        <DockItem
-          label={t("dock.addTransaction")}
-          variant="primary"
-          mouseX={mouseX}
-          onClick={() => openModal("addTransaction")}
-        >
-          <PlusIcon size={22} />
-        </DockItem>
+        {/* Center is the primary "Add expense / income"; MSI + Savings flank it, slightly smaller. */}
         <DockItem
           label={t("dock.registerMsi")}
           variant="glass"
           mouseX={mouseX}
+          baseSize={FLANK_SIZE.base}
+          magnifiedSize={FLANK_SIZE.magnified}
           onClick={() => openModal("registerMsi")}
         >
           <LayersIcon size={20} />
         </DockItem>
         <DockItem
+          label={t("dock.addTransaction")}
+          variant="primary"
+          mouseX={mouseX}
+          baseSize={PRIMARY_SIZE.base}
+          magnifiedSize={PRIMARY_SIZE.magnified}
+          onClick={() => openModal("addTransaction")}
+        >
+          <PlusIcon size={26} />
+        </DockItem>
+        <DockItem
           label={t("dock.logSavings")}
           variant="savings"
           mouseX={mouseX}
+          baseSize={FLANK_SIZE.base}
+          magnifiedSize={FLANK_SIZE.magnified}
           onClick={() => openModal("logSavings")}
         >
           <CoinsIcon size={20} />

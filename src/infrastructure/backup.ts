@@ -1,7 +1,6 @@
 import type { Repositories } from "./di/container";
 import type {
   CardRecord,
-  CategoryRecord,
   MSIPlanRecord,
   SavingsRecord,
   TransactionRecord,
@@ -26,7 +25,6 @@ import {
 export interface BackupDoc {
   version: 1;
   exportedAt: string;
-  categories: CategoryRecord[];
   cards: CardRecord[];
   msiPlans: MSIPlanRecord[];
   savingsEntries: SavingsRecord[];
@@ -34,8 +32,9 @@ export interface BackupDoc {
 }
 
 export async function exportDataset(repos: Repositories): Promise<BackupDoc> {
-  const [categories, cards, msiPlans, savings, transactions] = await Promise.all([
-    repos.categoryRepository.getAll(),
+  // Categories are static client-side constants (no per-user DB table since migration 0002),
+  // so they're deliberately excluded — the export mirrors the current Supabase schema.
+  const [cards, msiPlans, savings, transactions] = await Promise.all([
     repos.cardRepository.getAll(),
     repos.msiPlanRepository.getAll(),
     repos.savingsRepository.getAll(),
@@ -44,7 +43,6 @@ export async function exportDataset(repos: Repositories): Promise<BackupDoc> {
   return {
     version: 1,
     exportedAt: new Date().toISOString(),
-    categories, // Category record === entity (no Money/dates)
     cards: cards.map(cardToRecord),
     msiPlans: msiPlans.map(msiPlanToRecord),
     savingsEntries: savings.map(savingsToRecord),

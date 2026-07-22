@@ -17,10 +17,10 @@ import { DeleteAllModal } from "../components/modals/DeleteAllModal";
 
 function isBackupDoc(value: unknown): value is BackupDoc {
   const d = value as Partial<BackupDoc> | null;
+  // A stray `categories` array in older exports is ignored (importDataset never reads it).
   return (
     !!d &&
     d.version === 1 &&
-    Array.isArray(d.categories) &&
     Array.isArray(d.cards) &&
     Array.isArray(d.msiPlans) &&
     Array.isArray(d.savingsEntries) &&
@@ -97,93 +97,116 @@ export function SettingsPage() {
         </div>
       }
     >
-      <div className="mx-auto max-w-xl space-y-4 pt-2">
-        <GlassCard title={t("settings.profile")}>
-          <Field label={t("settings.displayName")}>
-            {/* Uncontrolled + keyed so it re-seeds when the value loads (e.g. cloud fetch); saved
-                only when the Save button is pressed. */}
-            <input
-              key={displayName}
-              ref={nameInput}
-              defaultValue={displayName}
-              onChange={() => setNameSaved(false)}
-              placeholder={t("settings.displayNamePlaceholder")}
-              autoComplete="off"
-              className={control}
-            />
-          </Field>
-          <p className="mt-2 text-xs text-white/40">{t("settings.displayNameHint")}</p>
-          <div className="mt-3 flex items-center gap-3">
-            <Button variant="primary" onClick={() => void saveName()}>
-              {t("common.save")}
-            </Button>
-            {nameSaved && <span className="text-xs text-mint">{t("settings.saved")}</span>}
-          </div>
-        </GlassCard>
-
-        <GlassCard title={t("settings.preferences")}>
-          <Field label={t("settings.language")}>
-            <GlassSelect
-              value={language}
-              onChange={(v) => void i18n.changeLanguage(v)}
-              aria-label={t("settings.language")}
-              placeholder={t("settings.language")}
-              options={[
-                { value: "en", label: t("settings.english") },
-                { value: "es", label: t("settings.spanish") },
-              ]}
-            />
-          </Field>
-        </GlassCard>
-
-        <GlassCard title={t("settings.account")}>
-          <p className="text-sm text-white/60">{modeText}</p>
-          {isCloudEnabled && (
-            <div className="mt-3">
-              {user ? (
-                <Button type="button" onClick={() => void signOut()}>
-                  {t("auth.signOut")}
+      <div className="mx-auto w-full max-w-xl pt-2 lg:max-w-5xl">
+        {/* Desktop: two balanced columns (identity + account/data | preferences + about);
+            Danger Zone spans full width below. Mobile: everything stacks. `items-start`
+            keeps each column sized to its own content instead of stretching to match. */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="flex flex-col gap-4">
+            <GlassCard title={t("settings.profile")}>
+              <Field label={t("settings.displayName")}>
+                {/* Uncontrolled + keyed so it re-seeds when the value loads (e.g. cloud fetch);
+                    saved only when the Save button is pressed. */}
+                <input
+                  key={displayName}
+                  ref={nameInput}
+                  defaultValue={displayName}
+                  onChange={() => setNameSaved(false)}
+                  placeholder={t("settings.displayNamePlaceholder")}
+                  autoComplete="off"
+                  className={control}
+                />
+              </Field>
+              <p className="mt-2 text-xs text-white/40">{t("settings.displayNameHint")}</p>
+              <div className="mt-3 flex items-center gap-3">
+                <Button variant="primary" onClick={() => void saveName()}>
+                  {t("common.save")}
                 </Button>
-              ) : (
-                <Button type="button" variant="primary" onClick={() => openModal("signIn")}>
-                  {t("auth.signIn")}
-                </Button>
+                {nameSaved && <span className="text-xs text-mint">{t("settings.saved")}</span>}
+              </div>
+            </GlassCard>
+
+            <GlassCard title={t("settings.account")}>
+              <p className="text-sm text-white/60">{modeText}</p>
+              {isCloudEnabled && (
+                <div className="mt-3">
+                  {user ? (
+                    <Button type="button" onClick={() => void signOut()}>
+                      {t("auth.signOut")}
+                    </Button>
+                  ) : (
+                    <Button type="button" variant="primary" onClick={() => openModal("signIn")}>
+                      {t("auth.signIn")}
+                    </Button>
+                  )}
+                </div>
               )}
-            </div>
-          )}
 
-          <div className="mt-5 border-t border-white/10 pt-4">
-            <p className="text-sm font-medium">{t("settings.backup")}</p>
-            <p className="mt-1 text-xs text-white/40">{t("settings.backupHint")}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button type="button" onClick={() => void handleExport()}>
-                {t("settings.exportBackup")}
-              </Button>
-              <Button type="button" onClick={() => fileInput.current?.click()}>
-                {t("settings.importBackup")}
-              </Button>
-              <input
-                ref={fileInput}
-                type="file"
-                accept="application/json,.json"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) void handleImportFile(file);
-                  e.target.value = "";
-                }}
-              />
-            </div>
-            {notice && <p className="mt-2 text-xs text-mint">{notice}</p>}
-            {error && <p className="mt-2 text-xs text-coral">{error}</p>}
+              <div className="mt-5 border-t border-white/10 pt-4">
+                <p className="text-sm font-medium">{t("settings.backup")}</p>
+                <p className="mt-1 text-xs text-white/40">{t("settings.backupHint")}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button type="button" onClick={() => void handleExport()}>
+                    {t("settings.exportBackup")}
+                  </Button>
+                  <Button type="button" onClick={() => fileInput.current?.click()}>
+                    {t("settings.importBackup")}
+                  </Button>
+                  <input
+                    ref={fileInput}
+                    type="file"
+                    accept="application/json,.json"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void handleImportFile(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
+                {notice && <p className="mt-2 text-xs text-mint">{notice}</p>}
+                {error && <p className="mt-2 text-xs text-coral">{error}</p>}
+              </div>
+            </GlassCard>
           </div>
-        </GlassCard>
 
-        <GlassCard title={t("settings.about")}>
-          <p className="text-sm text-white/60">{t("settings.aboutText")}</p>
-        </GlassCard>
+          <div className="flex flex-col gap-4">
+            <GlassCard title={t("settings.preferences")}>
+              <Field label={t("settings.language")}>
+                <GlassSelect
+                  value={language}
+                  onChange={(v) => void i18n.changeLanguage(v)}
+                  aria-label={t("settings.language")}
+                  placeholder={t("settings.language")}
+                  options={[
+                    { value: "en", label: t("settings.english") },
+                    { value: "es", label: t("settings.spanish") },
+                  ]}
+                />
+              </Field>
+            </GlassCard>
 
-        <GlassCard title={t("settings.dangerZone")} className="ring-1 ring-coral/25">
+            {/* flex-1 lets About absorb the right column's extra height so its bottom aligns
+                with the taller left column — a centered brand plaque instead of an empty gap. */}
+            <GlassCard title={t("settings.about")} className="flex-1">
+              <div className="flex h-full flex-col items-center justify-center gap-3 py-6 text-center">
+                <img
+                  src="/favicon/favicon-128x128.png"
+                  alt=""
+                  className="size-14 rounded-2xl shadow-lg shadow-black/30"
+                />
+                <div>
+                  <p className="text-base font-bold tracking-tight">High Count</p>
+                  <p className="mx-auto mt-1 max-w-xs text-sm text-white/60">
+                    {t("settings.aboutText")}
+                  </p>
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+        </div>
+
+        <GlassCard title={t("settings.dangerZone")} className="mt-4 ring-1 ring-coral/25">
           <p className="text-sm text-coral/90">{t("settings.deleteAllHint")}</p>
           <p className="mt-1 text-xs text-white/50">
             {signedIn

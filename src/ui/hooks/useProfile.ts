@@ -1,10 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../infrastructure/supabase/client";
 import {
-  getProfileName,
+  getProfile,
   setProfileName,
+  setProfileTheme,
 } from "../../infrastructure/persistence/supabase/repositories";
 import { useSettingsStore } from "../../state/settingsStore";
+import { normalizeTheme } from "../theme/themes";
+import type { ThemeId } from "../theme/themes";
 import { useAuth } from "../auth/authContext";
 
 interface Profile {
@@ -12,39 +15,61 @@ interface Profile {
   email: string | null;
   avatarUrl: string | null;
   signedIn: boolean;
+  /** Effective theme: synced from the cloud profile when signed in, else the local store. */
+  theme: ThemeId;
   setDisplayName: (name: string) => Promise<void>;
+  setTheme: (theme: ThemeId) => Promise<void>;
 }
 
 /**
- * Backend-aware profile: name/email/avatar for the header. Signed-in reads/writes the cloud
- * `profiles` table; signed-out uses the local settings store. Email + avatar come from the session.
+ * Backend-aware profile: name/email/avatar for the header, plus the selected color theme.
+ * Signed-in reads/writes the cloud `profiles` table (theme syncs across devices); signed-out uses
+ * the local settings store. Email + avatar come from the session.
  */
 export function useProfile(): Profile {
   const { user, isCloudEnabled } = useAuth();
   const localName = useSettingsStore((s) => s.displayName);
   const setLocalName = useSettingsStore((s) => s.setDisplayName);
+  const localTheme = useSettingsStore((s) => s.theme);
+  const setLocalTheme = useSettingsStore((s) => s.setTheme);
   const queryClient = useQueryClient();
   const signedIn = isCloudEnabled && !!user && !!supabase;
 
   const cloud = useQuery({
     queryKey: ["profile", user?.id],
     enabled: signedIn,
-    queryFn: () => getProfileName(supabase!, user!.id),
+    queryFn: () => getProfile(supabase!, user!.id),
   });
 
   const meta = (user?.user_metadata ?? {}) as { avatar_url?: string; picture?: string };
 
+  // Signed-in: prefer the cloud theme once loaded, falling back to the local store while the query
+  // is in flight — so a reload paints the last theme instantly instead of flashing default.
+  const theme: ThemeId = signedIn
+    ? normalizeTheme(cloud.data?.theme ?? localTheme)
+    : normalizeTheme(localTheme);
+
   return {
-    displayName: signedIn ? (cloud.data ?? "") : localName,
+    displayName: signedIn ? (cloud.data?.displayName ?? "") : localName,
     email: user?.email ?? null,
     avatarUrl: meta.avatar_url ?? meta.picture ?? null,
     signedIn,
+    theme,
     setDisplayName: async (name) => {
       if (signedIn) {
         await setProfileName(supabase!, user!.id, name);
         await queryClient.invalidateQueries({ queryKey: ["profile"] });
       } else {
         setLocalName(name);
+      }
+    },
+    setTheme: async (next) => {
+      // Always warm the local store (guest storage + a cache for the next reload); when signed in,
+      // also persist to the cloud profile so the choice follows the user to other devices.
+      setLocalTheme(next);
+      if (signedIn) {
+        await setProfileTheme(supabase!, user!.id, next);
+        await queryClient.invalidateQueries({ queryKey: ["profile"] });
       }
     },
   };

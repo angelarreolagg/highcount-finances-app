@@ -39,3 +39,7 @@ export function savingsKindLabel(t: TFunction, kind: SavingsEntryKind): string {
 export function chipColorLabel(t: TFunction, color: string): string {
   return t(`enums.chipColor.${color}`);
 }
+
+export function themeLabel(t: TFunction, id: string): string {
+  return t(`enums.theme.${id}`);
+}

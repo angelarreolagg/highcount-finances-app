@@ -137,16 +137,22 @@ export function BalanceLineChart({ timeline }: { timeline: SavingsTimelinePoint[
             strokeDasharray="2 4"
           />
         )}
-        <path d={areaPath} fill="rgb(129 140 248 / 0.14)" />
-        <path d={linePath} fill="none" stroke="#818cf8" strokeWidth={2} strokeLinejoin="round" />
+        <path d={areaPath} fill="color-mix(in srgb, var(--color-peri) 14%, transparent)" />
+        <path
+          d={linePath}
+          fill="none"
+          stroke="var(--color-peri)"
+          strokeWidth={2}
+          strokeLinejoin="round"
+        />
         {points.map((p, i) => (
           <circle
             key={p.point.id}
             cx={p.x}
             cy={p.y}
             r={hover?.index === i ? 5 : 4}
-            fill="#818cf8"
-            stroke="#0b0d1f"
+            fill="var(--color-peri)"
+            stroke="var(--color-panel)"
             strokeWidth={2}
           />
         ))}
@@ -226,7 +232,7 @@ export function ReturnsBarChart({ timeline }: { timeline: SavingsTimelinePoint[]
               />
               <path
                 d={roundedTopBar(x, yTop, barWidth, yBase)}
-                fill="#34d399"
+                fill="var(--color-mint)"
                 opacity={hover === null || hover.index === i ? 1 : 0.5}
               />
               <text

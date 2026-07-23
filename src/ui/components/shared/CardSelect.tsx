@@ -5,7 +5,7 @@ import type { Card } from "../../../domain/entities/Card";
 import type { Money } from "../../../domain/value-objects/Money";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { cardTypeLabel } from "../../i18n/labels";
-import { cardSurface } from "../../utils/chips";
+import { cardSurfaceStyle } from "../../utils/chips";
 import { FloatingPanel } from "./FloatingPanel";
 import { control } from "./formStyles";
 import { ChevronDownIcon } from "./icons";
@@ -27,7 +27,7 @@ function MiniCardTile({ card, available, t }: { card: Card; available?: Money; t
   return (
     <div
       className="flex aspect-[4/5] flex-col justify-between overflow-hidden rounded-xl p-1.5 ring-1 ring-inset ring-white/12"
-      style={{ backgroundImage: cardSurface(card.color) }}
+      style={cardSurfaceStyle(card.color)}
     >
       <span className="self-end text-[8px] font-semibold tracking-widest text-white/70 uppercase">
         {cardTypeLabel(t, card.type)}
@@ -92,7 +92,7 @@ export function CardSelect({
           <>
             <span
               className="size-8 shrink-0 rounded-lg ring-1 ring-inset ring-white/15"
-              style={{ backgroundImage: cardSurface(selected.color) }}
+              style={cardSurfaceStyle(selected.color)}
             />
             <span className="min-w-0 flex-1">
               <span className="flex items-baseline justify-between gap-2">

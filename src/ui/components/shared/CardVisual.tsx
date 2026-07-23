@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { CardType } from "../../../domain/entities/Card";
 import { cardTypeLabel } from "../../i18n/labels";
-import { cardSurface } from "../../utils/chips";
+import { cardSurfaceStyle } from "../../utils/chips";
 
 interface CardVisualProps {
   name: string;
@@ -34,7 +34,7 @@ export function CardVisual({
   return (
     <div
       className={`relative flex aspect-[16/10] flex-col justify-between overflow-hidden rounded-2xl p-3 shadow-lg shadow-black/30 ring-1 ring-inset ring-white/12 ${className}`}
-      style={{ backgroundImage: cardSurface(color) }}
+      style={cardSurfaceStyle(color)}
     >
       <div className="flex justify-end">
         <span className="text-[9px] font-semibold tracking-widest text-white/70 uppercase">

@@ -15,6 +15,10 @@
   --backdrop-deep: #0a1180;
   --blob-a: rgb(147 197 253 / 0.55);
   --blob-b: rgb(129 140 248 / 0.5);
+
+  /* Editorial serif, used ONLY for the login quote (`font-quote`) — everything else stays on the
+     system stack. Loaded in index.html; the fallbacks are the closest ubiquitous serifs. */
+  --font-quote: "PT Serif", Georgia, "Times New Roman", serif;
 }
 
 @layer base {
@@ -311,6 +315,25 @@
   color: transparent;
   -webkit-text-fill-color: transparent;
   animation: holo-shine 11s ease-in-out infinite;
+}
+
+/* ---- Legibility for the login quote sitting on a photo. Deliberately NOT a hard shadow on the
+   glyph — a tight black outline is what makes overlay type look cheap. Instead the work is split:
+   `.quote-scrim` dims the photo in a soft pool behind the block (an ellipse of `night`, invisible
+   as an edge because it fades out well before the container), and the type carries only a wide,
+   low-opacity ambient shadow to lift it off whatever texture survives underneath. ---- */
+
+.quote-scrim {
+  background: radial-gradient(
+    ellipse 62% 46% at 50% 50%,
+    rgb(5 6 14 / 0.6) 0%,
+    rgb(5 6 14 / 0.38) 42%,
+    rgb(5 6 14 / 0) 78%
+  );
+}
+
+.text-on-photo {
+  text-shadow: 0 1px 24px rgb(5 6 14 / 0.72);
 }
 
 /* Casino felt: a static green-baize table — a soft center spotlight, a darker vignette toward

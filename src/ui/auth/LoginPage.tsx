@@ -20,6 +20,12 @@ const LOGIN_BACKDROPS = [
   "/login/login-bg-shibuya.png"
 ];
 
+/** One entry of `login.quotes` in the locale files (text + author are both translated). */
+interface LoginQuote {
+  text: string;
+  author: string;
+}
+
 /** Dark-glass split-screen sign-in: the landing for new users and the destination after sign-out. */
 export function LoginPage() {
   const { t, i18n } = useTranslation();
@@ -30,6 +36,11 @@ export function LoginPage() {
   const [bg] = useState(
     () => LOGIN_BACKDROPS[Math.floor(Math.random() * LOGIN_BACKDROPS.length)],
   );
+  const quotes = t("login.quotes", { returnObjects: true }) as LoginQuote[];
+  // Only the index is stored, so the language switch below re-renders the SAME quote translated
+  // instead of drawing a new one. Sorted independently of the backdrop.
+  const [quoteIndex] = useState(() => Math.floor(Math.random() * quotes.length));
+  const quote = quotes[quoteIndex];
 
   return (
     <main className="relative min-h-dvh bg-night text-white">
@@ -46,6 +57,23 @@ export function LoginPage() {
         aria-hidden="true"
         className="absolute inset-y-0 right-0 hidden w-1/2 bg-night/45 lg:block"
       />
+      {/* The quote sits over the side image — after the veil in the DOM so it reads above it
+          without a z-index. Desktop only; the mobile banner carries its own subtle copy. */}
+      <div className="quote-scrim pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 items-center justify-center px-12 lg:flex">
+        <motion.blockquote
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", bounce: 0.15, duration: 0.7, delay: 0.25 }}
+          className="max-w-lg text-center"
+        >
+          <p className="text-on-photo font-quote text-2xl leading-[1.45] text-balance text-white/95 italic xl:text-[1.9rem]">
+            “{quote.text}”
+          </p>
+          <footer className="text-on-photo font-quote mt-5 text-sm tracking-wide text-white/60">
+            — {quote.author}
+          </footer>
+        </motion.blockquote>
+      </div>
 
       <div className="relative flex min-h-dvh flex-col lg:w-1/2">
         {/* Subtle animated glow behind the form — desktop only, purely decorative. */}
@@ -63,6 +91,14 @@ export function LoginPage() {
             className="h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-linear-to-b from-transparent to-night" />
+          {/* Centred in the banner, on the exact same `.quote-scrim` ellipse as the desktop slot —
+              the pool lands mid-image, which is also where the photo is cleanest (the gradient
+              above already takes the bottom). */}
+          <div className="quote-scrim pointer-events-none absolute inset-0 flex items-center justify-center px-7">
+            <p className="text-on-photo font-quote line-clamp-3 text-center text-[13px] leading-relaxed text-white/95 italic">
+              “{quote.text}” — {quote.author}
+            </p>
+          </div>
         </div>
 
         <div className="relative z-10 flex flex-1 items-center justify-center px-6 py-8 lg:px-12">

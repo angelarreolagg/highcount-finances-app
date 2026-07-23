@@ -81,7 +81,8 @@
   "savings": {
     "heroLabel": "Ahorros totales · neto",
     "breakdown": "Total ahorrado {{saved}} · <ret>+{{returns}} de rendimientos</ret>",
-    "empty": "Aún no hay movimientos de ahorro — registra tu primer depósito para seguir el crecimiento.",
+    "emptyTitle": "Controla tus ahorros aquí",
+    "emptyBody": "En esta página das seguimiento a tus ahorros. Registra un “depósito” cuando apartes dinero, y un movimiento de “rendimientos” cuando tu cuenta pague intereses — tu saldo y la gráfica de crecimiento se construyen a partir de ahí. Agrega tu primer movimiento para empezar.",
     "logMovement": "Registrar un movimiento",
     "balanceOverTime": "Saldo en el tiempo",
     "returnsPerEntry": "Rendimientos por registro",
@@ -337,7 +338,12 @@
     "deleteKeyword": "eliminar",
     "deleteEverything": "Eliminar todo",
     "deleting": "Eliminando…",
-    "deleteDone": "Todos los datos fueron eliminados."
+    "deleteDone": "Todos los datos fueron eliminados.",
+    "deleteAccount": "Eliminar cuenta",
+    "deleteAccountTitle": "¿Eliminar tu cuenta?",
+    "deleteAccountHint": "Elimina permanentemente tu cuenta y todo su contenido — en la nube y en este dispositivo. Esto no se puede deshacer, y volver a iniciar sesión después crea una cuenta nueva y vacía.",
+    "deleteAccountScope": "Esto elimina la cuenta {{email}} y todos sus datos en todas partes.",
+    "deletingAccount": "Eliminando cuenta…"
   },
   "auth": {
     "signIn": "Iniciar sesión",
@@ -369,26 +375,34 @@
     }
   },
   "onboarding": {
-    "nameTitle": "¡Bienvenido! ¿Cómo te llamas?",
-    "nameSubtitle": "Usaremos tu nombre para personalizar tu espacio.",
-    "continue": "Continuar",
+    "introTagline": "Tu dinero, por fin en foco.",
+    "nameTitle": "¡Hola! ¿Cómo te llamas?",
+    "nameSubtitle": "Para que este rincón del dinero se sienta tuyo.",
+    "continue": "¡Vamos!",
     "skip": "Omitir por ahora",
     "maybeLater": "Quizá más tarde",
-    "cardsTitle": "Agrega tus tarjetas",
-    "cardsJoke": "Tranquilo — no estamos aquí para venderte una tarjeta de crédito. Solo necesitamos saber dónde vive tu dinero para poder rastrearlo.",
+    "cardsTitle": "¿Dónde vive tu dinero?",
+    "cardsJoke": "Tranquilo — no venimos a venderte una tarjeta de crédito. Solo necesitamos saber dónde anda tu dinero para echarle un ojo.",
     "addCard": "Agregar tarjeta",
-    "expenseTitle": "Registra tu primer gasto",
-    "expenseBody": "Anímate — agrega algo que hayas gastado hace poco. Este es el hábito que vienes a construir.",
+    "expenseTitle": "Ahora, algo que hayas gastado",
+    "expenseBody": "Anímate — agrega algo que compraste hace poco. Hábito pequeño, gran recompensa.",
     "logExpense": "Registrar gasto",
-    "congratsTitle": "¡Bien hecho!",
-    "congratsBody": "Felicidades — ahora sabes cómo cuidar tu dinero. Y esto es solo el comienzo.",
+    "congratsTitle": "¡Todo listo! 🎉",
+    "congratsBody": "Eso es todo — ya sabes cómo cuidar tu dinero. Y esto es apenas el comienzo.",
     "deposit": {
-      "title": "Agrega tus ahorros iniciales",
-      "body": "¿Ya tienes dinero apartado? Regístralo como tu primer depósito para que tu saldo de ahorros empiece en el lugar correcto.",
-      "account": "Cuenta (opcional)",
-      "submit": "Agregar depósito",
-      "successTitle": "¡Ahorros iniciados!",
-      "successBody": "Tu saldo inicial está listo. Puedes registrar depósitos y rendimientos cuando quieras."
+      "title": "¿Cuánto tienes ahora mismo?",
+      "body": "Pon lo que tienes hoy y lo registramos como tu primer ingreso, para que tu saldo arranque en el lugar correcto.",
+      "account": "Cuenta",
+      "submit": "Agregar ingreso",
+      "successTitle": "¡Dinero adentro! 💸",
+      "successBody": "Tu saldo inicial está listo. Puedes registrar ingresos y gastos cuando quieras."
+    },
+    "salary": {
+      "title": "¿Cuánto ganas al mes?",
+      "body": "Más o menos lo que te llega cada mes — esto impulsa tu autonomía, para que siempre sepas cuánto te dura el dinero.",
+      "label": "Salario mensual promedio",
+      "hint": "Se usa para estimar tu autonomía. Puedes cambiarlo después en Ajustes.",
+      "submit": "Guardar salario"
     },
     "signUpTitle": "Guarda tu progreso",
     "signUpBody": "Ahora mismo todo se guarda solo en este dispositivo — si borras tu navegador, se pierde. Crea una cuenta para respaldarlo y sincronizarlo entre tus dispositivos."

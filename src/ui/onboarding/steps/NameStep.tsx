@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../auth/authContext";
@@ -5,6 +6,20 @@ import { useProfile } from "../../hooks/useProfile";
 import { Field } from "../../components/shared/Field";
 import { control } from "../../components/shared/formStyles";
 import { OnboardingCta, OnboardingSkip } from "../OnboardingLayout";
+
+/** "Presenting the app" intro: the logo springs in, then the welcome copy cascades up under it. */
+const introContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+};
+const introLogo = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: { opacity: 1, scale: 1, transition: { type: "spring" as const, bounce: 0.4 } },
+};
+const introItem = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring" as const, bounce: 0.2 } },
+};
 
 /** First setup step: the user's name (pre-filled from a Google account when available). */
 export function NameStep({ onContinue }: { onContinue: () => void }) {
@@ -27,11 +42,20 @@ export function NameStep({ onContinue }: { onContinue: () => void }) {
 
   return (
     <div className="text-center">
-      <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-3xl bg-white/10 ring-1 ring-white/15">
-        <img src="/favicon/favicon-128x128.png" alt="" className="size-10 rounded-xl" />
-      </div>
-      <h1 className="text-2xl font-bold tracking-tight">{t("onboarding.nameTitle")}</h1>
-      <p className="mx-auto mt-2 max-w-xs text-sm text-white/60">{t("onboarding.nameSubtitle")}</p>
+      <motion.div variants={introContainer} initial="hidden" animate="visible">
+        <motion.div
+          variants={introLogo}
+          className="mx-auto mb-5 flex size-16 items-center justify-center rounded-3xl bg-white/10 ring-1 ring-white/15"
+        >
+          <img src="/favicon/favicon-128x128.png" alt="" className="size-10 rounded-xl" />
+        </motion.div>
+        <motion.h1 variants={introItem} className="text-2xl font-bold tracking-tight">
+          {t("onboarding.nameTitle")}
+        </motion.h1>
+        <motion.p variants={introItem} className="mx-auto mt-2 max-w-xs text-sm text-white/60">
+          {t("onboarding.nameSubtitle")}
+        </motion.p>
+      </motion.div>
 
       <div className="mt-6 text-left">
         <Field label={t("settings.displayName")}>

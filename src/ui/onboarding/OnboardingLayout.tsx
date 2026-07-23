@@ -1,3 +1,5 @@
+import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 /** The shared animated gradient backdrop + drifting blobs (same as PageShell's). */
@@ -10,14 +12,55 @@ export function OnboardingBackdrop() {
   );
 }
 
-/** Minimal splash shown while the gate decides whether to onboard (avoids a dashboard flash). */
-export function OnboardingSplash() {
+const introContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+};
+const introLogo = {
+  hidden: { opacity: 0, scale: 0.85 },
+  visible: { opacity: 1, scale: 1, transition: { type: "spring" as const, bounce: 0.4, duration: 0.7 } },
+};
+const introItem = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { type: "spring" as const, bounce: 0.2 } },
+};
+
+/**
+ * The app's brand intro — logo + wordmark + tagline. Shared by the gate's loading splash and the
+ * wizard's opening transition so both entry paths (Google OAuth return and "continue local") present
+ * the app the same way, with no empty-tile flash. Fills the viewport, centered over the backdrop.
+ */
+export function OnboardingIntro() {
+  const { t } = useTranslation();
   return (
-    <div className="relative flex min-h-dvh items-center justify-center">
+    <div className="relative flex min-h-dvh items-center justify-center px-6">
       <OnboardingBackdrop />
-      <div className="size-12 animate-pulse rounded-2xl bg-white/10 ring-1 ring-white/15 backdrop-blur" />
+      <motion.div
+        variants={introContainer}
+        initial="hidden"
+        animate="visible"
+        className="relative text-center"
+      >
+        <motion.div
+          variants={introLogo}
+          className="mx-auto mb-5 flex size-20 items-center justify-center rounded-3xl bg-white/10 ring-1 ring-white/15 shadow-xl shadow-black/30"
+        >
+          <img src="/favicon/favicon-128x128.png" alt="" className="size-12 rounded-2xl" />
+        </motion.div>
+        <motion.h1 variants={introItem} className="text-3xl font-bold tracking-tight">
+          High Count
+        </motion.h1>
+        <motion.p variants={introItem} className="mx-auto mt-2 max-w-xs text-sm text-white/60">
+          {t("onboarding.introTagline")}
+        </motion.p>
+      </motion.div>
     </div>
   );
+}
+
+/** Splash shown while the gate decides whether to onboard — the branded intro (avoids a dashboard flash). */
+export function OnboardingSplash() {
+  return <OnboardingIntro />;
 }
 
 /**
@@ -89,9 +132,15 @@ export function OnboardingLayout({
             })}
           </div>
         )}
-        <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 shadow-xl shadow-black/30 backdrop-blur-xl">
+        {/* layout="size" animates only width/height (not position, so the column stays centered),
+            so the panel grows/shrinks smoothly as steps of different heights swap in. */}
+        <motion.div
+          layout="size"
+          transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
+          className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 shadow-xl shadow-black/30 backdrop-blur-xl"
+        >
           {children}
-        </div>
+        </motion.div>
       </div>
     </main>
   );

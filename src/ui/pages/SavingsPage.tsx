@@ -51,8 +51,11 @@ export function SavingsPage() {
       {summary && (
         <div className="space-y-4 pt-2">
           {!data?.hasEntries ? (
-            <GlassCard className="text-center">
-              <p className="mb-3 text-sm text-white/60">{t("savings.empty")}</p>
+            <GlassCard className="items-center py-8 text-center">
+              <h2 className="text-lg font-semibold">{t("savings.emptyTitle")}</h2>
+              <p className="mx-auto mt-2 mb-5 max-w-md text-sm text-white/60">
+                {t("savings.emptyBody")}
+              </p>
               <Button variant="primary" onClick={() => openModal("logSavings")}>
                 {t("savings.logMovement")}
               </Button>

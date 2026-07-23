@@ -1,10 +1,10 @@
-import { PiggyBank } from "lucide-react";
+import { Wallet } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Money } from "../../../domain/value-objects/Money";
 import { toISODate } from "../../../domain/value-objects/calendar";
-import { useCards, useLogSavingsGrowth } from "../../hooks/useDashboardData";
+import { useAddTransaction, useCards } from "../../hooks/useDashboardData";
 import { Button } from "../../components/shared/Button";
 import { CardSelect } from "../../components/shared/CardSelect";
 import { DatePicker } from "../../components/shared/DatePicker";
@@ -16,20 +16,20 @@ interface DepositForm {
   amount: string;
   cardId: string;
   date: string;
-  note: string;
+  description: string;
 }
 
 const AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
 const QUICK_AMOUNTS = [100, 500, 1000, 5000];
 
 /**
- * Optional setup step: seed the user's savings balance with a first "deposit" movement.
- * The account (cardId) is just a debit/cash label on the savings entry — no credit/balance
- * effect — so it stays optional. Skipping (or logging) advances the wizard.
+ * Optional setup step: log the user's first income so their balance starts from the right place.
+ * Recorded as an income transaction (type "income", tagged with the seeded Salary category) into
+ * the chosen account — not a savings movement. Skipping (or logging) advances the wizard.
  */
 export function DepositStep({ onContinue }: { onContinue: () => void }) {
   const { t } = useTranslation();
-  const logSavings = useLogSavingsGrowth();
+  const addTransaction = useAddTransaction();
   const { data: cards = [] } = useCards();
   const [logged, setLogged] = useState(false);
 
@@ -41,7 +41,7 @@ export function DepositStep({ onContinue }: { onContinue: () => void }) {
     setValue,
     formState: { errors },
   } = useForm<DepositForm>({
-    defaultValues: { amount: "", cardId: "", date: toISODate(new Date()), note: "" },
+    defaultValues: { amount: "", cardId: "", date: toISODate(new Date()), description: "" },
   });
 
   const cardId = watch("cardId");
@@ -53,8 +53,15 @@ export function DepositStep({ onContinue }: { onContinue: () => void }) {
   };
 
   const onSubmit = handleSubmit((v) => {
-    logSavings.mutate(
-      { kind: "deposit", amount: v.amount, date: v.date, cardId: v.cardId || undefined, note: v.note },
+    addTransaction.mutate(
+      {
+        type: "income",
+        categoryId: "cat-salary",
+        cardId: v.cardId,
+        amount: v.amount,
+        date: v.date,
+        description: v.description,
+      },
       { onSuccess: () => setLogged(true) },
     );
   });
@@ -63,7 +70,7 @@ export function DepositStep({ onContinue }: { onContinue: () => void }) {
     return (
       <div className="text-center">
         <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-mint/15 text-mint ring-1 ring-mint/30">
-          <PiggyBank size={26} strokeWidth={1.8} />
+          <Wallet size={26} strokeWidth={1.8} />
         </div>
         <h1 className="text-xl font-bold tracking-tight">{t("onboarding.deposit.successTitle")}</h1>
         <p className="mx-auto mt-2 max-w-xs text-sm text-white/60">
@@ -107,11 +114,11 @@ export function DepositStep({ onContinue }: { onContinue: () => void }) {
           </div>
         </Field>
 
-        <Field label={t("onboarding.deposit.account")}>
-          <input type="hidden" {...register("cardId")} />
+        <Field label={t("onboarding.deposit.account")} error={errors.cardId?.message}>
+          <input type="hidden" {...register("cardId", { required: t("validation.cardRequired") })} />
           <CardSelect
             value={cardId}
-            onChange={(v) => setValue("cardId", v)}
+            onChange={(v) => setValue("cardId", v, { shouldValidate: true })}
             placeholder={t("placeholders.selectAccount")}
             aria-label={t("onboarding.deposit.account")}
             cards={cards}
@@ -129,17 +136,17 @@ export function DepositStep({ onContinue }: { onContinue: () => void }) {
 
         <Field label={t("fields.description")}>
           <input
-            {...register("note")}
+            {...register("description")}
             placeholder={t("placeholders.descriptionWhat")}
             className={control}
           />
         </Field>
 
-        <Button type="submit" variant="primary" disabled={logSavings.isPending} className="w-full">
-          {logSavings.isPending ? t("common.saving") : t("onboarding.deposit.submit")}
+        <Button type="submit" variant="primary" disabled={addTransaction.isPending} className="w-full">
+          {addTransaction.isPending ? t("common.saving") : t("onboarding.deposit.submit")}
         </Button>
-        {logSavings.error != null && (
-          <p className="text-xs text-coral">{(logSavings.error as Error).message}</p>
+        {addTransaction.error != null && (
+          <p className="text-xs text-coral">{(addTransaction.error as Error).message}</p>
         )}
       </form>
 

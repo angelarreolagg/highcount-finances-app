@@ -97,3 +97,13 @@ export async function setProfileSalary(
     .upsert({ user_id: userId, average_salary: salary === "" ? null : salary });
   if (error) throw new Error(error.message);
 }
+
+/**
+ * Permanently delete the signed-in user's account (see the `delete_account()` SECURITY DEFINER
+ * function in supabase/schema.sql). Removes the auth.users row, which cascade-deletes every table
+ * scoped to that user. The session is invalidated server-side, so the caller should sign out after.
+ */
+export async function deleteAccount(client: SupabaseClient): Promise<void> {
+  const { error } = await client.rpc("delete_account");
+  if (error) throw new Error(error.message);
+}

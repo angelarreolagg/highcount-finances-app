@@ -16,6 +16,7 @@ import { repositories } from "../../infrastructure/di/container";
 import { exportDataset, importDataset } from "../../infrastructure/backup";
 import type { BackupDoc } from "../../infrastructure/backup";
 import { DeleteAllModal } from "../components/modals/DeleteAllModal";
+import { DeleteAccountModal } from "../components/modals/DeleteAccountModal";
 import { Money } from "../../domain/value-objects/Money";
 
 /** Money format guard, shared with the entry modals: whole or 2-decimal amount. */
@@ -50,6 +51,7 @@ export function SettingsPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const language = i18n.resolvedLanguage ?? "en";
   const signedIn = isCloudEnabled && !!user;
 
@@ -281,10 +283,19 @@ export function SettingsPage() {
                 ? t("settings.deleteScopeCloud", { email: user?.email })
                 : t("settings.deleteScopeLocal")}
             </p>
-            <div className="mt-3">
+            <div className="mt-3 flex flex-wrap gap-2">
               <Button type="button" variant="danger" onClick={() => setDeleteOpen(true)}>
                 {t("settings.deleteEverything")}
               </Button>
+              {signedIn && (
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={() => setDeleteAccountOpen(true)}
+                >
+                  {t("settings.deleteAccount")}
+                </Button>
+              )}
             </div>
           </div>
         </GlassCard>
@@ -292,6 +303,10 @@ export function SettingsPage() {
       </div>
 
       <DeleteAllModal open={deleteOpen} onClose={() => setDeleteOpen(false)} />
+      <DeleteAccountModal
+        open={deleteAccountOpen}
+        onClose={() => setDeleteAccountOpen(false)}
+      />
     </PageShell>
   );
 }

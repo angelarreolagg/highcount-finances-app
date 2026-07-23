@@ -24,19 +24,29 @@ interface SettingsState {
   /** Average monthly salary as a Money.toStorage() decimal string ("" = unset). Drives runway. */
   averageMonthlySalary: string;
   setAverageMonthlySalary: (value: string) => void;
+  /** Restore every preference to its first-run default (used when deleting the account). */
+  reset: () => void;
 }
+
+const DEFAULTS = {
+  displayName: "",
+  onboardingComplete: false,
+  theme: DEFAULT_THEME,
+  averageMonthlySalary: "",
+};
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      displayName: "",
+      displayName: DEFAULTS.displayName,
       setDisplayName: (name) => set({ displayName: name }),
-      onboardingComplete: false,
+      onboardingComplete: DEFAULTS.onboardingComplete,
       setOnboardingComplete: (done) => set({ onboardingComplete: done }),
-      theme: DEFAULT_THEME,
+      theme: DEFAULTS.theme,
       setTheme: (theme) => set({ theme }),
-      averageMonthlySalary: "",
+      averageMonthlySalary: DEFAULTS.averageMonthlySalary,
       setAverageMonthlySalary: (value) => set({ averageMonthlySalary: value }),
+      reset: () => set({ ...DEFAULTS }),
     }),
     { name: "highcount:settings" },
   ),

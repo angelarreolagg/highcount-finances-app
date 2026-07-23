@@ -81,7 +81,8 @@
   "savings": {
     "heroLabel": "Total savings · net",
     "breakdown": "Total saved {{saved}} · <ret>+{{returns}} returns</ret>",
-    "empty": "No savings movements yet — log your first deposit to start tracking growth.",
+    "emptyTitle": "Track your savings here",
+    "emptyBody": "This page is where you keep an eye on your savings. Log a “deposit” when you set money aside, and a “returns” movement when your account pays interest — your balance and growth chart build up from there. Add your first movement to get started.",
     "logMovement": "Log a movement",
     "balanceOverTime": "Balance over time",
     "returnsPerEntry": "Returns per entry",
@@ -337,7 +338,12 @@
     "deleteKeyword": "delete",
     "deleteEverything": "Delete everything",
     "deleting": "Deleting…",
-    "deleteDone": "All data deleted."
+    "deleteDone": "All data deleted.",
+    "deleteAccount": "Delete account",
+    "deleteAccountTitle": "Delete your account?",
+    "deleteAccountHint": "Permanently delete your account and everything in it — cloud and on this device. This can't be undone, and signing back in later starts a brand-new empty account.",
+    "deleteAccountScope": "This deletes the account {{email}} and all of its data everywhere.",
+    "deletingAccount": "Deleting account…"
   },
   "auth": {
     "signIn": "Sign in",
@@ -369,26 +375,34 @@
     }
   },
   "onboarding": {
-    "nameTitle": "Welcome! What should we call you?",
-    "nameSubtitle": "We'll use your name to personalize your space.",
-    "continue": "Continue",
+    "introTagline": "Your money, finally in focus.",
+    "nameTitle": "Hey there! What's your name?",
+    "nameSubtitle": "So we can make this little money corner feel like yours.",
+    "continue": "Let's go",
     "skip": "Skip for now",
     "maybeLater": "Maybe later",
-    "cardsTitle": "Add your cards",
-    "cardsJoke": "Don't worry — we're not here to sell you a credit card. We just need to know where your money lives so we can track it.",
+    "cardsTitle": "Where does your money live?",
+    "cardsJoke": "Relax — we're not here to sell you a credit card. We just need to know where your money hangs out so we can keep an eye on it.",
     "addCard": "Add card",
-    "expenseTitle": "Log your first expense",
-    "expenseBody": "Go ahead — add something you spent recently. This is the habit you're here to build.",
+    "expenseTitle": "Now, a little something you spent",
+    "expenseBody": "Go on — add something you bought recently. Tiny habit, big payoff.",
     "logExpense": "Log expense",
-    "congratsTitle": "Nicely done!",
-    "congratsBody": "Congratulations — now you know how to take care of your money. And this is just the start.",
+    "congratsTitle": "You're all set! 🎉",
+    "congratsBody": "That's it — you now know how to take care of your money. And this is only the beginning.",
     "deposit": {
-      "title": "Add your starting savings",
-      "body": "Already have money set aside? Log it as your first deposit so your savings balance starts from the right place.",
-      "account": "Account (optional)",
-      "submit": "Add deposit",
-      "successTitle": "Savings started!",
-      "successBody": "Your starting balance is in. You can log deposits and returns any time."
+      "title": "How much have you got right now?",
+      "body": "Drop in what you have today and we'll log it as your first income, so your balance kicks off in the right spot.",
+      "account": "Account",
+      "submit": "Add income",
+      "successTitle": "Money's in! 💸",
+      "successBody": "Your starting balance is set. You can log income and expenses any time."
+    },
+    "salary": {
+      "title": "What do you pull in each month?",
+      "body": "Roughly what lands in your pocket monthly — this powers your runway, so you always know how long your money lasts.",
+      "label": "Average monthly salary",
+      "hint": "Used to estimate your runway. You can change it later in Settings.",
+      "submit": "Save salary"
     },
     "signUpTitle": "Save your progress",
     "signUpBody": "Right now everything is saved only on this device — clear your browser and it's gone. Create an account to back it up and sync across your devices."

@@ -16,6 +16,8 @@ interface Profile {
   email: string | null;
   avatarUrl: string | null;
   signedIn: boolean;
+  /** True once the profile has resolved (cloud fetch settled when signed in; always true for guests). */
+  profileLoaded: boolean;
   /** Effective theme: synced from the cloud profile when signed in, else the local store. */
   theme: ThemeId;
   /** Average monthly salary (Money.toStorage() decimal string; "" = unset). Drives runway. */
@@ -63,6 +65,8 @@ export function useProfile(): Profile {
     email: user?.email ?? null,
     avatarUrl: meta.avatar_url ?? meta.picture ?? null,
     signedIn,
+    // Guests have no cloud profile; signed-in waits for the first fetch to settle (success or error).
+    profileLoaded: signedIn ? cloud.isFetched : true,
     theme,
     averageMonthlySalary,
     setDisplayName: async (name) => {

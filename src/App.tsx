@@ -7,6 +7,7 @@ import { SettingsPage } from "./ui/pages/SettingsPage";
 import { LoginPage } from "./ui/auth/LoginPage";
 import { OnboardingGate } from "./ui/onboarding/OnboardingGate";
 import { OnboardingPage } from "./ui/onboarding/OnboardingPage";
+import { ThemeTransition } from "./ui/theme/ThemeTransition";
 import { useApplyTheme } from "./ui/theme/useApplyTheme";
 
 /**
@@ -18,8 +19,10 @@ function App() {
   // Keeps <html data-theme> in sync with the selected (and eligibility-gated) color theme.
   useApplyTheme();
   return (
-    <OnboardingGate>
-      <Routes>
+    <>
+      <ThemeTransition />
+      <OnboardingGate>
+        <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/expenses" element={<ExpensesPage />} />
         <Route path="/savings" element={<SavingsPage />} />
@@ -27,8 +30,9 @@ function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/welcome" element={<OnboardingPage />} />
-      </Routes>
-    </OnboardingGate>
+        </Routes>
+      </OnboardingGate>
+    </>
   );
 }
 

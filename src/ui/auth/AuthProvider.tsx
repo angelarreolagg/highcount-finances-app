@@ -72,6 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       signInWithGoogle: async () => {
         if (!supabase) return;
+        // Flag the pending OAuth so ThemeTransition can cover the theme fetch on the return load
+        // (a full page reload, otherwise indistinguishable from a normal reload).
+        sessionStorage.setItem("highcount:oauth-pending", "1");
         const { error } = await supabase.auth.signInWithOAuth({
           provider: "google",
           options: { redirectTo: window.location.origin },

@@ -60,6 +60,16 @@ export function cardSurface(color: string | undefined): string {
   return `linear-gradient(135deg, ${base} 0%, color-mix(in srgb, ${base} 55%, #05060e) 100%)`;
 }
 
+/**
+ * Full inline style for a card-face element: the gradient plus a local `--color-white: #fff`
+ * reset. A card always sits on a dark colored gradient, so its `text-white/…` / `ring-white/…`
+ * must stay light in every theme — this pins white back even under the Excel light theme (which
+ * globally flips `--color-white` to dark ink). A no-op in the dark themes.
+ */
+export function cardSurfaceStyle(color: string | undefined): CSSProperties {
+  return { backgroundImage: cardSurface(color), "--color-white": "#fff" } as CSSProperties;
+}
+
 /** Inline background for a chip tinted by a free hex color; undefined when none (use a class fallback). */
 export function cardChipStyle(color: string | undefined): CSSProperties | undefined {
   return isHexColor(color) ? { backgroundColor: color } : undefined;

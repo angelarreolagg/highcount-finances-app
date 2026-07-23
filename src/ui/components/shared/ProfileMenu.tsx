@@ -6,6 +6,10 @@ import { Link } from "react-router";
 import { useUiStore } from "../../../state/uiStore";
 import { useAuth } from "../../auth/authContext";
 import { useProfile } from "../../hooks/useProfile";
+import { THEMES } from "../../theme/themes";
+import type { ThemeId } from "../../theme/themes";
+import { themeLabel } from "../../i18n/labels";
+import { GlassSelect } from "./GlassSelect";
 import { CardIcon, CoinsIcon, StarIcon, UserIcon } from "./icons";
 
 /** Avatar button + dropdown: the home of account-level actions (per docs/DESIGN.md). */
@@ -14,7 +18,7 @@ export function ProfileMenu({ year }: { year: number }) {
   const [open, setOpen] = useState(false);
   const openModal = useUiStore((s) => s.openModal);
   const { isCloudEnabled, user, signOut } = useAuth();
-  const { displayName, email, avatarUrl, signedIn } = useProfile();
+  const { displayName, email, avatarUrl, signedIn, theme, setTheme } = useProfile();
   const initial =
     displayName.trim().charAt(0).toUpperCase() || (email?.charAt(0).toUpperCase() ?? "");
   const secondary = signedIn ? (displayName ? email : null) : t("profileMenu.localDevice");
@@ -30,6 +34,41 @@ export function ProfileMenu({ year }: { year: number }) {
 
   const itemClass =
     "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm text-white/85 hover:bg-white/10";
+
+  // Each option shows the theme name + a round swatch blending its three accent colors — except
+  // Casino, which gets a little red poker chip (white edge spots + inner ring) for character.
+  const themeOptions = THEMES.map((meta) => {
+    // Default reads as its signature blue rather than the peri→mint→coral blend.
+    const gradient =
+      meta.id === "default"
+        ? "linear-gradient(135deg, #a5b4fc, #818cf8, #2536e8)"
+        : `linear-gradient(135deg, ${meta.swatch[0]}, ${meta.swatch[1]}, ${meta.swatch[2]})`;
+    return {
+      value: meta.id,
+      label: themeLabel(t, meta.id),
+      leading:
+        meta.id === "casino" ? (
+          <svg viewBox="0 0 24 24" aria-hidden className="block size-4">
+            <circle cx="12" cy="12" r="11.5" fill="#c1121f" />
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="3.2"
+              strokeDasharray="3.4 7"
+            />
+            <circle cx="12" cy="12" r="6.2" fill="none" stroke="#ffffff" strokeWidth="1.2" />
+          </svg>
+        ) : (
+          <span
+            className="block size-4 rounded-full ring-1 ring-black/20"
+            style={{ backgroundImage: gradient }}
+          />
+        ),
+    };
+  });
 
   return (
     <div className="relative">
@@ -99,6 +138,24 @@ export function ProfileMenu({ year }: { year: number }) {
                 <CoinsIcon size={16} className="text-white/60" />
                 {t("profileMenu.logSavings")}
               </button>
+
+              {/* Quick theme switch — premium themes only apply when signed in. */}
+              {signedIn && (
+                <>
+                  <div className="mx-3 my-1 border-t border-white/10" />
+                  <div className="px-1.5 py-1.5">
+                    <p className="mb-1.5 px-1.5 text-xs text-white/40">{t("settings.theme")}</p>
+                    <GlassSelect
+                      value={theme}
+                      onChange={(v) => void setTheme(v as ThemeId)}
+                      options={themeOptions}
+                      aria-label={t("settings.theme")}
+                      placeholder={t("settings.theme")}
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="mx-3 my-1 border-t border-white/10" />
               <Link to={`/summary/${year}`} className={itemClass} onClick={() => setOpen(false)}>
                 <StarIcon size={16} className="text-white/60" />

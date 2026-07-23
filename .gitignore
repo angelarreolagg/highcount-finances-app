@@ -17,8 +17,14 @@ dist-ssr
 .env.*
 !.env.example
 
-# Ad-hoc SQL migrations run manually against Supabase (schema.sql is the canonical schema).
+# Supabase SQL kept local-only (run manually against the dashboard, not versioned here).
 supabase/migrations/
+supabase/schema.sql
+
+# Internal design/onboarding/setup docs kept out of version control.
+docs/DESIGN.md
+docs/ONBOARDING.md
+docs/SUPABASE.md
 
 # Editor directories and files
 .vscode/*

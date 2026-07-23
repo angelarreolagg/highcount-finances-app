@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import { AuthForm } from "./AuthForm";
 import { Button } from "../components/shared/Button";
 import { Modal } from "../components/shared/Modal";
+import { LanguageFlag } from "../i18n/LanguageFlag";
 
 /** Background images for the login side panel — add files to public/login/ and list them here. */
-const LOGIN_BACKDROPS = ["/login/login-bg-beach.png"];
+const LOGIN_BACKDROPS = [
+  "/login/login-bg-beach.png",
+  "/login/login-bg-cdmx.png",
+  "/login/login-bg-forest.png",
+  "/login/login-bg-moon.png",
+  "/login/login-bg-newyork.png",
+  "/login/login-bg-newzealand.png",
+  "/login/login-bg-paris.png",
+  "/login/login-bg-piramids.png",
+  "/login/login-bg-shibuya.png"
+];
 
 /** Dark-glass split-screen sign-in: the landing for new users and the destination after sign-out. */
 export function LoginPage() {
@@ -16,7 +27,9 @@ export function LoginPage() {
   const [reconsider, setReconsider] = useState(false);
   const lang = i18n.resolvedLanguage ?? "en";
   // Pick a random backdrop once per mount via a lazy initializer (keeps Math.random out of render).
-  const [bg] = useState(() => LOGIN_BACKDROPS[Math.floor(Math.random() * LOGIN_BACKDROPS.length)]);
+  const [bg] = useState(
+    () => LOGIN_BACKDROPS[Math.floor(Math.random() * LOGIN_BACKDROPS.length)],
+  );
 
   return (
     <main className="relative min-h-dvh bg-night text-white">
@@ -27,29 +40,53 @@ export function LoginPage() {
         aria-hidden="true"
         className="absolute inset-y-0 right-0 hidden h-full w-1/2 object-cover lg:block"
       />
+      {/* Even dark veil over the side image so the busy pixel-art stays calm. Uniform (no gradient
+          asymmetry). Desktop only, non-interactive. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-y-0 right-0 hidden w-1/2 bg-night/45 lg:block"
+      />
 
       <div className="relative flex min-h-dvh flex-col lg:w-1/2">
+        {/* Subtle animated glow behind the form — desktop only, purely decorative. */}
+        <div
+          className="login-aura pointer-events-none absolute inset-0 -z-0 hidden overflow-hidden lg:block"
+          aria-hidden="true"
+        />
+
         {/* Image banner on mobile, fading into the panel. */}
         <div className="relative h-40 shrink-0 lg:hidden">
-          <img src={bg} alt="" aria-hidden="true" className="h-full w-full object-cover" />
+          <img
+            src={bg}
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full object-cover"
+          />
           <div className="absolute inset-0 bg-linear-to-b from-transparent to-night" />
         </div>
 
-        <div className="flex flex-1 items-center justify-center px-6 py-8 lg:px-12">
+        <div className="relative z-10 flex flex-1 items-center justify-center px-6 py-8 lg:px-12">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
-            className="w-full max-w-sm"
+            className="-mt-24 w-full max-w-sm lg:mt-0"
           >
             <div className="mb-6 text-center">
               <img
                 src="/favicon/favicon-128x128.png"
                 alt=""
-                className="mx-auto size-14 rounded-2xl ring-1 ring-white/10"
+                className="mx-auto size-16 rounded-2xl ring-1 ring-white/10 lg:size-[4.2rem]"
               />
-              <h1 className="mt-4 text-2xl font-bold tracking-tight">{t("login.title")}</h1>
-              <p className="mt-1 text-sm text-white/60">{t("login.subtitle")}</p>
+              <h1 className="mt-4 text-2xl font-bold tracking-tight">
+                <Trans
+                  i18nKey="login.title"
+                  components={{ holo: <span className="holo" /> }}
+                />
+              </h1>
+              <p className="mt-1 text-sm text-white/60">
+                {t("login.subtitle")}
+              </p>
             </div>
 
             <AuthForm />
@@ -69,16 +106,18 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => void i18n.changeLanguage("en")}
-                className={lang === "en" ? "font-medium text-white/80" : "text-white/40 hover:text-white/70"}
+                className={`inline-flex items-center gap-1.5 ${lang === "en" ? "font-medium text-white/80" : "text-white/40 hover:text-white/70"}`}
               >
+                <LanguageFlag lang="en" />
                 English
               </button>
               <span className="text-white/20">·</span>
               <button
                 type="button"
                 onClick={() => void i18n.changeLanguage("es")}
-                className={lang === "es" ? "font-medium text-white/80" : "text-white/40 hover:text-white/70"}
+                className={`inline-flex items-center gap-1.5 ${lang === "es" ? "font-medium text-white/80" : "text-white/40 hover:text-white/70"}`}
               >
+                <LanguageFlag lang="es" />
                 Español
               </button>
             </div>
@@ -97,7 +136,9 @@ export function LoginPage() {
             <Button variant="primary" onClick={() => setReconsider(false)}>
               {t("login.reconsiderStay")}
             </Button>
-            <Button onClick={() => navigate("/welcome")}>{t("login.reconsiderContinue")}</Button>
+            <Button onClick={() => navigate("/welcome")}>
+              {t("login.reconsiderContinue")}
+            </Button>
           </div>
         </div>
       </Modal>

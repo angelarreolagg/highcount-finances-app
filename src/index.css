@@ -7,6 +7,14 @@
   --color-peri-deep: #2536e8;
   --color-mint: #34d399;
   --color-coral: #f87171;
+
+  /* Animated backdrop stops + drifting-blob colors. Promoted to variables so a theme can
+     retint the whole page background; each `[data-theme]` block below overrides these. */
+  --backdrop-top: #7c8cf8;
+  --backdrop-mid: #2536e8;
+  --backdrop-deep: #0a1180;
+  --blob-a: rgb(147 197 253 / 0.55);
+  --blob-b: rgb(129 140 248 / 0.5);
 }
 
 @layer base {
@@ -15,7 +23,9 @@
   }
   body {
     background-color: var(--color-night);
-    color: #fff;
+    /* Follows the theme: default white; the Excel light theme flips --color-white to dark ink,
+       which retints every `text-white/…` utility app-wide in one move. */
+    color: var(--color-white);
     -webkit-font-smoothing: antialiased;
   }
   /* Native <button> keeps the default arrow; give every enabled button a pointer. */
@@ -41,6 +51,100 @@
   *::-webkit-scrollbar-track {
     background: transparent;
   }
+}
+
+/* ---- Premium themes -------------------------------------------------------------------
+   Each block overrides the Tailwind v4 `--color-*` custom properties (utilities read them
+   live) plus the backdrop vars. The 5 vibrant themes retint the brand accent (`peri`) and the
+   page backdrop while keeping green=positive / red=warning stable for financial readability.
+   Excel is a genuine light theme (it flips `--color-white` → dark ink). Casino repaints the
+   backdrop as green felt with red/gold accents. Applied via `data-theme` on <html>. ---- */
+
+[data-theme="orange"] {
+  --color-peri: #fb923c;
+  --color-peri-deep: #c2410c;
+  --backdrop-top: #fdba74;
+  --backdrop-mid: #ea580c;
+  --backdrop-deep: #7c2d12;
+  --blob-a: rgb(253 186 116 / 0.5);
+  --blob-b: rgb(251 146 60 / 0.5);
+}
+
+[data-theme="purple"] {
+  --color-peri: #a78bfa;
+  --color-peri-deep: #6d28d9;
+  --backdrop-top: #c4b5fd;
+  --backdrop-mid: #7c3aed;
+  --backdrop-deep: #3b0764;
+  --blob-a: rgb(196 181 253 / 0.5);
+  --blob-b: rgb(167 139 250 / 0.5);
+}
+
+[data-theme="green"] {
+  --color-peri: #22c55e;
+  --color-peri-deep: #15803d;
+  --backdrop-top: #6ee7b7;
+  --backdrop-mid: #059669;
+  --backdrop-deep: #064e3b;
+  --blob-a: rgb(110 231 183 / 0.45);
+  --blob-b: rgb(52 211 153 / 0.5);
+}
+
+[data-theme="darkred"] {
+  --color-peri: #f2545b;
+  --color-peri-deep: #7f1d1d;
+  --backdrop-top: #b91c1c;
+  --backdrop-mid: #7f1d1d;
+  --backdrop-deep: #3b0a0a;
+  --blob-a: rgb(248 113 113 / 0.4);
+  --blob-b: rgb(220 38 38 / 0.45);
+}
+
+[data-theme="yellow"] {
+  --color-peri: #fbbf24;
+  --color-peri-deep: #b45309;
+  --backdrop-top: #fde68a;
+  --backdrop-mid: #d97706;
+  --backdrop-deep: #713f12;
+  --blob-a: rgb(253 230 138 / 0.5);
+  --blob-b: rgb(251 191 36 / 0.5);
+}
+
+/* Excel — light "spreadsheet" theme. Overriding --color-white to dark ink flips every
+   `text-white/…`, `border-white/…`, and `bg-white/…` utility to dark, so the glass surfaces
+   become faint dark tints over a light page and text reads correctly, without touching
+   components. A few decorative spots (dock-ring white sparks) stay light — accepted. */
+[data-theme="excel"] {
+  color-scheme: light;
+  --color-white: #10241a;
+  --color-night: #eef3ee;
+  --color-panel: #f7faf7;
+  --color-peri: #217346;
+  --color-peri-deep: #1a5c38;
+  --color-mint: #1e7e34;
+  --color-coral: #c0392b;
+  --backdrop-top: #dcefe1;
+  --backdrop-mid: #b7e0c4;
+  --backdrop-deep: #eef3ee;
+  --blob-a: rgb(52 168 83 / 0.18);
+  --blob-b: rgb(33 115 70 / 0.16);
+}
+[data-theme="excel"] * {
+  scrollbar-color: rgb(16 36 26 / 0.25) transparent;
+}
+[data-theme="excel"] *::-webkit-scrollbar-thumb {
+  background-color: rgb(16 36 26 / 0.25);
+}
+
+/* Casino — green poker-felt table with casino-red + gold accents. Dark surfaces stay (text is
+   light), so only the backdrop gets a bespoke felt treatment below. */
+[data-theme="casino"] {
+  --color-night: #08301c;
+  --color-panel: #0a3b23;
+  --color-peri: #e0b34d;
+  --color-peri-deep: #6b4e12;
+  --color-mint: #4ade80;
+  --color-coral: #ef4444;
 }
 
 /* ---- App backdrop: the animated gradient is the page background, blue over the
@@ -88,10 +192,10 @@
   background-color: var(--color-night);
   background-image: linear-gradient(
     180deg,
-    #7c8cf8 -12%,
-    #2536e8 30%,
-    #0a1180 62%,
-    #05060e 100%
+    var(--backdrop-top) -12%,
+    var(--backdrop-mid) 30%,
+    var(--backdrop-deep) 62%,
+    var(--color-night) 100%
   );
   background-size: 100% 820px;
   background-repeat: no-repeat;
@@ -106,13 +210,130 @@
 }
 
 .hero-blob-a {
-  background: radial-gradient(circle, rgb(147 197 253 / 0.55), transparent 70%);
+  background: radial-gradient(circle, var(--blob-a), transparent 70%);
   animation: blob-drift-a 26s ease-in-out infinite;
 }
 
 .hero-blob-b {
-  background: radial-gradient(circle, rgb(129 140 248 / 0.5), transparent 70%);
+  background: radial-gradient(circle, var(--blob-b), transparent 70%);
   animation: blob-drift-b 34s ease-in-out infinite;
+}
+
+/* ---- Login aura: a very subtle, slow drifting glow behind the sign-in form on the dark desktop
+   panel. Two blurred accent blobs, low opacity, transform-only animation (GPU-cheap). Calmer and
+   slower than the dashboard backdrop — it adds depth without becoming a second backdrop. ---- */
+
+@keyframes login-aura-a {
+  0%,
+  100% {
+    transform: translate(-12%, -8%) scale(1);
+  }
+  50% {
+    transform: translate(10%, 6%) scale(1.15);
+  }
+}
+
+@keyframes login-aura-b {
+  0%,
+  100% {
+    transform: translate(8%, 10%) scale(1.05);
+  }
+  50% {
+    transform: translate(-6%, -4%) scale(0.95);
+  }
+}
+
+.login-aura::before,
+.login-aura::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  pointer-events: none;
+}
+
+.login-aura::before {
+  top: -10%;
+  left: -5%;
+  width: 60%;
+  height: 55%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-peri-deep) 55%, transparent),
+    transparent 70%
+  );
+  opacity: 0.5;
+  animation: login-aura-a 34s ease-in-out infinite;
+}
+
+.login-aura::after {
+  bottom: -8%;
+  right: -8%;
+  width: 55%;
+  height: 55%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-peri) 40%, transparent),
+    transparent 70%
+  );
+  opacity: 0.35;
+  animation: login-aura-b 42s ease-in-out infinite;
+}
+
+/* ---- Holographic brand name: an iridescent mint→blue gradient clipped to the text with a bright
+   specular band that sweeps across, giving "High Count" a premium holo sheen. Token-based so it
+   follows the accent palette; ambient CSS loop like the backdrop pan. Used on the login title. ---- */
+
+@keyframes holo-shine {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.holo {
+  /* Pearlescent holo: mostly light/white with faint pastel hints of the accent hues mixed toward
+     white — an iridescent sheen, not a saturated gradient. Stays theme-aware via the tokens. */
+  background: linear-gradient(
+    100deg,
+    #f2f5ff 0%,
+    color-mix(in srgb, var(--color-peri) 35%, white) 26%,
+    #ffffff 46%,
+    color-mix(in srgb, var(--color-mint) 28%, white) 66%,
+    color-mix(in srgb, var(--color-peri) 30%, white) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: holo-shine 11s ease-in-out infinite;
+}
+
+/* Casino felt: a static green-baize table — a soft center spotlight, a darker vignette toward
+   the edges, and a faint diagonal weave for texture. No pan; the drifting glow blobs are hidden. */
+[data-theme="casino"] .app-backdrop {
+  background-color: #062416;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgb(255 255 255 / 0.015) 0 2px,
+      transparent 2px 4px
+    ),
+    radial-gradient(150% 90% at 50% -10%, transparent 55%, rgb(0 0 0 / 0.55) 100%),
+    radial-gradient(120% 80% at 50% 0%, #14663b 0%, #0d492a 42%, #062416 100%);
+  background-size:
+    auto,
+    100% 100%,
+    100% 100%;
+  background-repeat: repeat, no-repeat, no-repeat;
+  animation: none;
+}
+[data-theme="casino"] .hero-blob {
+  display: none;
 }
 
 /* ---- ActionDock glow rings: a colored light segment traveling around the
@@ -198,6 +419,15 @@
   }
   /* Ring stays as a static gradient border. */
   .dock-ring::before {
+    animation: none;
+  }
+  /* Login glow stays as a static soft gradient. */
+  .login-aura::before,
+  .login-aura::after {
+    animation: none;
+  }
+  /* Brand holo freezes to a static gradient tint. */
+  .holo {
     animation: none;
   }
 }

@@ -12,8 +12,10 @@ import {
   isBootstrapped,
   markBootstrapped,
   setProfileName,
+  setProfileTheme,
 } from "../../infrastructure/persistence/supabase/repositories";
 import { useSettingsStore } from "../../state/settingsStore";
+import { DEFAULT_THEME, normalizeTheme } from "../theme/themes";
 
 /**
  * Point the app's active backend at the right store for the given session:
@@ -35,6 +37,9 @@ export async function activateBackendForSession(session: Session | null): Promis
       // Carry a locally-set profile name up to the cloud account.
       const localName = useSettingsStore.getState().displayName.trim();
       if (localName) await setProfileName(supabase, userId, localName);
+      // Carry a locally-chosen theme up too, so a guest's pick follows them into the account.
+      const localTheme = normalizeTheme(useSettingsStore.getState().theme);
+      if (localTheme !== DEFAULT_THEME) await setProfileTheme(supabase, userId, localTheme);
       await markBootstrapped(supabase, userId);
     }
     // Seed a default Cash account ONLY if the account is still empty (ensureSeeded is idempotent).

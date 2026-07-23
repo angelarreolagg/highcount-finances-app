@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./authContext";
+import { GoogleSignInButton } from "./GoogleSignInButton";
 import { Button } from "../components/shared/Button";
 import { Field } from "../components/shared/Field";
 import { control } from "../components/shared/formStyles";
@@ -110,14 +111,7 @@ export function AuthForm({ onSignedIn }: { onSignedIn?: () => void }) {
 
   return (
     <div className="space-y-3">
-      <button
-        type="button"
-        onClick={() => void google()}
-        aria-label={t("auth.google")}
-        className="mx-auto block rounded-full transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-peri/40"
-      >
-        <img src="/google/google-signin.png" alt="" className="h-11 w-auto" />
-      </button>
+      <GoogleSignInButton onClick={() => void google()} />
 
       <div className="flex items-center gap-3 text-[11px] text-white/40">
         <span className="h-px flex-1 bg-white/10" />

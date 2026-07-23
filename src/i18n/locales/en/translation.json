@@ -269,6 +269,16 @@
       "violet": "Violet",
       "cyan": "Cyan",
       "fuchsia": "Fuchsia"
+    },
+    "theme": {
+      "default": "Default",
+      "orange": "Orange",
+      "purple": "Purple",
+      "green": "Green",
+      "darkred": "Dark Red",
+      "yellow": "Yellow",
+      "excel": "Excel",
+      "casino": "Casino"
     }
   },
   "categories": {
@@ -295,8 +305,13 @@
     "language": "Language",
     "english": "English",
     "spanish": "Español",
+    "theme": "Theme",
+    "themePremium": "Premium",
+    "themeLockedHint": "Sign in to unlock premium themes.",
+    "themeSignInCta": "Sign in",
+    "themeUnavailable": "Premium themes need cloud sign-in, which isn't set up on this build.",
     "about": "About",
-    "aboutText": "High Count — a local-only personal finance tracker. Your data never leaves this device.",
+    "aboutText": "High Count — a safe and efficient personal finance tracker.",
     "account": "Account & sync",
     "modeLocal": "Local — saved on this device only.",
     "modeCloud": "Signed in as {{email}} — synced to the cloud.",
@@ -375,7 +390,7 @@
     "signUpBody": "Right now everything is saved only on this device — clear your browser and it's gone. Create an account to back it up and sync across your devices."
   },
   "login": {
-    "title": "Sign in to High Count",
+    "title": "Sign in to <holo>High Count</holo>",
     "subtitle": "Your money, tracked — cards, cycles, installments and savings, all in one place.",
     "continueLocal": "Continue without an account",
     "reconsiderTitle": "Sure you want to skip signing in?",

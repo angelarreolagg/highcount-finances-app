@@ -6,6 +6,8 @@ import { GlassCard } from "../components/shared/GlassCard";
 import { GlassSelect } from "../components/shared/GlassSelect";
 import { Button } from "../components/shared/Button";
 import { Field } from "../components/shared/Field";
+import { ThemePicker } from "../components/settings/ThemePicker";
+import { LanguageFlag } from "../i18n/LanguageFlag";
 import { control } from "../components/shared/formStyles";
 import { useUiStore } from "../../state/uiStore";
 import { useAuth } from "../auth/authContext";
@@ -131,7 +133,7 @@ export function SettingsPage() {
               {isCloudEnabled && (
                 <div className="mt-3">
                   {user ? (
-                    <Button type="button" onClick={() => void signOut()}>
+                    <Button type="button" variant="dangerSoft" onClick={() => void signOut()}>
                       {t("auth.signOut")}
                     </Button>
                   ) : (
@@ -179,32 +181,42 @@ export function SettingsPage() {
                   aria-label={t("settings.language")}
                   placeholder={t("settings.language")}
                   options={[
-                    { value: "en", label: t("settings.english") },
-                    { value: "es", label: t("settings.spanish") },
+                    {
+                      value: "en",
+                      label: t("settings.english"),
+                      leading: <LanguageFlag lang="en" className="h-4 w-auto rounded-[2px]" />,
+                    },
+                    {
+                      value: "es",
+                      label: t("settings.spanish"),
+                      leading: <LanguageFlag lang="es" className="h-4 w-auto rounded-[2px]" />,
+                    },
                   ]}
                 />
               </Field>
-            </GlassCard>
-
-            {/* flex-1 lets About absorb the right column's extra height so its bottom aligns
-                with the taller left column — a centered brand plaque instead of an empty gap. */}
-            <GlassCard title={t("settings.about")} className="flex-1">
-              <div className="flex h-full flex-col items-center justify-center gap-3 py-6 text-center">
-                <img
-                  src="/favicon/favicon-128x128.png"
-                  alt=""
-                  className="size-14 rounded-2xl shadow-lg shadow-black/30"
-                />
-                <div>
-                  <p className="text-base font-bold tracking-tight">High Count</p>
-                  <p className="mx-auto mt-1 max-w-xs text-sm text-white/60">
-                    {t("settings.aboutText")}
-                  </p>
-                </div>
+              <div className="mt-4 border-t border-white/10 pt-4">
+                <ThemePicker />
               </div>
             </GlassCard>
           </div>
         </div>
+
+        {/* About spans the full grid width below the two columns — a centered brand plaque. */}
+        <GlassCard title={t("settings.about")} className="mt-4">
+          <div className="flex flex-col items-center justify-center gap-3 py-6 text-center">
+            <img
+              src="/favicon/favicon-128x128.png"
+              alt=""
+              className="size-14 rounded-2xl shadow-lg shadow-black/30"
+            />
+            <div>
+              <p className="text-base font-bold tracking-tight">High Count</p>
+              <p className="mx-auto mt-1 max-w-md text-sm text-white/60">
+                {t("settings.aboutText")}
+              </p>
+            </div>
+          </div>
+        </GlassCard>
 
         <GlassCard title={t("settings.dangerZone")} className="mt-4 ring-1 ring-coral/25">
           <p className="text-sm text-coral/90">{t("settings.deleteAllHint")}</p>

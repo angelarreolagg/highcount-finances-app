@@ -269,6 +269,16 @@
       "violet": "Violeta",
       "cyan": "Cian",
       "fuchsia": "Fucsia"
+    },
+    "theme": {
+      "default": "Predeterminado",
+      "orange": "Naranja",
+      "purple": "Morado",
+      "green": "Verde",
+      "darkred": "Rojo oscuro",
+      "yellow": "Amarillo",
+      "excel": "Excel",
+      "casino": "Casino"
     }
   },
   "categories": {
@@ -295,8 +305,13 @@
     "language": "Idioma",
     "english": "English",
     "spanish": "Español",
+    "theme": "Tema",
+    "themePremium": "Premium",
+    "themeLockedHint": "Inicia sesión para desbloquear los temas premium.",
+    "themeSignInCta": "Iniciar sesión",
+    "themeUnavailable": "Los temas premium requieren iniciar sesión en la nube, que no está configurada en esta versión.",
     "about": "Acerca de",
-    "aboutText": "High Count — un gestor de finanzas personales solo local. Tus datos nunca salen de este dispositivo.",
+    "aboutText": "High Count — un gestor de finanzas personales seguro y eficiente.",
     "account": "Cuenta y sincronización",
     "modeLocal": "Local — guardado solo en este dispositivo.",
     "modeCloud": "Sesión iniciada como {{email}} — sincronizado en la nube.",
@@ -375,7 +390,7 @@
     "signUpBody": "Ahora mismo todo se guarda solo en este dispositivo — si borras tu navegador, se pierde. Crea una cuenta para respaldarlo y sincronizarlo entre tus dispositivos."
   },
   "login": {
-    "title": "Inicia sesión en High Count",
+    "title": "Inicia sesión en <holo>High Count</holo>",
     "subtitle": "Tu dinero, bajo control — tarjetas, ciclos, mensualidades y ahorros, todo en un solo lugar.",
     "continueLocal": "Continuar sin cuenta",
     "reconsiderTitle": "¿Seguro que quieres omitir el inicio de sesión?",

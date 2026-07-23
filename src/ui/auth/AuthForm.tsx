@@ -147,7 +147,7 @@ export function AuthForm({ onSignedIn }: { onSignedIn?: () => void }) {
             className={control}
           />
         </Field>
-        <Button type="submit" variant="primary" disabled={pending} className="w-full">
+        <Button type="submit" variant="primary" disabled={pending} className="w-full mt-4">
           {pending
             ? t("common.saving")
             : t(mode === "signIn" ? "auth.submitSignIn" : "auth.submitSignUp")}

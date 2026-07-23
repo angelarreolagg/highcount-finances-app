@@ -40,18 +40,18 @@ describe("averageMonthlyIncome", () => {
 });
 
 describe("assessRunway", () => {
-  it("warns below 3 months of runway", () => {
-    const result = assessRunway(Money.from("2999"), Money.from("1000"));
+  it("warns below the warning threshold (4 months)", () => {
+    const result = assessRunway(Money.from("3999"), Money.from("1000"));
     expect(result.level).toBe("warning");
-    expect(result.monthsOfRunway?.toString()).toBe("2.999");
+    expect(result.monthsOfRunway?.toString()).toBe("3.999");
   });
 
-  it("is ok at exactly 3 months or more", () => {
-    expect(assessRunway(Money.from("3000"), Money.from("1000")).level).toBe("ok");
+  it("is ok at exactly 4 months or more", () => {
+    expect(assessRunway(Money.from("4000"), Money.from("1000")).level).toBe("ok");
     expect(assessRunway(Money.from("10000"), Money.from("1000")).level).toBe("ok");
   });
 
-  it("is unknown without savings or income data", () => {
+  it("is unknown without a balance or salary", () => {
     expect(assessRunway(null, Money.from("1000")).level).toBe("unknown");
     expect(assessRunway(Money.from("5000"), null).level).toBe("unknown");
     expect(assessRunway(Money.from("5000"), Money.zero()).level).toBe("unknown");

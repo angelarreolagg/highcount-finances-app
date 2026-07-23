@@ -47,7 +47,7 @@
     "realTotal": "Real total (all MSI committed):"
   },
   "runway": {
-    "unknown": "Runway unknown — log savings and an income",
+    "unknown": "Runway unknown — set your monthly salary",
     "months_one": "{{count}} month of runway",
     "months_other": "{{count}} months of runway",
     "belowThreshold": "below {{threshold}}"
@@ -300,6 +300,8 @@
     "displayName": "Display name",
     "displayNamePlaceholder": "Your name",
     "displayNameHint": "Shows on your avatar.",
+    "averageSalary": "Average monthly salary",
+    "averageSalaryHint": "Used to estimate your runway. Leave blank to hide it.",
     "saved": "Saved",
     "preferences": "Preferences",
     "language": "Language",
@@ -309,6 +311,8 @@
     "themePremium": "Premium",
     "themeLockedHint": "Sign in to unlock premium themes.",
     "themeSignInCta": "Sign in",
+    "themeSeeMore": "See more themes",
+    "themeSeeLess": "See fewer",
     "themeUnavailable": "Premium themes need cloud sign-in, which isn't set up on this build.",
     "about": "About",
     "aboutText": "High Count — a safe and efficient personal finance tracker.",

@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCases, repositories } from "../../infrastructure/di/container";
 import { computeCreditUsage } from "../../domain/services/creditAvailability";
 import type { CreditUsage } from "../../domain/services/creditAvailability";
+import { Money } from "../../domain/value-objects/Money";
+import { useProfile } from "./useProfile";
 import type { AddTransactionInput } from "../../application/useCases/addTransaction";
 import type { RegisterMSIPurchaseInput } from "../../application/useCases/registerMSIPurchase";
 import type { LogSavingsGrowthInput } from "../../application/useCases/logSavingsGrowth";
@@ -13,9 +15,13 @@ import type { UpdateTransactionInput } from "../../application/useCases/updateTr
 /** Tanstack Query wraps the application use cases; the UI never touches repositories or IndexedDB directly. */
 
 export function useDashboardSummary(year: number, monthIndex: number) {
+  // Runway's denominator is the user-set average monthly salary (synced via the profile). Keyed
+  // into the query so the runway chip recomputes the moment the salary changes.
+  const { averageMonthlySalary } = useProfile();
+  const salary = averageMonthlySalary ? Money.from(averageMonthlySalary) : null;
   return useQuery({
-    queryKey: ["dashboard", year, monthIndex],
-    queryFn: () => useCases.getDashboardSummary(year, monthIndex),
+    queryKey: ["dashboard", year, monthIndex, averageMonthlySalary],
+    queryFn: () => useCases.getDashboardSummary(year, monthIndex, salary),
   });
 }
 

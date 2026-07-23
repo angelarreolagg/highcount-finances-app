@@ -13,6 +13,7 @@ import {
   markBootstrapped,
   setProfileName,
   setProfileTheme,
+  setProfileSalary,
 } from "../../infrastructure/persistence/supabase/repositories";
 import { useSettingsStore } from "../../state/settingsStore";
 import { DEFAULT_THEME, normalizeTheme } from "../theme/themes";
@@ -40,6 +41,9 @@ export async function activateBackendForSession(session: Session | null): Promis
       // Carry a locally-chosen theme up too, so a guest's pick follows them into the account.
       const localTheme = normalizeTheme(useSettingsStore.getState().theme);
       if (localTheme !== DEFAULT_THEME) await setProfileTheme(supabase, userId, localTheme);
+      // Carry a locally-set average monthly salary up as well.
+      const localSalary = useSettingsStore.getState().averageMonthlySalary.trim();
+      if (localSalary) await setProfileSalary(supabase, userId, localSalary);
       await markBootstrapped(supabase, userId);
     }
     // Seed a default Cash account ONLY if the account is still empty (ensureSeeded is idempotent).

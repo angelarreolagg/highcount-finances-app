@@ -16,6 +16,10 @@ import { repositories } from "../../infrastructure/di/container";
 import { exportDataset, importDataset } from "../../infrastructure/backup";
 import type { BackupDoc } from "../../infrastructure/backup";
 import { DeleteAllModal } from "../components/modals/DeleteAllModal";
+import { Money } from "../../domain/value-objects/Money";
+
+/** Money format guard, shared with the entry modals: whole or 2-decimal amount. */
+const AMOUNT_PATTERN = /^\d+(\.\d{1,2})?$/;
 
 function isBackupDoc(value: unknown): value is BackupDoc {
   const d = value as Partial<BackupDoc> | null;
@@ -32,25 +36,54 @@ function isBackupDoc(value: unknown): value is BackupDoc {
 
 export function SettingsPage() {
   const { t, i18n } = useTranslation();
-  const { displayName, setDisplayName } = useProfile();
+  const { displayName, setDisplayName, averageMonthlySalary, setAverageMonthlySalary } =
+    useProfile();
   const openModal = useUiStore((s) => s.openModal);
   const { isCloudEnabled, user, signOut } = useAuth();
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
   const nameInput = useRef<HTMLInputElement>(null);
-  const [nameSaved, setNameSaved] = useState(false);
+  const salaryInput = useRef<HTMLInputElement>(null);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [profileDirty, setProfileDirty] = useState(false);
+  const [salaryError, setSalaryError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const language = i18n.resolvedLanguage ?? "en";
   const signedIn = isCloudEnabled && !!user;
 
-  const saveName = async () => {
-    const next = (nameInput.current?.value ?? "").trim();
-    if (next !== displayName) {
-      await setDisplayName(next);
-      setNameSaved(true);
+  // Enable Save only when the name or salary field differs from its stored value.
+  const recomputeDirty = () => {
+    const nameVal = nameInput.current?.value ?? "";
+    const salaryVal = salaryInput.current?.value ?? "";
+    setProfileDirty(nameVal !== displayName || salaryVal !== averageMonthlySalary);
+    setProfileSaved(false);
+    setSalaryError(null);
+  };
+
+  const saveProfile = async () => {
+    setSalaryError(null);
+    const nameVal = (nameInput.current?.value ?? "").trim();
+    const salaryRaw = (salaryInput.current?.value ?? "").trim();
+
+    // Validate + normalize the salary only if it actually changed. null = leave as-is.
+    let salaryToStore: string | null = null;
+    if (salaryRaw !== averageMonthlySalary) {
+      if (salaryRaw === "") {
+        salaryToStore = ""; // clears the salary → runway "unknown"
+      } else if (!AMOUNT_PATTERN.test(salaryRaw) || Number(salaryRaw) <= 0) {
+        setSalaryError(t("validation.positiveAmount"));
+        return;
+      } else {
+        salaryToStore = Money.from(salaryRaw).round2().toStorage();
+      }
     }
+
+    if (nameVal !== displayName) await setDisplayName(nameVal);
+    if (salaryToStore !== null) await setAverageMonthlySalary(salaryToStore);
+    setProfileSaved(true);
+    setProfileDirty(false);
   };
 
   const handleExport = async () => {
@@ -100,109 +133,8 @@ export function SettingsPage() {
       }
     >
       <div className="mx-auto w-full max-w-xl pt-2 lg:max-w-5xl">
-        {/* Desktop: two balanced columns (identity + account/data | preferences + about);
-            Danger Zone spans full width below. Mobile: everything stacks. `items-start`
-            keeps each column sized to its own content instead of stretching to match. */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="flex flex-col gap-4">
-            <GlassCard title={t("settings.profile")}>
-              <Field label={t("settings.displayName")}>
-                {/* Uncontrolled + keyed so it re-seeds when the value loads (e.g. cloud fetch);
-                    saved only when the Save button is pressed. */}
-                <input
-                  key={displayName}
-                  ref={nameInput}
-                  defaultValue={displayName}
-                  onChange={() => setNameSaved(false)}
-                  placeholder={t("settings.displayNamePlaceholder")}
-                  autoComplete="off"
-                  className={control}
-                />
-              </Field>
-              <p className="mt-2 text-xs text-white/40">{t("settings.displayNameHint")}</p>
-              <div className="mt-3 flex items-center gap-3">
-                <Button variant="primary" onClick={() => void saveName()}>
-                  {t("common.save")}
-                </Button>
-                {nameSaved && <span className="text-xs text-mint">{t("settings.saved")}</span>}
-              </div>
-            </GlassCard>
-
-            <GlassCard title={t("settings.account")}>
-              <p className="text-sm text-white/60">{modeText}</p>
-              {isCloudEnabled && (
-                <div className="mt-3">
-                  {user ? (
-                    <Button type="button" variant="dangerSoft" onClick={() => void signOut()}>
-                      {t("auth.signOut")}
-                    </Button>
-                  ) : (
-                    <Button type="button" variant="primary" onClick={() => openModal("signIn")}>
-                      {t("auth.signIn")}
-                    </Button>
-                  )}
-                </div>
-              )}
-
-              <div className="mt-5 border-t border-white/10 pt-4">
-                <p className="text-sm font-medium">{t("settings.backup")}</p>
-                <p className="mt-1 text-xs text-white/40">{t("settings.backupHint")}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Button type="button" onClick={() => void handleExport()}>
-                    {t("settings.exportBackup")}
-                  </Button>
-                  <Button type="button" onClick={() => fileInput.current?.click()}>
-                    {t("settings.importBackup")}
-                  </Button>
-                  <input
-                    ref={fileInput}
-                    type="file"
-                    accept="application/json,.json"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) void handleImportFile(file);
-                      e.target.value = "";
-                    }}
-                  />
-                </div>
-                {notice && <p className="mt-2 text-xs text-mint">{notice}</p>}
-                {error && <p className="mt-2 text-xs text-coral">{error}</p>}
-              </div>
-            </GlassCard>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <GlassCard title={t("settings.preferences")}>
-              <Field label={t("settings.language")}>
-                <GlassSelect
-                  value={language}
-                  onChange={(v) => void i18n.changeLanguage(v)}
-                  aria-label={t("settings.language")}
-                  placeholder={t("settings.language")}
-                  options={[
-                    {
-                      value: "en",
-                      label: t("settings.english"),
-                      leading: <LanguageFlag lang="en" className="h-4 w-auto rounded-[2px]" />,
-                    },
-                    {
-                      value: "es",
-                      label: t("settings.spanish"),
-                      leading: <LanguageFlag lang="es" className="h-4 w-auto rounded-[2px]" />,
-                    },
-                  ]}
-                />
-              </Field>
-              <div className="mt-4 border-t border-white/10 pt-4">
-                <ThemePicker />
-              </div>
-            </GlassCard>
-          </div>
-        </div>
-
-        {/* About spans the full grid width below the two columns — a centered brand plaque. */}
-        <GlassCard title={t("settings.about")} className="mt-4">
+        {/* About sits at the very top — a titleless brand plaque. */}
+        <GlassCard>
           <div className="flex flex-col items-center justify-center gap-3 py-6 text-center">
             <img
               src="/favicon/favicon-128x128.png"
@@ -218,19 +150,145 @@ export function SettingsPage() {
           </div>
         </GlassCard>
 
-        <GlassCard title={t("settings.dangerZone")} className="mt-4 ring-1 ring-coral/25">
-          <p className="text-sm text-coral/90">{t("settings.deleteAllHint")}</p>
-          <p className="mt-1 text-xs text-white/50">
-            {signedIn
-              ? t("settings.deleteScopeCloud", { email: user?.email })
-              : t("settings.deleteScopeLocal")}
-          </p>
-          <div className="mt-3">
-            <Button type="button" variant="danger" onClick={() => setDeleteOpen(true)}>
-              {t("settings.deleteEverything")}
-            </Button>
+        {/* Profile + Preferences side by side, stretched to equal height (default grid stretch).
+            Profile pins its account status + sign out to the bottom so it fills the taller column. */}
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <GlassCard title={t("settings.profile")}>
+            <div className="flex h-full flex-col">
+              <Field label={t("settings.displayName")}>
+                {/* Uncontrolled + keyed so it re-seeds when the value loads (e.g. cloud fetch);
+                    saved only when the Save button is pressed. */}
+                <input
+                  key={displayName}
+                  ref={nameInput}
+                  defaultValue={displayName}
+                  onChange={recomputeDirty}
+                  placeholder={t("settings.displayNamePlaceholder")}
+                  autoComplete="off"
+                  className={control}
+                />
+              </Field>
+              <p className="mt-2 text-xs text-white/40">{t("settings.displayNameHint")}</p>
+
+              <div className="mt-4 border-t border-white/10 pt-4">
+                <Field label={t("settings.averageSalary")} error={salaryError ?? undefined}>
+                  <input
+                    key={averageMonthlySalary}
+                    ref={salaryInput}
+                    defaultValue={averageMonthlySalary}
+                    onChange={recomputeDirty}
+                    inputMode="decimal"
+                    placeholder={t("placeholders.amount")}
+                    autoComplete="off"
+                    className={control}
+                  />
+                </Field>
+                <p className="mt-2 text-xs text-white/40">{t("settings.averageSalaryHint")}</p>
+              </div>
+
+              {/* One Save for the whole card — enabled only when something changed. */}
+              <div className="mt-4 flex items-center gap-3">
+                <Button
+                  variant="primary"
+                  disabled={!profileDirty}
+                  onClick={() => void saveProfile()}
+                >
+                  {t("common.save")}
+                </Button>
+                {profileSaved && <span className="text-xs text-mint">{t("settings.saved")}</span>}
+              </div>
+
+              {/* Account status + sign out pinned to the bottom to match the Preferences height. */}
+              <div className="mt-auto border-t border-white/10 pt-4">
+                <p className="text-sm text-white/60">{modeText}</p>
+                {isCloudEnabled && (
+                  <div className="mt-3">
+                    {user ? (
+                      <Button type="button" variant="dangerSoft" onClick={() => void signOut()}>
+                        {t("auth.signOut")}
+                      </Button>
+                    ) : (
+                      <Button type="button" variant="primary" onClick={() => openModal("signIn")}>
+                        {t("auth.signIn")}
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </GlassCard>
+
+          <GlassCard title={t("settings.preferences")}>
+            <Field label={t("settings.language")}>
+              <GlassSelect
+                value={language}
+                onChange={(v) => void i18n.changeLanguage(v)}
+                aria-label={t("settings.language")}
+                placeholder={t("settings.language")}
+                options={[
+                  {
+                    value: "en",
+                    label: t("settings.english"),
+                    leading: <LanguageFlag lang="en" className="h-4 w-auto rounded-[2px]" />,
+                  },
+                  {
+                    value: "es",
+                    label: t("settings.spanish"),
+                    leading: <LanguageFlag lang="es" className="h-4 w-auto rounded-[2px]" />,
+                  },
+                ]}
+              />
+            </Field>
+            <div className="mt-4 border-t border-white/10 pt-4">
+              <ThemePicker />
+            </div>
+          </GlassCard>
+        </div>
+
+        {/* Backup + danger zone — full width on desktop. */}
+        <GlassCard title={t("settings.account")} className="mt-4">
+          <div>
+            <p className="text-sm font-medium">{t("settings.backup")}</p>
+            <p className="mt-1 text-xs text-white/40">{t("settings.backupHint")}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button type="button" onClick={() => void handleExport()}>
+                {t("settings.exportBackup")}
+              </Button>
+              <Button type="button" onClick={() => fileInput.current?.click()}>
+                {t("settings.importBackup")}
+              </Button>
+              <input
+                ref={fileInput}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void handleImportFile(file);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+            {notice && <p className="mt-2 text-xs text-mint">{notice}</p>}
+            {error && <p className="mt-2 text-xs text-coral">{error}</p>}
+          </div>
+
+          <div className="mt-5 border-t border-coral/20 pt-4">
+            <p className="text-sm font-medium text-coral">{t("settings.dangerZone")}</p>
+            <p className="mt-1 text-xs text-coral/80">{t("settings.deleteAllHint")}</p>
+            <p className="mt-1 text-xs text-white/50">
+              {signedIn
+                ? t("settings.deleteScopeCloud", { email: user?.email })
+                : t("settings.deleteScopeLocal")}
+            </p>
+            <div className="mt-3">
+              <Button type="button" variant="danger" onClick={() => setDeleteOpen(true)}>
+                {t("settings.deleteEverything")}
+              </Button>
+            </div>
           </div>
         </GlassCard>
+
       </div>
 
       <DeleteAllModal open={deleteOpen} onClose={() => setDeleteOpen(false)} />

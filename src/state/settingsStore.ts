@@ -21,6 +21,9 @@ interface SettingsState {
   /** Selected color theme (see `ui/theme/themes.ts`). */
   theme: ThemeId;
   setTheme: (theme: ThemeId) => void;
+  /** Average monthly salary as a Money.toStorage() decimal string ("" = unset). Drives runway. */
+  averageMonthlySalary: string;
+  setAverageMonthlySalary: (value: string) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -32,6 +35,8 @@ export const useSettingsStore = create<SettingsState>()(
       setOnboardingComplete: (done) => set({ onboardingComplete: done }),
       theme: DEFAULT_THEME,
       setTheme: (theme) => set({ theme }),
+      averageMonthlySalary: "",
+      setAverageMonthlySalary: (value) => set({ averageMonthlySalary: value }),
     }),
     { name: "highcount:settings" },
   ),

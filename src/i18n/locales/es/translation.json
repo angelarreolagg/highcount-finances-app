@@ -47,7 +47,7 @@
     "realTotal": "Total real (todo MSI comprometido):"
   },
   "runway": {
-    "unknown": "Autonomía desconocida — registra ahorros y un ingreso",
+    "unknown": "Autonomía desconocida — define tu salario mensual",
     "months_one": "{{count}} mes de autonomía",
     "months_other": "{{count}} meses de autonomía",
     "belowThreshold": "por debajo de {{threshold}}"
@@ -300,6 +300,8 @@
     "displayName": "Nombre para mostrar",
     "displayNamePlaceholder": "Tu nombre",
     "displayNameHint": "Se muestra en tu avatar.",
+    "averageSalary": "Salario mensual promedio",
+    "averageSalaryHint": "Se usa para estimar tu autonomía. Déjalo vacío para ocultarla.",
     "saved": "Guardado",
     "preferences": "Preferencias",
     "language": "Idioma",
@@ -309,6 +311,8 @@
     "themePremium": "Premium",
     "themeLockedHint": "Inicia sesión para desbloquear los temas premium.",
     "themeSignInCta": "Iniciar sesión",
+    "themeSeeMore": "Ver más temas",
+    "themeSeeLess": "Ver menos",
     "themeUnavailable": "Los temas premium requieren iniciar sesión en la nube, que no está configurada en esta versión.",
     "about": "Acerca de",
     "aboutText": "High Count — un gestor de finanzas personales seguro y eficiente.",

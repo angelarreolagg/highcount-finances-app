@@ -2,7 +2,7 @@ import type Decimal from "decimal.js";
 import type { Transaction } from "../entities/Transaction";
 import { Money } from "../value-objects/Money";
 
-export const RUNWAY_WARNING_THRESHOLD_MONTHS = 3;
+export const RUNWAY_WARNING_THRESHOLD_MONTHS = 4;
 
 export type RiskLevel = "ok" | "warning" | "unknown";
 

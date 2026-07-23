@@ -4,6 +4,7 @@ import {
   getProfile,
   setProfileName,
   setProfileTheme,
+  setProfileSalary,
 } from "../../infrastructure/persistence/supabase/repositories";
 import { useSettingsStore } from "../../state/settingsStore";
 import { normalizeTheme } from "../theme/themes";
@@ -17,8 +18,11 @@ interface Profile {
   signedIn: boolean;
   /** Effective theme: synced from the cloud profile when signed in, else the local store. */
   theme: ThemeId;
+  /** Average monthly salary (Money.toStorage() decimal string; "" = unset). Drives runway. */
+  averageMonthlySalary: string;
   setDisplayName: (name: string) => Promise<void>;
   setTheme: (theme: ThemeId) => Promise<void>;
+  setAverageMonthlySalary: (value: string) => Promise<void>;
 }
 
 /**
@@ -32,6 +36,8 @@ export function useProfile(): Profile {
   const setLocalName = useSettingsStore((s) => s.setDisplayName);
   const localTheme = useSettingsStore((s) => s.theme);
   const setLocalTheme = useSettingsStore((s) => s.setTheme);
+  const localSalary = useSettingsStore((s) => s.averageMonthlySalary);
+  const setLocalSalary = useSettingsStore((s) => s.setAverageMonthlySalary);
   const queryClient = useQueryClient();
   const signedIn = isCloudEnabled && !!user && !!supabase;
 
@@ -49,12 +55,16 @@ export function useProfile(): Profile {
     ? normalizeTheme(cloud.data?.theme ?? localTheme)
     : normalizeTheme(localTheme);
 
+  // Signed-in: prefer the cloud value once loaded, falling back to the local store while in flight.
+  const averageMonthlySalary = signedIn ? (cloud.data?.averageSalary ?? localSalary) : localSalary;
+
   return {
     displayName: signedIn ? (cloud.data?.displayName ?? "") : localName,
     email: user?.email ?? null,
     avatarUrl: meta.avatar_url ?? meta.picture ?? null,
     signedIn,
     theme,
+    averageMonthlySalary,
     setDisplayName: async (name) => {
       if (signedIn) {
         await setProfileName(supabase!, user!.id, name);
@@ -69,6 +79,13 @@ export function useProfile(): Profile {
       setLocalTheme(next);
       if (signedIn) {
         await setProfileTheme(supabase!, user!.id, next);
+        await queryClient.invalidateQueries({ queryKey: ["profile"] });
+      }
+    },
+    setAverageMonthlySalary: async (value) => {
+      setLocalSalary(value);
+      if (signedIn) {
+        await setProfileSalary(supabase!, user!.id, value);
         await queryClient.invalidateQueries({ queryKey: ["profile"] });
       }
     },

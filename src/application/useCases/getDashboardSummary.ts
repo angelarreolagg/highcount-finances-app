@@ -5,8 +5,9 @@ import type { TransactionRepository } from "../../domain/repositories/Transactio
 import { computeBalances } from "../../domain/services/balances";
 import { getYearMonthStatuses } from "../../domain/services/billingCycle";
 import { summarizeTransactions, summarizeYearByMonth } from "../../domain/services/monthlySummary";
-import { assessRunway, averageMonthlyIncome } from "../../domain/services/riskIndicator";
+import { assessRunway } from "../../domain/services/riskIndicator";
 import { buildSavingsSummary } from "../../domain/services/savingsSummary";
+import type { Money } from "../../domain/value-objects/Money";
 import type { DashboardSummaryDTO } from "../dto/dashboard";
 
 export interface GetDashboardSummaryDeps {
@@ -20,6 +21,8 @@ export function makeGetDashboardSummary(deps: GetDashboardSummaryDeps) {
   return async function getDashboardSummary(
     year: number,
     monthIndex: number,
+    /** Runway denominator: the user-set average monthly salary; null → runway is "unknown". */
+    averageMonthlySalary: Money | null,
     today: Date = new Date(),
   ): Promise<DashboardSummaryDTO> {
     const [monthTransactions, yearTransactions, allTransactions, cards, categories, savingsEntries] =
@@ -35,10 +38,12 @@ export function makeGetDashboardSummary(deps: GetDashboardSummaryDeps) {
     const totals = summarizeTransactions(monthTransactions);
     const savings = buildSavingsSummary(savingsEntries);
     const savingsBalance = savingsEntries.length > 0 ? savings.currentBalance : null;
-    const runway = assessRunway(savingsBalance, averageMonthlyIncome(allTransactions));
     // Income logged to a credit card is a card payment, not cash income — exclude it.
     const creditCardIds = new Set(cards.filter((c) => c.type === "credit").map((c) => c.id));
     const balances = computeBalances(allTransactions, today, creditCardIds);
+    // Runway = real balance (money after ALL committed MSI) ÷ the user's average monthly salary
+    // (sole basis; a null salary → "unknown").
+    const runway = assessRunway(balances.realBalance, averageMonthlySalary);
 
     const largest = totals.largestExpense;
     return {

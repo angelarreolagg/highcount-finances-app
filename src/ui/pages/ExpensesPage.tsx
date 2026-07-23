@@ -14,7 +14,7 @@ import { useUiStore } from "../../state/uiStore";
 import { RowActions } from "../components/shared/RowActions";
 import { seedLabel, cardTypeLabel, chipColorLabel } from "../i18n/labels";
 import { categoryIcon } from "../utils/categoryIcons";
-import { cardSurface, CHIP_COLOR_OPTIONS } from "../utils/chips";
+import { cardSurfaceStyle, CHIP_COLOR_OPTIONS } from "../utils/chips";
 import { Money } from "../../domain/value-objects/Money";
 
 type TypeFilter = "expense" | "income" | "all";
@@ -122,7 +122,7 @@ export function ExpensesPage() {
                   leading: (
                     <span
                       className="block size-4 rounded"
-                      style={{ backgroundImage: cardSurface(c.color) }}
+                      style={cardSurfaceStyle(c.color)}
                     />
                   ),
                 })),

@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { useIntroClock } from "./introPlayback";
 
 /** The shared animated gradient backdrop + drifting blobs (same as PageShell's). */
 export function OnboardingBackdrop() {
@@ -12,49 +13,101 @@ export function OnboardingBackdrop() {
   );
 }
 
-const introContainer = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
-};
-const introLogo = {
-  hidden: { opacity: 0, scale: 0.85 },
-  visible: { opacity: 1, scale: 1, transition: { type: "spring" as const, bounce: 0.4, duration: 0.7 } },
-};
-const introItem = {
+/**
+ * The stage every onboarding screen plays on. Mounted ONCE by the page and kept alive across the
+ * intro → wizard handoff: if the backdrop unmounts mid-transition the screen flashes bare `bg-night`
+ * (the old "fade to black") and the ambient blob/gradient keyframes restart from zero.
+ */
+export function OnboardingScene({ children }: { children: ReactNode }) {
+  return (
+    <main className="relative flex min-h-dvh flex-col items-center justify-center px-5 py-10">
+      <OnboardingBackdrop />
+      {children}
+    </main>
+  );
+}
+
+/**
+ * The brand tile — the one element that survives the whole onboarding opening. It appears centered
+ * in the intro and again in the name step's header; the shared `layoutId` means Motion *travels and
+ * shrinks the same tile* between those two slots instead of fading one out and springing another
+ * in. Only ever render one at a time.
+ */
+export function OnboardingMark({ size = "card" }: { size?: "hero" | "card" }) {
+  const hero = size === "hero";
+  return (
+    <motion.div
+      layoutId="onboarding-mark"
+      transition={{ type: "spring", bounce: 0.12, duration: 0.9 }}
+      className={`mx-auto flex items-center justify-center rounded-3xl bg-white/10 ring-1 ring-white/15 ${
+        hero ? "size-20 shadow-xl shadow-black/30" : "size-16"
+      }`}
+    >
+      <img
+        src="/favicon/favicon-128x128.png"
+        alt=""
+        className={hero ? "size-12 rounded-2xl" : "size-10 rounded-xl"}
+      />
+    </motion.div>
+  );
+}
+
+const wordmark = {
   hidden: { opacity: 0, y: 10 },
   visible: { opacity: 1, y: 0, transition: { type: "spring" as const, bounce: 0.2 } },
 };
 
 /**
- * The app's brand intro — logo + wordmark + tagline. Shared by the gate's loading splash and the
- * wizard's opening transition so both entry paths (Google OAuth return and "continue local") present
- * the app the same way, with no empty-tile flash. Fills the viewport, centered over the backdrop.
+ * The intro's wordmark + tagline — everything *except* the mark, so the two can leave separately:
+ * this block blurs away while the mark flies on into the form card.
  */
-export function OnboardingIntro() {
+export function OnboardingWordmark({
+  instant = false,
+  held = false,
+}: {
+  /** Mount already in place (the beat played on the previous route) instead of replaying it. */
+  instant?: boolean;
+  /** Hold at the start of the entrance — used while the auth cover hides the screen. */
+  held?: boolean;
+}) {
   const { t } = useTranslation();
   return (
-    <div className="relative flex min-h-dvh items-center justify-center px-6">
-      <OnboardingBackdrop />
+    <motion.div
+      initial={instant ? false : "hidden"}
+      animate={held ? "hidden" : "visible"}
+      exit={{ opacity: 0, y: 10, filter: "blur(6px)", transition: { duration: 0.45 } }}
+      variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } } }}
+      className="mt-5 text-center"
+    >
+      <motion.h1 variants={wordmark} className="text-3xl font-bold tracking-tight">
+        High Count
+      </motion.h1>
+      <motion.p variants={wordmark} className="mx-auto mt-2 max-w-xs text-sm text-white/60">
+        {t("onboarding.introTagline")}
+      </motion.p>
+    </motion.div>
+  );
+}
+
+/**
+ * The app's brand intro — mark + wordmark + tagline, centered. Used standalone as the gate's
+ * loading splash; the wizard composes the same two pieces itself so it can hand the mark off.
+ */
+export function OnboardingIntro() {
+  // The clock (and the entrance) start only once the auth cover is gone — behind it the beat would
+  // be spent invisibly and the wizard would take over mid-animation.
+  const { covered, startedBefore } = useIntroClock();
+  return (
+    <OnboardingScene>
       <motion.div
-        variants={introContainer}
-        initial="hidden"
-        animate="visible"
-        className="relative text-center"
+        initial={startedBefore ? false : { opacity: 0, scale: 0.85 }}
+        animate={covered ? { opacity: 0, scale: 0.85 } : { opacity: 1, scale: 1 }}
+        transition={{ type: "spring", bounce: 0.35, duration: 0.9 }}
       >
-        <motion.div
-          variants={introLogo}
-          className="mx-auto mb-5 flex size-20 items-center justify-center rounded-3xl bg-white/10 ring-1 ring-white/15 shadow-xl shadow-black/30"
-        >
-          <img src="/favicon/favicon-128x128.png" alt="" className="size-12 rounded-2xl" />
-        </motion.div>
-        <motion.h1 variants={introItem} className="text-3xl font-bold tracking-tight">
-          High Count
-        </motion.h1>
-        <motion.p variants={introItem} className="mx-auto mt-2 max-w-xs text-sm text-white/60">
-          {t("onboarding.introTagline")}
-        </motion.p>
+        <OnboardingMark size="hero" />
       </motion.div>
-    </div>
+      <OnboardingWordmark instant={startedBefore} held={covered} />
+    </OnboardingScene>
   );
 }
 
@@ -97,7 +150,10 @@ export function OnboardingSkip({ children, ...props }: ButtonHTMLAttributes<HTML
   );
 }
 
-/** The distraction-free wizard frame: backdrop + centered glass column + optional progress dots. */
+/**
+ * The wizard's centered glass column (progress dots + panel). The stage around it belongs to
+ * `OnboardingScene`, which the page keeps mounted across the intro handoff.
+ */
 export function OnboardingLayout({
   progress,
   children,
@@ -107,41 +163,53 @@ export function OnboardingLayout({
   children: ReactNode;
 }) {
   return (
-    <main className="relative flex min-h-dvh flex-col items-center justify-center px-5 py-10">
-      <OnboardingBackdrop />
-      <div className="w-full max-w-md">
-        {progress && (
-          <div
-            className="mb-6 flex items-center justify-center gap-2"
-            role="list"
-            aria-label="Progress"
-          >
-            {Array.from({ length: progress.total }, (_, i) => {
-              const active = i === progress.current - 1;
-              const done = i < progress.current - 1;
-              return (
-                <span
-                  key={i}
-                  role="listitem"
-                  aria-current={active ? "step" : undefined}
-                  className={`h-1.5 rounded-full transition-all ${
-                    active ? "w-6 bg-peri" : done ? "w-1.5 bg-peri/50" : "w-1.5 bg-white/15"
-                  }`}
-                />
-              );
-            })}
-          </div>
-        )}
-        {/* layout="size" animates only width/height (not position, so the column stays centered),
-            so the panel grows/shrinks smoothly as steps of different heights swap in. */}
+    <div className="w-full max-w-md">
+      {progress && (
         <motion.div
-          layout="size"
-          transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
-          className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 shadow-xl shadow-black/30 backdrop-blur-xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+          className="mb-6 flex items-center justify-center gap-2"
+          role="list"
+          aria-label="Progress"
         >
-          {children}
+          {Array.from({ length: progress.total }, (_, i) => {
+            const active = i === progress.current - 1;
+            const done = i < progress.current - 1;
+            return (
+              <span
+                key={i}
+                role="listitem"
+                aria-current={active ? "step" : undefined}
+                className={`h-1.5 rounded-full transition-all ${
+                  active ? "w-6 bg-peri" : done ? "w-1.5 bg-peri/50" : "w-1.5 bg-white/15"
+                }`}
+              />
+            );
+          })}
         </motion.div>
-      </div>
-    </main>
+      )}
+      {/* layout="size" animates only width/height (not position, so the column stays centered),
+          so the panel grows/shrinks smoothly as steps of different heights swap in. */}
+      <motion.div
+        layout="size"
+        transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
+        className="relative p-6"
+      >
+        {/* The glass is its own layer BEHIND the content rather than a class on the panel: the
+            entrance fades it in, and anything that fades must not be an ancestor of the arriving
+            mark (that's what made the flight invisible). `layout` keeps its radius undistorted
+            while the panel springs between step heights. */}
+        <motion.div
+          layout
+          aria-hidden="true"
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", bounce: 0.1, duration: 0.7, delay: 0.2 }}
+          className="absolute inset-0 rounded-3xl border border-white/10 bg-white/[0.06] shadow-xl shadow-black/30 backdrop-blur-xl"
+        />
+        <div className="relative">{children}</div>
+      </motion.div>
+    </div>
   );
 }

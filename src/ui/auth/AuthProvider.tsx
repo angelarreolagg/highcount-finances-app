@@ -5,9 +5,14 @@ import type { Session } from "@supabase/supabase-js";
 import { getActiveUserId } from "../../infrastructure/di/container";
 import { queryClient } from "../../infrastructure/queryClient";
 import { isCloudEnabled, supabase } from "../../infrastructure/supabase/client";
+import { useBackendStore } from "../../state/backendStore";
+import { useSettingsStore } from "../../state/settingsStore";
+import { COVER_FADE_MS, useThemeTransitionStore } from "../../state/themeTransitionStore";
 import { AuthContext } from "./authContext";
 import type { AuthContextValue } from "./authContext";
 import { activateBackendForSession } from "./backend";
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Tracks the Supabase session and re-points the active backend on sign in / out
@@ -20,6 +25,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   // With cloud disabled there's no session to load, so we're hydrated from the start.
   const [hydrated, setHydrated] = useState(() => !supabase);
+  // `bootstrapBackend()` already activated the initial session before first render, so the backend
+  // starts in sync; it only goes out of sync while an in-app auth change is being applied.
+  const backendReady = useBackendStore((s) => s.ready);
+  const setBackendReady = useBackendStore((s) => s.setReady);
 
   useEffect(() => {
     if (!supabase) return;
@@ -39,8 +48,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // If the live backend already matches this session, there's nothing to do. This is exactly
     // the OAuth-return case (bootstrap already activated it) — skipping avoids the redundant
     // queryClient.clear() whose refetch would deadlock against Supabase's still-held auth lock.
-    if (userId === getActiveUserId()) return;
+    // Also re-raises the flag if a previous activation was cancelled by this very re-run (A → out →
+    // A in quick succession), which would otherwise leave the app stuck behind the splash.
+    if (userId === getActiveUserId()) {
+      setBackendReady(true);
+      return;
+    }
 
+    // The live `repositories` binding still points at the OUTGOING session from here until
+    // activation finishes — hold off every data read (and any routing decision made from one).
+    setBackendReady(false);
     let cancelled = false;
     // Defer off the auth-event tick (Supabase deadlock avoidance) before touching the client.
     const timer = setTimeout(() => {
@@ -52,8 +69,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         if (cancelled) return;
         queryClient.clear();
-        // On sign-out, deterministically land on the login screen.
-        if (!userId) navigate("/login", { replace: true });
+        setBackendReady(true);
+        // On sign-out, deterministically land on the login screen. The persisted settings are the
+        // *local* (guest) identity — wipe them so the account's theme / name / salary / onboarding
+        // flag can't bleed into whoever signs in next. Done here rather than in the `signOut`
+        // action so an expired session or another tab's sign-out is covered too.
+        if (!userId) {
+          useSettingsStore.getState().reset();
+          navigate("/login", { replace: true });
+        }
       })();
     }, 0);
     return () => {
@@ -68,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       isCloudEnabled,
       authReady: hydrated,
+      backendReady,
       session,
       user: session?.user ?? null,
       signInWithGoogle: async () => {
@@ -100,11 +125,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       signOut: async () => {
         if (!supabase) return;
+        // Raise the cover BEFORE dropping the session: losing the session flips the premium theme
+        // back to default and clears the query cache, so everything from here to the /login mount
+        // must happen underneath. The cover lifts once /login is up (see ThemeTransition).
+        useThemeTransitionStore.getState().startCover(true, "/login");
+        await sleep(COVER_FADE_MS);
         const { error } = await supabase.auth.signOut();
-        if (error) throw new Error(error.message);
+        if (error) {
+          useThemeTransitionStore.getState().endCover();
+          throw new Error(error.message);
+        }
       },
     }),
-    [session, hydrated],
+    [session, hydrated, backendReady],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

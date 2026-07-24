@@ -7,6 +7,7 @@ import { supabase } from "../../../infrastructure/supabase/client";
 import { deleteAccount } from "../../../infrastructure/persistence/supabase/repositories";
 import { useSettingsStore } from "../../../state/settingsStore";
 import { useAuth } from "../../auth/authContext";
+import { clearLocalDatasetClaim } from "../../auth/backend";
 import { Button } from "../shared/Button";
 import { control } from "../shared/formStyles";
 import { Modal } from "../shared/Modal";
@@ -44,6 +45,8 @@ export function DeleteAccountModal({ open, onClose }: { open: boolean; onClose: 
       await resetDataset(createIndexedDbRepositories());
       // 3. Reset local preferences (name/theme/salary/onboarding) → next account is truly new.
       useSettingsStore.getState().reset();
+      // …and release the "already absorbed" claim, since there's no local dataset left to absorb.
+      clearLocalDatasetClaim();
       // 4. Sign out — the server already invalidated the session, so tolerate a failure here.
       try {
         await signOut();

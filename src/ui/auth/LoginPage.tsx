@@ -36,6 +36,10 @@ export function LoginPage() {
   const [bg] = useState(
     () => LOGIN_BACKDROPS[Math.floor(Math.random() * LOGIN_BACKDROPS.length)],
   );
+  // The backdrop often decodes a beat after mount (e.g. right as the sign-out cover lifts) — fade
+  // it in on load so it never pops in mid-transition. Both slots share the same src, so one flag.
+  const [bgLoaded, setBgLoaded] = useState(false);
+  const bgFade = `transition-opacity duration-500 ${bgLoaded ? "opacity-100" : "opacity-0"}`;
   const quotes = t("login.quotes", { returnObjects: true }) as LoginQuote[];
   // Only the index is stored, so the language switch below re-renders the SAME quote translated
   // instead of drawing a new one. Sorted independently of the backdrop.
@@ -49,7 +53,8 @@ export function LoginPage() {
         src={bg}
         alt=""
         aria-hidden="true"
-        className="absolute inset-y-0 right-0 hidden h-full w-1/2 object-cover lg:block"
+        onLoad={() => setBgLoaded(true)}
+        className={`absolute inset-y-0 right-0 hidden h-full w-1/2 object-cover lg:block ${bgFade}`}
       />
       {/* Even dark veil over the side image so the busy pixel-art stays calm. Uniform (no gradient
           asymmetry). Desktop only, non-interactive. */}
@@ -88,7 +93,8 @@ export function LoginPage() {
             src={bg}
             alt=""
             aria-hidden="true"
-            className="h-full w-full object-cover"
+            onLoad={() => setBgLoaded(true)}
+            className={`h-full w-full object-cover ${bgFade}`}
           />
           <div className="absolute inset-0 bg-linear-to-b from-transparent to-night" />
           {/* Centred in the banner, on the exact same `.quote-scrim` ellipse as the desktop slot —

@@ -5,6 +5,7 @@ import {
   setProfileName,
   setProfileTheme,
   setProfileSalary,
+  setProfileOnboardingComplete,
 } from "../../infrastructure/persistence/supabase/repositories";
 import { useSettingsStore } from "../../state/settingsStore";
 import { normalizeTheme } from "../theme/themes";
@@ -22,9 +23,12 @@ interface Profile {
   theme: ThemeId;
   /** Average monthly salary (Money.toStorage() decimal string; "" = unset). Drives runway. */
   averageMonthlySalary: string;
+  /** True once THIS account (or the local guest profile) has finished first-run setup. */
+  onboardingComplete: boolean;
   setDisplayName: (name: string) => Promise<void>;
   setTheme: (theme: ThemeId) => Promise<void>;
   setAverageMonthlySalary: (value: string) => Promise<void>;
+  setOnboardingComplete: (done: boolean) => Promise<void>;
 }
 
 /**
@@ -40,6 +44,8 @@ export function useProfile(): Profile {
   const setLocalTheme = useSettingsStore((s) => s.setTheme);
   const localSalary = useSettingsStore((s) => s.averageMonthlySalary);
   const setLocalSalary = useSettingsStore((s) => s.setAverageMonthlySalary);
+  const localOnboarded = useSettingsStore((s) => s.onboardingComplete);
+  const setLocalOnboarded = useSettingsStore((s) => s.setOnboardingComplete);
   const queryClient = useQueryClient();
   const signedIn = isCloudEnabled && !!user && !!supabase;
 
@@ -51,14 +57,21 @@ export function useProfile(): Profile {
 
   const meta = (user?.user_metadata ?? {}) as { avatar_url?: string; picture?: string };
 
-  // Signed-in: prefer the cloud theme once loaded, falling back to the local store while the query
-  // is in flight — so a reload paints the last theme instantly instead of flashing default.
-  const theme: ThemeId = signedIn
-    ? normalizeTheme(cloud.data?.theme ?? localTheme)
+  // Signed-in: once the fetch SUCCEEDS the cloud profile is authoritative — a null column means
+  // "unset" (default theme), never "reuse the cached value", or a fresh account would inherit the
+  // previous one's theme. The local store is only the in-flight / failed-fetch fallback, so a
+  // reload still paints the last theme instantly instead of flashing default.
+  const cloudResolved = signedIn && cloud.isSuccess;
+  const theme: ThemeId = cloudResolved
+    ? normalizeTheme(cloud.data.theme)
     : normalizeTheme(localTheme);
 
-  // Signed-in: prefer the cloud value once loaded, falling back to the local store while in flight.
-  const averageMonthlySalary = signedIn ? (cloud.data?.averageSalary ?? localSalary) : localSalary;
+  const averageMonthlySalary = cloudResolved ? (cloud.data.averageSalary ?? "") : localSalary;
+
+  // Setup completion belongs to the ACCOUNT (a signed-in user must never be asked twice, on any
+  // device). The local flag is the guest's own value and, while the query is in flight, an
+  // optimistic cache so a reload doesn't flash the setup splash.
+  const onboardingComplete = cloudResolved ? cloud.data.onboardingComplete : localOnboarded;
 
   return {
     displayName: signedIn ? (cloud.data?.displayName ?? "") : localName,
@@ -69,6 +82,7 @@ export function useProfile(): Profile {
     profileLoaded: signedIn ? cloud.isFetched : true,
     theme,
     averageMonthlySalary,
+    onboardingComplete,
     setDisplayName: async (name) => {
       if (signedIn) {
         await setProfileName(supabase!, user!.id, name);
@@ -90,6 +104,13 @@ export function useProfile(): Profile {
       setLocalSalary(value);
       if (signedIn) {
         await setProfileSalary(supabase!, user!.id, value);
+        await queryClient.invalidateQueries({ queryKey: ["profile"] });
+      }
+    },
+    setOnboardingComplete: async (done) => {
+      setLocalOnboarded(done);
+      if (signedIn) {
+        await setProfileOnboardingComplete(supabase!, user!.id, done);
         await queryClient.invalidateQueries({ queryKey: ["profile"] });
       }
     },

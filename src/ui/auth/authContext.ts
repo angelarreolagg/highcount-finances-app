@@ -6,6 +6,12 @@ export interface AuthContextValue {
   isCloudEnabled: boolean;
   /** True once the initial session has loaded (always true when cloud is disabled). */
   authReady: boolean;
+  /**
+   * False while the active backend is being re-pointed at a new session. Repositories are a live
+   * binding (`di/container.ts`), so anything that reads data — or routes based on it — must wait,
+   * or it would query the outgoing backend (e.g. the empty local store right after a sign-in).
+   */
+  backendReady: boolean;
   session: Session | null;
   user: User | null;
   signInWithGoogle: () => Promise<void>;

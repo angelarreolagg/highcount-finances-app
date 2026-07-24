@@ -36,14 +36,22 @@ export async function markBootstrapped(client: SupabaseClient, userId: string): 
   if (error) throw new Error(error.message);
 }
 
-/** The user's synced profile: display name, theme, and average monthly salary (any may be null). */
+/**
+ * The user's synced profile: display name, theme, average monthly salary (any may be null), and
+ * whether first-run setup has been completed for THIS account (never inferred from data).
+ */
 export async function getProfile(
   client: SupabaseClient,
   userId: string,
-): Promise<{ displayName: string | null; theme: string | null; averageSalary: string | null }> {
+): Promise<{
+  displayName: string | null;
+  theme: string | null;
+  averageSalary: string | null;
+  onboardingComplete: boolean;
+}> {
   const { data, error } = await client
     .from("profiles")
-    .select("display_name, theme, average_salary")
+    .select("display_name, theme, average_salary, onboarding_complete")
     .eq("user_id", userId)
     .maybeSingle();
   if (error) throw new Error(error.message);
@@ -51,11 +59,13 @@ export async function getProfile(
     display_name?: string | null;
     theme?: string | null;
     average_salary?: string | null;
+    onboarding_complete?: boolean | null;
   } | null;
   return {
     displayName: row?.display_name ?? null,
     theme: row?.theme ?? null,
     averageSalary: row?.average_salary ?? null,
+    onboardingComplete: row?.onboarding_complete ?? false,
   };
 }
 
@@ -95,6 +105,21 @@ export async function setProfileSalary(
   const { error } = await client
     .from("profiles")
     .upsert({ user_id: userId, average_salary: salary === "" ? null : salary });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Record that this account has finished (or re-finished) first-run setup. Upsert only touches
+ * onboarding_complete, leaving other columns intact.
+ */
+export async function setProfileOnboardingComplete(
+  client: SupabaseClient,
+  userId: string,
+  done: boolean,
+): Promise<void> {
+  const { error } = await client
+    .from("profiles")
+    .upsert({ user_id: userId, onboarding_complete: done });
   if (error) throw new Error(error.message);
 }
 
